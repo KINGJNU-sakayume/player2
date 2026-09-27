@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 
 type PlaybackState = {
   playingUri?: string;
@@ -42,6 +43,7 @@ const SpotifyEmbedContext = createContext<SpotifyEmbedContextValue | null>(null)
 const FALLBACK_URI = 'spotify:track:11dFghVXANMlKmJXsNCbNl';
 
 export const SpotifyEmbedProvider = ({ children }: { children: ReactNode }) => {
+  const location = useLocation();
   const mountRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<EmbedController | null>(null);
   const pendingUriRef = useRef<string>();
@@ -126,7 +128,7 @@ export const SpotifyEmbedProvider = ({ children }: { children: ReactNode }) => {
   return (
     <SpotifyEmbedContext.Provider value={value}>
       {children}
-      <div className="spotify-engine" aria-label="Spotify player">
+      <div className={`spotify-engine ${location.pathname === '/now-playing' ? 'visible' : 'parked'}`} aria-label="Spotify player">
         <div ref={mountRef} />
       </div>
     </SpotifyEmbedContext.Provider>
