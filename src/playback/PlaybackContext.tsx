@@ -1,168 +1,217 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import { useAuth } from '../auth/AuthContext';
-import type { AlbumIdentity, PlayerSnapshot, TrackIdentity } from '../data/types';
-import { startSpotifyTrack, transferSpotifyPlayback } from '../spotify/client';
-import { loadSpotifySdk } from './sdkLoader';
+import type { AlbumIdentity, PlaybackDevice, PlayerSnapshot, TrackIdentity } from '../data/types';
+import {
+  getSpotifyDevices,
+  getSpotifyPlaybackState,
+  nextSpotifyTrack,
+  pauseSpotifyPlayback,
+  previousSpotifyTrack,
+  resumeSpotifyPlayback,
+  seekSpotifyPlayback,
+  startSpotifyTrack,
+  transferSpotifyPlayback,
+} from '../spotify/client';
 
-export type PlaybackStatus = 'idle' | 'sdk-loading' | 'ready' | 'not-ready' | 'unavailable' | 'error';
+export type PlaybackStatus = 'idle' | 'syncing' | 'ready' | 'no-playback' | 'error';
 
 type PlaybackContextValue = {
   status: PlaybackStatus;
   snapshot: PlayerSnapshot | null;
-  deviceId?: string;
+  devices: PlaybackDevice[];
+  activeDevice?: PlaybackDevice;
   error?: string;
+  refresh: () => Promise<void>;
+  refreshDevices: () => Promise<void>;
   previous: () => Promise<void>;
   togglePlay: () => Promise<void>;
   next: () => Promise<void>;
   seek: (positionMs: number) => Promise<void>;
   playTrack: (track: TrackIdentity, album?: AlbumIdentity) => Promise<void>;
-  activateBrowser: () => Promise<void>;
+  transferToDevice: (deviceId: string) => Promise<void>;
 };
 
 const PlaybackContext = createContext<PlaybackContextValue | null>(null);
 
-const idFromUri = (uri?: string) => uri?.split(':').pop() ?? '';
-
-const mapSdkState = (state: SpotifySdkState, deviceId?: string): PlayerSnapshot => {
-  const source = state.track_window.current_track;
-  const albumId = idFromUri(source.album.uri);
-  const album: AlbumIdentity = {
-    id: albumId,
-    uri: source.album.uri,
-    name: source.album.name,
-    artistIds: source.artists.map((artist) => idFromUri(artist.uri)),
-    artistNames: source.artists.map((artist) => artist.name),
-    imageUrl: source.album.images?.[0]?.url,
-  };
-  const track: TrackIdentity = {
-    id: source.id,
-    uri: source.uri,
-    title: source.name,
-    durationMs: source.duration_ms,
-    artists: source.artists.map((artist) => ({ id: idFromUri(artist.uri), name: artist.name })),
-    album,
-  };
-  return {
-    track,
-    positionMs: state.position,
-    durationMs: state.duration,
-    paused: state.paused,
-    deviceId,
-    contextUri: state.context?.uri,
-    updatedAt: Date.now(),
-  };
-};
+const delay = (milliseconds: number) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
 export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
-  const auth = useAuth();
-  const { status: authStatus, getAccessToken } = auth;
+  const { status: authStatus, getAccessToken } = useAuth();
   const [status, setStatus] = useState<PlaybackStatus>('idle');
   const [snapshot, setSnapshot] = useState<PlayerSnapshot | null>(null);
-  const [deviceId, setDeviceId] = useState<string>();
+  const [devices, setDevices] = useState<PlaybackDevice[]>([]);
+  const [preferredDeviceId, setPreferredDeviceId] = useState<string>();
   const [error, setError] = useState<string>();
-  const playerRef = useRef<SpotifyPlayer | null>(null);
-  const deviceRef = useRef<string>();
+
+  const refreshPlayback = useCallback(async () => {
+    if (authStatus !== 'connected') return;
+    try {
+      const nextSnapshot = await getSpotifyPlaybackState(getAccessToken);
+      setSnapshot(nextSnapshot);
+      setStatus(nextSnapshot?.track ? 'ready' : 'no-playback');
+      setError(undefined);
+    } catch (cause) {
+      setStatus('error');
+      setError(cause instanceof Error ? cause.message : 'Unable to read Spotify playback state.');
+    }
+  }, [authStatus, getAccessToken]);
+
+  const refreshDevices = useCallback(async () => {
+    if (authStatus !== 'connected') return;
+    try {
+      const nextDevices = await getSpotifyDevices(getAccessToken);
+      setDevices(nextDevices);
+      const active = nextDevices.find((device) => device.isActive);
+      if (active) setPreferredDeviceId(active.id);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Unable to load Spotify devices.');
+    }
+  }, [authStatus, getAccessToken]);
+
+  const refresh = useCallback(async () => {
+    await Promise.all([refreshPlayback(), refreshDevices()]);
+  }, [refreshDevices, refreshPlayback]);
 
   useEffect(() => {
     if (authStatus !== 'connected') {
-      playerRef.current?.disconnect();
-      playerRef.current = null;
       setSnapshot(null);
-      setDeviceId(undefined);
-      deviceRef.current = undefined;
+      setDevices([]);
+      setPreferredDeviceId(undefined);
       setStatus('idle');
+      setError(undefined);
       return;
     }
 
-    let disposed = false;
-    setStatus('sdk-loading');
-    setError(undefined);
+    setStatus('syncing');
+    void refresh();
 
-    loadSpotifySdk()
-      .then((Spotify) => {
-        if (disposed) return;
-        const player = new Spotify.Player({
-          name: 'ARC Music Browser',
-          getOAuthToken: (callback) => {
-            void getAccessToken().then((token) => {
-              if (token) callback(token);
-            });
-          },
-          volume: 0.7,
-        });
-        playerRef.current = player;
-        player.addListener('ready', ({ device_id }) => {
-          deviceRef.current = device_id;
-          setDeviceId(device_id);
-          setStatus('ready');
-          void player.getCurrentState().then((state) => {
-            if (state) setSnapshot(mapSdkState(state, device_id));
-          });
-        });
-        player.addListener('not_ready', ({ device_id }) => {
-          if (deviceRef.current === device_id) {
-            setStatus('not-ready');
-            setDeviceId(undefined);
-          }
-        });
-        player.addListener('player_state_changed', (state) => {
-          if (state) setSnapshot(mapSdkState(state, deviceRef.current));
-        });
-        ['initialization_error', 'authentication_error', 'account_error', 'playback_error'].forEach((event) => {
-          player.addListener(event as 'initialization_error', ({ message }) => {
-            setError(message);
-            setStatus(event === 'account_error' ? 'unavailable' : 'error');
-          });
-        });
-        return player.connect();
-      })
-      .then((connected) => {
-        if (!disposed && connected === false) {
-          setError('Spotify Web Playback SDK could not connect.');
-          setStatus('error');
-        }
-      })
-      .catch((cause: unknown) => {
-        if (disposed) return;
-        setError(cause instanceof Error ? cause.message : 'Spotify playback initialization failed.');
-        setStatus('error');
-      });
+    const interval = window.setInterval(() => {
+      void refreshPlayback();
+    }, 4000);
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') void refresh();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
-      disposed = true;
-      playerRef.current?.disconnect();
-      playerRef.current = null;
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [authStatus, getAccessToken]);
+  }, [authStatus, refresh, refreshPlayback]);
 
-  const requirePlayer = useCallback(() => {
-    if (!playerRef.current) throw new Error('Spotify browser player is not ready.');
-    return playerRef.current;
-  }, []);
+  const activeDevice = useMemo(() => {
+    const snapshotDeviceId = snapshot?.deviceId;
+    return devices.find((device) => device.id === snapshotDeviceId)
+      ?? devices.find((device) => device.isActive)
+      ?? devices.find((device) => device.id === preferredDeviceId);
+  }, [devices, preferredDeviceId, snapshot?.deviceId]);
 
-  const previous = useCallback(async () => requirePlayer().previousTrack(), [requirePlayer]);
+  const targetDeviceId = useCallback(async () => {
+    let target = activeDevice ?? devices.find((device) => !device.isRestricted);
+    if (!target) {
+      const nextDevices = await getSpotifyDevices(getAccessToken);
+      setDevices(nextDevices);
+      target = nextDevices.find((device) => device.isActive)
+        ?? nextDevices.find((device) => !device.isRestricted);
+    }
+    if (!target) {
+      throw new Error('Open Spotify on a phone, desktop, or speaker first. ARC controls a real Spotify Connect device.');
+    }
+    if (target.isRestricted) {
+      throw new Error(`${target.name} does not allow Web API playback control.`);
+    }
+    setPreferredDeviceId(target.id);
+    return target.id;
+  }, [activeDevice, devices, getAccessToken]);
+
+  const runCommand = useCallback(async (command: (deviceId: string) => Promise<void>) => {
+    const deviceId = await targetDeviceId();
+    await command(deviceId);
+    await delay(180);
+    await refreshPlayback();
+    await refreshDevices();
+  }, [refreshDevices, refreshPlayback, targetDeviceId]);
+
+  const previous = useCallback(
+    async () => runCommand((deviceId) => previousSpotifyTrack(getAccessToken, deviceId)),
+    [getAccessToken, runCommand],
+  );
+
   const togglePlay = useCallback(async () => {
-    const player = requirePlayer();
-    await player.activateElement();
-    await player.togglePlay();
-  }, [requirePlayer]);
-  const next = useCallback(async () => requirePlayer().nextTrack(), [requirePlayer]);
-  const seek = useCallback(async (positionMs: number) => requirePlayer().seek(positionMs), [requirePlayer]);
+    if (!snapshot) throw new Error('There is no current Spotify playback session.');
+    await runCommand((deviceId) =>
+      snapshot.paused
+        ? resumeSpotifyPlayback(getAccessToken, deviceId)
+        : pauseSpotifyPlayback(getAccessToken, deviceId),
+    );
+  }, [getAccessToken, runCommand, snapshot]);
+
+  const next = useCallback(
+    async () => runCommand((deviceId) => nextSpotifyTrack(getAccessToken, deviceId)),
+    [getAccessToken, runCommand],
+  );
+
+  const seek = useCallback(
+    async (positionMs: number) => runCommand((deviceId) => seekSpotifyPlayback(getAccessToken, positionMs, deviceId)),
+    [getAccessToken, runCommand],
+  );
 
   const playTrack = useCallback(async (track: TrackIdentity, album?: AlbumIdentity) => {
-    if (playerRef.current) await playerRef.current.activateElement();
-    await startSpotifyTrack(getAccessToken, track, album?.uri, deviceRef.current);
-  }, [getAccessToken]);
+    const deviceId = await targetDeviceId();
+    await startSpotifyTrack(getAccessToken, track, album?.uri, deviceId);
+    await delay(220);
+    await refreshPlayback();
+    await refreshDevices();
+  }, [getAccessToken, refreshDevices, refreshPlayback, targetDeviceId]);
 
-  const activateBrowser = useCallback(async () => {
-    const player = requirePlayer();
-    const id = deviceRef.current;
-    if (!id) throw new Error('Spotify browser device is not ready.');
-    await player.activateElement();
-    await transferSpotifyPlayback(getAccessToken, id);
-  }, [getAccessToken, requirePlayer]);
+  const transferToDevice = useCallback(async (deviceId: string) => {
+    const device = devices.find((item) => item.id === deviceId);
+    if (device?.isRestricted) throw new Error(`${device.name} does not allow Spotify Web API control.`);
+    await transferSpotifyPlayback(getAccessToken, deviceId, false);
+    setPreferredDeviceId(deviceId);
+    await delay(180);
+    await refresh();
+  }, [devices, getAccessToken, refresh]);
 
-  const value = useMemo(() => ({ status, snapshot, deviceId, error, previous, togglePlay, next, seek, playTrack, activateBrowser }), [status, snapshot, deviceId, error, previous, togglePlay, next, seek, playTrack, activateBrowser]);
+  const value = useMemo(() => ({
+    status,
+    snapshot,
+    devices,
+    activeDevice,
+    error,
+    refresh,
+    refreshDevices,
+    previous,
+    togglePlay,
+    next,
+    seek,
+    playTrack,
+    transferToDevice,
+  }), [
+    status,
+    snapshot,
+    devices,
+    activeDevice,
+    error,
+    refresh,
+    refreshDevices,
+    previous,
+    togglePlay,
+    next,
+    seek,
+    playTrack,
+    transferToDevice,
+  ]);
+
   return <PlaybackContext.Provider value={value}>{children}</PlaybackContext.Provider>;
 };
 
