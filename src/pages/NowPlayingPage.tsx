@@ -35,7 +35,7 @@ export const NowPlayingPage = () => {
       .then((value) => { if (!cancelled) setAlbum(value); })
       .catch(() => { if (!cancelled) setAlbum(undefined); });
     return () => { cancelled = true; };
-  }, [track?.album.id, auth.status, auth.getAccessToken]);
+  }, [track, auth.status, auth.getAccessToken]);
 
   useEffect(() => {
     if (!track) {
@@ -57,7 +57,7 @@ export const NowPlayingPage = () => {
         setLyricsState('error');
       });
     return () => { cancelled = true; };
-  }, [track?.id]);
+  }, [track]);
 
   useEffect(() => {
     if (!track || !player.playingUri || player.playingUri === track.uri || !album) return;
