@@ -75,6 +75,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
     }
 
     let disposed = false;
+    let onVisibility: (() => void) | undefined;
     setStatus('sdk-loading');
     setError(undefined);
 
@@ -91,6 +92,13 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
           volume: 0.7,
         });
         playerRef.current = player;
+        onVisibility = () => {
+          if (document.visibilityState !== 'visible') return;
+          void player.getCurrentState().then((state) => {
+            if (state && !disposed) setSnapshot(mapSdkState(state, deviceRef.current));
+          });
+        };
+        document.addEventListener('visibilitychange', onVisibility);
         player.addListener('ready', ({ device_id }) => {
           deviceRef.current = device_id;
           setDeviceId(device_id);
@@ -132,6 +140,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
       disposed = true;
       playerRef.current?.disconnect();
       playerRef.current = null;
+      if (onVisibility) document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [authStatus, getAccessToken]);
 

@@ -1,44 +1,34 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useArchive } from '../app/ArchiveContext';
 import { CoverImage } from '../components/CoverImage';
 import { NextIcon, PlayIcon, PreviousIcon } from '../components/icons';
 import { NotePreview } from '../components/NotePreview';
-import { findSeedAlbum } from '../data/seed';
 import type { AlbumWithTracks } from '../data/types';
 import { getSongEditorial } from '../editorial/lookup';
-import { MockLyricsProvider } from '../lyrics/MockLyricsProvider';
+import { LrclibLyricsProvider } from '../lyrics/LrclibLyricsProvider';
 import { getLyricWindow } from '../lyrics/sync';
 import type { TimedLyrics } from '../lyrics/types';
 import { usePlayback } from '../playback/PlaybackContext';
 import { useInterpolatedPosition } from '../playback/useInterpolatedPosition';
 import { useAuth } from '../auth/AuthContext';
 import { getSpotifyAlbum } from '../spotify/client';
-import { MockTranslationProvider } from '../translation/MockTranslationProvider';
 import { formatTime, progressPercent } from '../utils/time';
 
-const lyricProvider = new MockLyricsProvider();
-const translationProvider = new MockTranslationProvider();
+const lyricProvider = new LrclibLyricsProvider();
 
 export const NowPlayingPage = () => {
-  const archive = useArchive();
   const auth = useAuth();
   const playback = usePlayback();
   const snapshot = playback.snapshot;
-  const track = snapshot?.track ?? archive.selectedTrack;
-  const [album, setAlbum] = useState<AlbumWithTracks | undefined>(() => findSeedAlbum(track.album.id));
+  const track = snapshot?.track;
+  const [album, setAlbum] = useState<AlbumWithTracks>();
   const [lyrics, setLyrics] = useState<TimedLyrics | null>(null);
-  const [translations, setTranslations] = useState<string[]>([]);
+  const [lyricsStatus, setLyricsStatus] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
   const [feedback, setFeedback] = useState<string>();
   const positionMs = useInterpolatedPosition(snapshot);
 
   useEffect(() => {
-    const local = findSeedAlbum(track.album.id);
-    if (local) {
-      setAlbum(local);
-      return;
-    }
-    if (auth.status !== 'connected') {
+    if (!track || auth.status !== 'connected') {
       setAlbum(undefined);
       return;
     }
@@ -47,31 +37,28 @@ export const NowPlayingPage = () => {
       .then((value) => { if (!cancelled) setAlbum(value); })
       .catch(() => { if (!cancelled) setAlbum(undefined); });
     return () => { cancelled = true; };
-  }, [track.album.id, auth.status, auth.getAccessToken]);
+  }, [track, auth.status, auth.getAccessToken]);
 
   useEffect(() => {
-    let cancelled = false;
-    lyricProvider.getTimedLyrics({ ...track, language: album?.language ?? track.language })
-      .then(async (value) => {
-        if (cancelled) return;
+    if (!track) { setLyrics(null); return; }
+    const controller = new AbortController();
+    setLyricsStatus('loading');
+    lyricProvider.getTimedLyrics({ ...track, language: album?.language ?? track.language }, controller.signal)
+      .then((value) => {
+        if (controller.signal.aborted) return;
         setLyrics(value);
-        if (!value) return setTranslations([]);
-        try {
-          const result = await translationProvider.translateLines(value.lines, value.language, 'ko');
-          if (!cancelled) setTranslations(result);
-        } catch {
-          if (!cancelled) setTranslations([]);
-        }
+        setLyricsStatus(value ? 'ready' : 'missing');
       })
-      .catch(() => { if (!cancelled) setLyrics(null); });
-    return () => { cancelled = true; };
+      .catch((cause: unknown) => { if (!controller.signal.aborted && !(cause instanceof DOMException && cause.name === 'AbortError')) { setLyrics(null); setLyricsStatus('error'); } });
+    return () => controller.abort();
   // The provider needs the full track object, but lyrics should only refetch when track identity/content changes.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [track.id, track.durationMs, track.language, track.title, album?.language]);
+  }, [track?.id, track?.durationMs, track?.language, track?.title, album?.language]);
+
+  const lyricWindow = useMemo(() => getLyricWindow(lyrics?.lines ?? [], positionMs), [lyrics, positionMs]);
+  if (!track) return <div className="view active"><div className="state-page"><div className="label">Now playing</div><h1>{auth.status === 'connected' ? 'No active track' : 'Connect Spotify'}</h1><p>{auth.status === 'connected' ? 'Start a track from Spotify Search or another Spotify device. ARC will follow the real playback session.' : 'Connect a Spotify Premium account to initialize the browser player and search the Spotify catalogue.'}</p>{auth.status !== 'connected' && auth.hasClientId && <button className="plain-action" type="button" onClick={() => void auth.connect()}>Connect Spotify</button>}</div></div>;
 
   const durationMs = snapshot?.durationMs || track.durationMs;
-  const lyricWindow = useMemo(() => getLyricWindow(lyrics?.lines ?? [], positionMs), [lyrics, positionMs]);
-  const translation = lyricWindow.index >= 0 ? translations[lyricWindow.index] : undefined;
   const artist = track.artists[0];
   const releaseYear = Number((album?.releaseDate ?? track.album.releaseDate)?.slice(0, 4)) || undefined;
   const trackNumber = album?.tracks.find((item) => item.id === track.id)?.trackNumber ?? track.trackNumber;
@@ -119,8 +106,7 @@ export const NowPlayingPage = () => {
           <section className="player-listening">
             <div className="listening-head"><h2>Lyrics</h2><span>{album?.name ?? track.album.name} / {album?.totalTracks ?? album?.tracks.length ?? '—'} tracks</span></div>
             <div className="lyrics-panel" aria-live="polite">
-              <div className="current-lyric" lang={album?.lang}>{lyricWindow.current?.text ?? 'Lyrics unavailable'}</div>
-              {translation && <div className="current-trans">{translation}</div>}
+              <div className="current-lyric" lang={album?.lang}>{lyricWindow.current?.text ?? (lyricsStatus === 'loading' ? 'Loading synchronized lyrics…' : lyricsStatus === 'error' ? 'Lyrics provider unavailable' : 'Synchronized lyrics unavailable')}</div>
               <div className="next-lines">
                 {lyricWindow.next && <div className="next-line">{lyricWindow.next.text}</div>}
                 {lyricWindow.secondNext && <div className="next-line second">{lyricWindow.secondNext.text}</div>}

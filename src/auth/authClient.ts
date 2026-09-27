@@ -4,7 +4,7 @@ import { SPOTIFY_SCOPES } from '../spotify/scopes';
 
 const ACCOUNTS_URL = 'https://accounts.spotify.com';
 
-export const getRedirectUri = () => `${window.location.origin}${import.meta.env.BASE_URL}`;
+export const getRedirectUri = () => import.meta.env.VITE_SPOTIFY_REDIRECT_URI?.trim() || `${window.location.origin}${import.meta.env.BASE_URL}`;
 
 export const beginSpotifyAuthorization = async (clientId: string) => {
   const verifier = createCodeVerifier();

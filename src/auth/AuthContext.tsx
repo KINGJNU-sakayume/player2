@@ -28,15 +28,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const code = params.get('code');
     const returnedState = params.get('state');
     const authError = params.get('error');
+    const cleanCallbackUrl = () => window.history.replaceState({}, '', `${window.location.origin}${window.location.pathname}#/now-playing`);
     if (authError) {
       setError(`Spotify authorization failed: ${authError}`);
       setStatus('error');
+      cleanCallbackUrl();
       return;
     }
     if (!code) return;
     if (!returnedState || returnedState !== tokenStore.getState()) {
       setError('Spotify authorization state did not match. Please reconnect.');
       setStatus('error');
+      tokenStore.clearVerifier();
+      tokenStore.clearState();
+      cleanCallbackUrl();
       return;
     }
 
@@ -47,13 +52,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (cancelled) return;
         setToken(nextToken);
         setStatus('connected');
-        const cleanUrl = `${window.location.origin}${window.location.pathname}#/now-playing`;
-        window.history.replaceState({}, '', cleanUrl);
+        cleanCallbackUrl();
       })
       .catch((cause: unknown) => {
         if (cancelled) return;
         setError(cause instanceof Error ? cause.message : 'Spotify authorization failed.');
         setStatus('error');
+        cleanCallbackUrl();
       });
     return () => {
       cancelled = true;

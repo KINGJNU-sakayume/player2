@@ -33,6 +33,7 @@ jobs:
         run: npm run check
         env:
           VITE_SPOTIFY_CLIENT_ID: ${{ vars.VITE_SPOTIFY_CLIENT_ID }}
+          VITE_SPOTIFY_REDIRECT_URI: ${{ vars.VITE_SPOTIFY_REDIRECT_URI }}
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

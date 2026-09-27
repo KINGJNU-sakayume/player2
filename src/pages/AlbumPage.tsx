@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useArchive } from '../app/ArchiveContext';
 import { useAuth } from '../auth/AuthContext';
 import { CoverImage } from '../components/CoverImage';
 import { NotePreview } from '../components/NotePreview';
-import { findSeedAlbum } from '../data/seed';
 import type { AlbumWithTracks } from '../data/types';
 import { getAlbumEditorial } from '../editorial/lookup';
 import { usePlayback } from '../playback/PlaybackContext';
@@ -14,22 +12,14 @@ import { formatTime, sumDuration } from '../utils/time';
 export const AlbumPage = () => {
   const { albumId = '' } = useParams();
   const navigate = useNavigate();
-  const archive = useArchive();
   const auth = useAuth();
   const playback = usePlayback();
-  const seed = findSeedAlbum(albumId);
-  const [album, setAlbum] = useState<AlbumWithTracks | undefined>(seed);
-  const [loading, setLoading] = useState(!seed);
+  const [album, setAlbum] = useState<AlbumWithTracks>();
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
   const [feedback, setFeedback] = useState<string>();
 
   useEffect(() => {
-    if (seed) {
-      setAlbum(seed);
-      setLoading(false);
-      setError(undefined);
-      return;
-    }
     if (auth.status !== 'connected') {
       setLoading(false);
       setError('Connect Spotify to open albums outside the local ARC archive.');
@@ -43,7 +33,7 @@ export const AlbumPage = () => {
       .catch((cause: unknown) => { if (!cancelled) setError(cause instanceof Error ? cause.message : 'Unable to load album.'); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [albumId, seed, auth.status, auth.getAccessToken]);
+  }, [albumId, auth.status, auth.getAccessToken]);
 
   if (loading) return <div className="view active"><div className="state-page"><div className="label">Album</div><h1>Loading album…</h1></div></div>;
   if (!album || error) return <div className="view active"><div className="state-page"><div className="label">Album</div><h1>Album unavailable</h1><p>{error}</p></div></div>;
@@ -53,7 +43,7 @@ export const AlbumPage = () => {
   const releaseYear = Number(album.releaseDate?.slice(0, 4)) || undefined;
   const note = getAlbumEditorial(artistName, album.name, releaseYear);
   const totalDuration = sumDuration(album.tracks.map((track) => track.durationMs));
-  const activeTrackId = playback.snapshot?.track?.id ?? archive.selectedTrack.id;
+  const activeTrackId = playback.snapshot?.track?.id;
 
   const onTrack = async (track: AlbumWithTracks['tracks'][number]) => {
     setFeedback(undefined);
@@ -64,9 +54,7 @@ export const AlbumPage = () => {
         setFeedback(cause instanceof Error ? cause.message : 'Unable to start playback.');
         return;
       }
-    } else {
-      archive.selectTrack(track);
-    }
+    } else { setFeedback('Connect Spotify before starting playback.'); return; }
     navigate('/now-playing');
   };
 
