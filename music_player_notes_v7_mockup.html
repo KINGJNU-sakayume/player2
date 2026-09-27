@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Personal Music Player — Notes Study v7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --font-en:"IBM Plex Sans",sans-serif;
+  --font-ko:"Noto Sans KR",sans-serif;
+  --font-ja:"Noto Sans JP",sans-serif;
+  --bg:#f1eee6;
+  --paper:#f8f5ee;
+  --surface:#e7e2d8;
+  --ink:#171917;
+  --muted:#686b66;
+  --dim:#8f928c;
+  --line:rgba(23,25,23,.15);
+  --line-soft:rgba(23,25,23,.075);
+  --main:#b91f2e;
+  --rail:68px;
+  --ease:cubic-bezier(.2,.82,.2,1);
+}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0}
+body{overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--font-en),var(--font-ko),var(--font-ja),sans-serif;-webkit-font-smoothing:antialiased}
+[lang="ko"]{font-family:var(--font-ko)}[lang="ja"]{font-family:var(--font-ja)}[lang="en"]{font-family:var(--font-en)}
+button{font:inherit;color:inherit;cursor:pointer}img{display:block}.icon{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}
+.app{height:100dvh;display:grid;grid-template-columns:var(--rail) minmax(0,1fr);background:radial-gradient(980px 760px at 84% 5%,color-mix(in srgb,var(--main) 5%,transparent),transparent 70%),linear-gradient(90deg,rgba(20,20,20,.014) 1px,transparent 1px),var(--bg);background-size:auto,44px 44px,auto;transition:background .35s ease}
+.rail{height:100dvh;border-right:1px solid var(--line-soft);display:flex;flex-direction:column;align-items:center;padding:14px 0;background:rgba(248,245,238,.72);backdrop-filter:blur(12px);z-index:30}
+.logo{width:43px;height:52px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--paper);margin-bottom:20px}.logo b{font-size:13px;letter-spacing:-.03em}.logo span{font-size:8px;color:var(--dim);letter-spacing:.14em;text-transform:uppercase;margin-top:4px}
+.rail nav,.rail-foot{display:flex;flex-direction:column;gap:5px}.rail-foot{margin-top:auto}.rail button{width:44px;height:44px;border:0;background:transparent;color:var(--dim);display:grid;place-items:center;position:relative}.rail button:hover,.rail button.active{color:var(--ink)}.rail button.active:after{content:"";position:absolute;left:-12px;top:12px;bottom:12px;width:2px;background:var(--main)}.user{width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-size:10px;font-weight:600}
+.workspace{height:100dvh;min-width:0;display:grid;grid-template-rows:68px minmax(0,1fr)}
+.topbar{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center;padding:0 30px;border-bottom:1px solid var(--line-soft)}
+.crumbs{display:flex;gap:9px;align-items:center;min-width:0;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}.crumbs button{border:0;background:transparent;padding:0;color:inherit}.crumbs button:hover{color:var(--ink)}.crumbs span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.top-mark{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);white-space:nowrap}.top-mark b{color:var(--ink);font-weight:600}.top-right{display:flex;justify-content:flex-end;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim)}
+.stage{position:relative;min-height:0;overflow:hidden}.view{position:absolute;inset:0;opacity:0;pointer-events:none;transform:translateY(7px);transition:opacity .28s ease,transform .32s var(--ease)}.view.active{opacity:1;pointer-events:auto;transform:none}
+.label{font-size:10.5px;letter-spacing:.145em;text-transform:uppercase;color:var(--dim)}.linkish{cursor:pointer}.linkish:hover{text-decoration:underline;text-underline-offset:4px}.cover-frame{position:relative}.cover-shadow{position:absolute;inset:8% -5% -8% 8%;background:color-mix(in srgb,var(--main) 18%,rgba(0,0,0,.15));filter:blur(42px);opacity:.42}.cover{position:relative;width:100%;height:100%;object-fit:cover;background:var(--surface);box-shadow:0 0 0 1px var(--line-soft)}
+
+/* unified player */
+.player-page{height:100%;overflow:auto;padding:32px 44px 50px}.player-shell{max-width:1450px;margin:0 auto;display:grid;grid-template-columns:minmax(350px,42%) minmax(0,58%);gap:64px;padding:12px 0 30px;align-items:start}
+.player-object{min-width:0;position:sticky;top:0}.player-cover{width:min(48vh,32vw,520px);aspect-ratio:1}.player-copy{margin-top:22px}.player-copy h1{margin:8px 0 0;font-size:clamp(42px,5.2vw,78px);line-height:.93;letter-spacing:-.055em;font-weight:500}.player-copy .artist{margin-top:11px;font-size:15px}.player-meta{display:flex;gap:26px;flex-wrap:wrap;margin-top:23px;padding-top:13px;border-top:1px solid var(--line)}.player-meta div b{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}.player-meta div span{display:block;margin-top:5px;font-size:11.5px}
+.player-listening{min-width:0;padding-top:1px;display:flex;flex-direction:column;min-height:calc(100dvh - 150px)}.listening-head{display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--ink)}.listening-head h2{margin:0;font-size:clamp(28px,2.8vw,42px);line-height:1;letter-spacing:-.04em;font-weight:500}.listening-head span{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.lyrics-panel{padding:42px 0 30px}.current-lyric{font-size:clamp(36px,4vw,64px);line-height:1.08;letter-spacing:-.045em;font-weight:500;max-width:850px}.current-trans{margin-top:13px;font-size:15px;line-height:1.55;color:var(--muted)}.next-lines{display:flex;flex-direction:column;gap:13px;margin-top:24px}.next-line{font-size:clamp(18px,1.55vw,25px);line-height:1.4;color:var(--muted)}.next-line.second{color:var(--dim)}
+.player-transport{margin-top:auto;border-top:1px solid var(--line);padding-top:18px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:center}.controls{display:flex;gap:8px;align-items:center}.controls button{border:0;background:transparent;padding:7px;color:var(--muted)}.controls .play{width:42px;height:42px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center}.progress-wrap{display:grid;grid-template-columns:42px 1fr 42px;gap:10px;align-items:center;font-size:10px;color:var(--dim)}.progress{height:4px;background:var(--surface);position:relative;cursor:pointer}.progress span{position:absolute;inset:0 auto 0 0;width:38%;background:var(--ink)}
+
+/* editorial notes */
+.note-preview{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);max-width:620px}
+.note-kicker{display:flex;align-items:baseline;justify-content:space-between;gap:16px;font-size:9.5px;letter-spacing:.135em;text-transform:uppercase;color:var(--dim)}
+.note-kicker .index{font-variant-numeric:tabular-nums;color:var(--main)}
+.note-preview p{margin:10px 0 0;font-size:12.5px;line-height:1.72;color:var(--muted);max-width:54ch}
+.note-more{margin-top:10px;border:0;background:transparent;padding:0;font-size:10px;letter-spacing:.08em;color:var(--ink);text-transform:uppercase}
+.note-more:hover{text-decoration:underline;text-underline-offset:4px}
+.player-note{margin-top:auto;padding-bottom:22px}.player-note + .player-transport{margin-top:0}
+.note-drawer-backdrop{position:fixed;inset:0;background:rgba(17,19,21,.16);opacity:0;pointer-events:none;transition:opacity .28s ease;z-index:80}
+.note-drawer-backdrop.open{opacity:1;pointer-events:auto}
+.note-drawer{position:fixed;top:0;right:0;bottom:0;width:min(470px,92vw);z-index:90;background:var(--paper);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .34s var(--ease);box-shadow:-28px 0 80px rgba(0,0,0,.12);display:flex;flex-direction:column}
+.note-drawer.open{transform:none}
+.note-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:24px 26px 18px;border-bottom:1px solid var(--line-soft)}
+.note-drawer-head span{font-size:9.5px;letter-spacing:.145em;text-transform:uppercase;color:var(--dim)}
+.note-drawer-head button{width:36px;height:36px;border:0;background:transparent;font-size:18px;color:var(--muted)}
+.note-drawer-body{overflow:auto;padding:34px 34px 52px}
+.note-drawer-context{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--main)}
+.note-drawer-title{margin:9px 0 0;font-size:clamp(34px,4vw,54px);line-height:.98;letter-spacing:-.045em;font-weight:500}
+.note-drawer-subtitle{margin-top:9px;font-size:12px;color:var(--muted)}
+.note-drawer-rule{height:1px;background:var(--ink);margin:25px 0 24px}
+.note-drawer-copy{font-size:14px;line-height:1.9;color:#444844;white-space:pre-line}
+.note-drawer-foot{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim)}
+
+/* artist */
+.artist-page{height:100%;overflow:auto;padding:32px 44px 70px}.artist-shell{max-width:1380px;margin:0 auto}.artist-hero{display:grid;grid-template-columns:minmax(280px,390px) minmax(0,1fr);gap:54px;align-items:center;padding:22px 0 38px;border-bottom:1px solid var(--line)}.artist-portrait{position:relative;aspect-ratio:4/5;max-height:430px;background:linear-gradient(145deg,color-mix(in srgb,var(--main) 80%,#fff),#222);overflow:hidden}.artist-portrait:before{content:"";position:absolute;inset:11% 14%;border:1px solid rgba(255,255,255,.45);transform:rotate(-4deg)}.artist-portrait:after{content:attr(data-monogram);position:absolute;left:8%;bottom:4%;font-size:clamp(90px,10vw,160px);line-height:.8;letter-spacing:-.08em;font-weight:500;color:rgba(255,255,255,.78)}.artist-number{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim)}.artist-copy h1{margin:12px 0 0;font-size:clamp(62px,7vw,104px);line-height:.88;letter-spacing:-.06em;font-weight:500}.artist-copy .origin{margin-top:18px;font-size:13px;color:var(--muted)}.artist-grid{padding:34px 0 0}.artist-section h3{margin:0 0 14px;font-size:11px;letter-spacing:.14em;text-transform:uppercase}.release-card{display:grid;grid-template-columns:180px minmax(0,1fr) auto;gap:22px;align-items:center;padding:16px 0;border-top:1px solid var(--line)}.release-card img{width:180px;height:180px;object-fit:cover;background:var(--surface)}.release-card h4{margin:4px 0 0;font-size:26px;font-weight:500}.release-meta{margin-top:10px;display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}.release-card button{border:1px solid var(--line);background:transparent;padding:9px 12px;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase}.release-card button:hover{border-color:var(--ink)}
+
+/* album */
+.album-page{height:100%;overflow:auto;padding:32px 44px 70px}.album-shell{max-width:1450px;margin:0 auto;display:grid;grid-template-columns:minmax(350px,42%) minmax(0,58%);gap:64px;padding:12px 0 48px;align-items:start}.album-object{min-width:0;position:sticky;top:0}.album-hero-cover{width:min(48vh,32vw,520px);aspect-ratio:1}.album-object-copy{margin-top:22px}.album-object-copy h1{margin:8px 0 0;font-size:clamp(42px,5.2vw,78px);line-height:.93;letter-spacing:-.055em;font-weight:500}.album-object-copy .artist{margin-top:11px;font-size:15px}.album-hero-meta{display:flex;gap:26px;flex-wrap:wrap;margin-top:23px;padding-top:13px;border-top:1px solid var(--line)}.album-hero-meta div b{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}.album-hero-meta div span{display:block;margin-top:5px;font-size:11.5px}.album-sequence{min-width:0;padding-top:1px}.sequence-head{display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--ink)}.sequence-head h2{margin:0;font-size:clamp(28px,2.8vw,42px);line-height:1;letter-spacing:-.04em;font-weight:500}.sequence-head span{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}.track-table{border-bottom:1px solid var(--line)}.track-item{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:14px;align-items:center;padding:15px 8px 15px 0;border-bottom:1px solid var(--line-soft);cursor:pointer;transition:padding .2s var(--ease),background .2s ease}.track-item:last-child{border-bottom:0}.track-item:hover,.track-item.active{background:color-mix(in srgb,var(--main) 4%,transparent);padding-left:8px}.track-item .num{font-size:11px;color:var(--dim);letter-spacing:.08em}.track-item b{font-size:13.5px;font-weight:500}.track-item span{font-size:11px;color:var(--dim)}
+
+@media(max-width:1180px){.player-page,.artist-page,.album-page{padding-left:28px;padding-right:28px}.player-shell,.album-shell{gap:42px}.artist-hero{grid-template-columns:310px 1fr;gap:38px}}
+@media(max-width:900px){.note-preview{max-width:none}.note-drawer-body{padding:28px 24px 44px}body{overflow:auto}.app{min-height:100dvh;height:auto;grid-template-columns:56px minmax(0,1fr)}.rail{height:100dvh;position:sticky;top:0}.workspace{height:auto;min-height:100dvh;grid-template-rows:64px minmax(760px,auto)}.stage{min-height:760px}.player-shell,.artist-hero,.album-shell{grid-template-columns:1fr}.player-object,.album-object{position:static}.player-cover,.album-hero-cover{width:min(100%,430px)}.artist-portrait{max-width:360px}.release-card{grid-template-columns:130px 1fr}.release-card img{width:130px;height:130px}.release-card button{grid-column:2}.top-mark{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail">
+    <div class="logo"><b>ARC</b><span>music</span></div>
+    <nav>
+      <button id="navPlayer" class="active" title="Player"><svg class="icon" viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></button>
+      <button id="navArtist" title="Artist"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5 21c.5-4.2 2.8-6.3 7-6.3s6.5 2.1 7 6.3"/></svg></button>
+      <button id="navAlbum" title="Album"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16"/><circle cx="12" cy="12" r="3.5"/></svg></button>
+    </nav>
+    <div class="rail-foot"><button title="Settings"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A8 8 0 0 0 15 6l-.3-2.5h-4L10.4 6a8 8 0 0 0-1.5.9l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2.2l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 1.5.9l.3 2.5h4l.3-2.5a8 8 0 0 0 1.5-.9l2.4 1 2-3.4-2-1.5c.1-.3.1-.7.1-1z"/></svg></button><div class="user">WJ</div></div>
+  </aside>
+  <main class="workspace">
+    <header class="topbar">
+      <div id="crumbs" class="crumbs"><span>Player</span><span>/</span><span>怪獣の花唄</span></div>
+      <div class="top-mark"><b>Personal Music Archive</b></div>
+      <div id="topRight" class="top-right">Album-led interface study</div>
+    </header>
+    <section class="stage">
+      <div id="view-player" class="view active">
+        <div class="player-page"><div class="player-shell">
+          <section class="player-object">
+            <div class="player-cover"><div class="cover-frame" style="height:100%"><div class="cover-shadow"></div><img id="playerCover" class="cover" alt=""></div></div>
+            <div class="player-copy">
+              <div class="label">Now playing</div>
+              <h1 id="playerTitle">怪獣の花唄</h1>
+              <div><span id="playerArtist" class="artist linkish">Vaundy</span> · <span id="playerAlbum" class="linkish">strobo</span></div>
+              <div class="player-meta">
+                <div><b>Track</b><span id="playerTrackNo">04 / 11</span></div>
+                <div><b>Release</b><span id="playerYear">2020</span></div>
+                <div><b>Duration</b><span id="playerDuration">03:44</span></div>
+                <div><b>Language</b><span id="playerLanguage">Japanese</span></div>
+              </div>
+            </div>
+          </section>
+          <section class="player-listening">
+            <div class="listening-head"><h2>Lyrics</h2><span id="playerAlbumCount">strobo / 11 tracks</span></div>
+            <div class="lyrics-panel">
+              <div id="currentLyric" class="current-lyric" lang="ja">Lyric preview</div>
+              <div id="currentTrans" class="current-trans">디자인 확인용 가사 영역입니다.</div>
+              <div class="next-lines"><div id="nextLyric1" class="next-line">Next lyric line</div><div id="nextLyric2" class="next-line second">Following lyric line</div></div>
+            </div>
+            <div class="note-preview player-note">
+              <div class="note-kicker"><span>Listening note</span><span class="index">SONG</span></div>
+              <p id="playerNoteShort"></p>
+              <button id="playerNoteMore" class="note-more">Read full note →</button>
+            </div>
+            <div class="player-transport">
+              <div class="controls"><button id="prevBtn" title="Previous"><svg class="icon" viewBox="0 0 24 24"><path d="M6 5v14M18 6l-8 6 8 6z"/></svg></button><button id="playBtn" class="play" title="Play / Pause"><svg class="icon" viewBox="0 0 24 24"><path id="playPath" d="m9 6 9 6-9 6z"/></svg></button><button id="nextBtn" title="Next"><svg class="icon" viewBox="0 0 24 24"><path d="M18 5v14M6 6l8 6-8 6z"/></svg></button></div>
+              <div class="progress-wrap"><span id="timeNow">1:25</span><div id="progress" class="progress"><span id="progressBar"></span></div><span id="timeTotal">3:44</span></div>
+            </div>
+          </section>
+        </div></div>
+      </div>
+
+      <div id="view-artist" class="view">
+        <div class="artist-page"><div class="artist-shell">
+          <section class="artist-hero">
+            <div id="artistPortrait" class="artist-portrait" data-monogram="V"></div>
+            <div class="artist-copy"><div class="artist-number">Artist profile</div><h1 id="artistName">Vaundy</h1><div id="artistOrigin" class="origin">Tokyo, Japan · singer / songwriter / producer</div>
+              <div class="note-preview">
+                <div class="note-kicker"><span>Editorial note</span><span class="index">ARTIST</span></div>
+                <p id="artistNoteShort"></p>
+                <button id="artistNoteMore" class="note-more">Read full note →</button>
+              </div>
+            </div>
+          </section>
+          <section class="artist-grid"><div class="artist-section"><h3>Albums</h3><div id="artistAlbums"></div></div></section>
+        </div></div>
+      </div>
+
+      <div id="view-album" class="view">
+        <div class="album-page"><div class="album-shell">
+          <section class="album-object">
+            <div class="album-hero-cover"><div class="cover-frame" style="height:100%"><div class="cover-shadow"></div><img id="albumHeroCover" class="cover" alt=""></div></div>
+            <div class="album-object-copy"><div class="label">Album</div><h1 id="albumHeroTitle">strobo</h1><div id="albumHeroArtist" class="artist linkish">Vaundy</div>
+              <div class="album-hero-meta"><div><b>Release</b><span id="albumYear">2020</span></div><div><b>Format</b><span id="albumFormat">Album</span></div><div><b>Tracks</b><span id="albumTrackCount">11</span></div><div><b>Duration</b><span id="albumDuration">36:08</span></div></div>
+              <div class="note-preview">
+                <div class="note-kicker"><span>Editorial note</span><span class="index">ALBUM</span></div>
+                <p id="albumNoteShort"></p>
+                <button id="albumNoteMore" class="note-more">Read full note →</button>
+              </div>
+            </div>
+          </section>
+          <section class="album-sequence"><div class="sequence-head"><h2>Track Sequence</h2><span id="sequenceCount">11 tracks</span></div><div id="albumTrackTable" class="track-table"></div></section>
+        </div></div>
+      </div>
+    </section>
+  </main>
+</div>
+<div id="noteBackdrop" class="note-drawer-backdrop"></div>
+<aside id="noteDrawer" class="note-drawer" aria-hidden="true">
+  <div class="note-drawer-head"><span>Archive note</span><button id="noteDrawerClose" aria-label="Close note">×</button></div>
+  <div class="note-drawer-body">
+    <div id="noteDrawerContext" class="note-drawer-context">Editorial note</div>
+    <h2 id="noteDrawerTitle" class="note-drawer-title"></h2>
+    <div id="noteDrawerSubtitle" class="note-drawer-subtitle"></div>
+    <div class="note-drawer-rule"></div>
+    <div id="noteDrawerCopy" class="note-drawer-copy"></div>
+    <div id="noteDrawerFoot" class="note-drawer-foot">Personal Music Archive / Notes</div>
+  </div>
+</aside>
+<script>
+const DATA = [
+  {
+    id:"vaundy", artist:"Vaundy", artistOrigin:"Tokyo, Japan · singer / songwriter / producer", artistMonogram:"V", accent:"#b91f2e",
+    artistNoteShort:"장르보다 장면을 먼저 떠올리게 하는 음악가. 록, 팝, 소울의 경계를 가볍게 넘나들면서도 곡마다 강한 인상과 즉각적인 멜로디를 남긴다.",
+    artistNoteFull:"Vaundy의 음악은 특정 장르 하나로 정리하기보다 곡마다 다른 장면과 질감을 설계하는 방식으로 들을 때 더 잘 보인다. 기타 중심의 록에서 소울, 전자음악, 팝으로 빠르게 이동하지만 멜로디를 전면에 두는 태도는 비교적 일관적이다.\n\n초기의 곡들은 도시적이고 느슨한 리듬과 거친 질감이 동시에 존재한다. 정교하게 정돈된 스튜디오 팝이라기보다 한 사람이 여러 장르의 언어를 직접 시험해 보는 듯한 인상이 강하며, 그 폭넓음 자체가 아티스트의 캐릭터를 만든다.",
+    albums:[{
+      id:"strobo", title:"strobo", year:"2020", format:"Album", language:"Japanese", lang:"ja",
+      noteShort:"초기 Vaundy의 여러 얼굴을 한 장에 모은 앨범. 도시적인 리듬, 기타의 질감, 즉각적인 멜로디가 빠르게 교차하며 이후 음악의 원형을 보여준다.",
+      noteFull:"『strobo』는 한 가지 스타일을 밀어붙이기보다 서로 다른 곡의 개성을 연속해서 보여주는 앨범에 가깝다. 짧은 Audio 트랙 사이로 팝, 록, 소울의 문법이 번갈아 등장하고, 각 곡은 독립적인 싱글처럼 강한 인상을 남긴다.\n\n그럼에도 앨범 전체에는 공통된 속도가 있다. 도쿄의 밤과 개인적인 감정, 느슨한 그루브와 선명한 후렴이 계속 반복되면서 서로 다른 스타일을 하나의 시기 안에 묶는다. 순서대로 들으면 장르의 변화보다 한 아티스트가 자신의 언어를 빠르게 확장해 가는 과정이 더 두드러진다.",
+      cover:"https://i.scdn.co/image/ab67616d00001e02c8d4e8e5d8c3829163f12ff3",
+      tracks:[
+        {title:"Audio 001",duration:23},{title:"灯火",duration:178},{title:"東京フラッシュ",duration:258},{title:"怪獣の花唄",duration:224},{title:"life hack",duration:226},{title:"不可幸力",duration:200},{title:"soramimi",duration:213},{title:"Audio 002",duration:68},{title:"napori",duration:203},{title:"僕は今日も",duration:327},{title:"Bye by me",duration:242}
+      ]
+    }]
+  },
+  {
+    id:"tyler", artist:"Tyler, The Creator", artistOrigin:"Los Angeles, USA · rapper / producer / visual director", artistMonogram:"T", accent:"#d88fae",
+    artistNoteShort:"앨범마다 새로운 인물·색·화법을 만드는 음악가. 프로덕션과 랩, 영상과 패션을 분리하지 않고 하나의 세계로 묶는 방식이 핵심이다.",
+    artistNoteFull:"Tyler, The Creator의 작품은 음악만 떼어 놓기보다 앨범마다 새로 만드는 인물과 시각 언어를 함께 볼 때 구조가 선명해진다. 초기의 공격적인 랩에서 화려한 코드 진행과 소울, 신시사이저 중심의 프로덕션으로 이동하면서도 자신이 직접 세계를 설계한다는 태도는 유지된다.\n\n각 앨범은 하나의 캐릭터와 색채, 복장, 영상 문법을 갖는다. 그래서 디스코그래피는 단순한 음악적 성장이라기보다 서로 다른 페르소나를 통해 같은 감정과 집착을 여러 각도에서 반복해 보는 연작처럼 읽힌다.",
+    albums:[{
+      id:"igor", title:"IGOR", year:"2019", format:"Album", language:"English", lang:"en",
+      noteShort:"관계의 시작과 집착, 질투와 단절을 하나의 흐름으로 엮는다. 개별 곡보다 앨범의 순서와 반복되는 신시사이저·왜곡된 보컬이 만드는 감정선이 중요하다.",
+      noteFull:"『IGOR』는 사랑에 빠지는 순간부터 관계가 무너지고, 결국 상대를 놓으려는 지점까지를 하나의 연속된 감정선으로 구성한다. 트랙 사이의 경계가 느슨하고 모티프가 반복되기 때문에 셔플보다 처음부터 끝까지 이어 듣는 방식이 작품의 구조를 더 잘 드러낸다.\n\n거칠게 왜곡된 보컬과 밝고 낭만적인 코드가 동시에 등장한다는 점도 중요하다. 아름다운 화성과 불안정한 음색이 계속 충돌하면서 화자의 감정이 단순한 사랑이나 이별로 정리되지 않게 만든다. 핑크색 표지처럼 표면은 단순하지만 내부는 집착과 자기기만, 체념이 계속 겹쳐지는 앨범이다.",
+      cover:"https://i.scdn.co/image/ab67616d00001e0230a635de2bb0caa4e26f6abb",
+      tracks:[
+        {title:"IGOR'S THEME",duration:200},{title:"EARFQUAKE",duration:190},{title:"I THINK",duration:212},{title:"EXACTLY WHAT YOU RUN FROM YOU END UP CHASING",duration:14},{title:"RUNNING OUT OF TIME",duration:177},{title:"NEW MAGIC WAND",duration:195},{title:"A BOY IS A GUN*",duration:210},{title:"PUPPET",duration:179},{title:"WHAT'S GOOD",duration:205},{title:"GONE, GONE / THANK YOU",duration:375},{title:"I DON'T LOVE YOU ANYMORE",duration:161},{title:"ARE WE STILL FRIENDS?",duration:265}
+      ]
+    }]
+  },
+  {
+    id:"triples", artist:"tripleS", artistOrigin:"Seoul, Korea · idol group / modular pop project", artistMonogram:"S", accent:"#e76046",
+    artistNoteShort:"고정된 한 팀보다 조합과 재구성을 전제로 움직이는 프로젝트. 음악에서도 여러 유닛과 결을 하나의 큰 서사 안에 축적해 가는 방식이 특징이다.",
+    artistNoteFull:"tripleS는 멤버와 유닛의 조합 자체를 작품 구조의 일부로 사용하는 프로젝트다. 따라서 한 가지 대표 이미지나 장르로 그룹을 설명하기보다, 여러 시기의 곡과 유닛이 어떻게 서로 다른 방향을 시험하고 다시 전체 그룹으로 모이는지를 보는 편이 적합하다.\n\n음악적으로는 정교한 팝 프로덕션과 비교적 서늘한 질감, 청춘의 지속성과 집단성을 반복해서 사용한다. 많은 멤버와 콘텐츠를 단순히 양으로 보여주기보다 '조합 가능한 하나의 아카이브'로 보는 것이 이 프로젝트의 성격에 가깝다.",
+    albums:[{
+      id:"assemble24", title:"<ASSEMBLE24>", year:"2024", format:"Album", language:"Korean", lang:"ko",
+      noteShort:"여러 유닛으로 흩어졌던 tripleS가 완전체라는 형식으로 모이는 앨범. 다양한 팝 질감을 유지하면서도 ‘함께 계속 나아간다’는 정서를 중심축으로 둔다.",
+      noteFull:"『<ASSEMBLE24>』는 모듈형 그룹이라는 tripleS의 구조를 한 번에 보여주는 앨범이다. 서로 다른 유닛에서 축적된 질감이 한 트랙리스트 안에 모이지만, 앨범은 그 차이를 지우기보다 여러 방향이 동시에 존재하도록 둔다.\n\n중심에는 'Girls Never Die'가 보여주는 지속성과 집단성이 있다. 밝음과 서늘함, 전진감과 회상이 교차하고, 뒤로 갈수록 서로 다른 스타일의 곡들이 하나의 큰 그룹 이미지 안에서 연결된다. 완전체라는 말을 멤버 수의 과시보다 서로 다른 조각이 같은 방향을 바라보는 순간으로 읽게 하는 앨범이다.",
+      cover:"https://i.scdn.co/image/ab67616d00001e024b9eb26603f674ec91dcd545",
+      tracks:[
+        {title:"S",duration:73},{title:"Girls Never Die",duration:187},{title:"Heart Raider",duration:179},{title:"Midnight Flower",duration:166},{title:"White Soul Sneakers",duration:183},{title:"Chiyu",duration:170},{title:"24",duration:153},{title:"Beyond the Beyond",duration:182},{title:"Non Scale",duration:206},{title:"Dimension",duration:197}
+      ]
+    }]
+  }
+];
+
+let artistIndex=0, albumIndex=0, trackIndex=3, pageType="player", pos=85, playing=false, last=performance.now();
+const $=id=>document.getElementById(id);const root=document.documentElement;
+function fmt(s){s=Math.max(0,Math.floor(s));return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}
+function albumDuration(album){return album.tracks.reduce((a,t)=>a+t.duration,0)}
+function currentArtist(){return DATA[artistIndex]}function currentAlbum(){return currentArtist().albums[albumIndex]}function currentTrack(){return currentAlbum().tracks[trackIndex]}
+function lyricMock(lang){if(lang==="ja")return ["歌詞プレビュー","デザイン確認用の歌詞領域です。","次の歌詞ライン","その次の歌詞ライン"];if(lang==="ko")return ["가사 프리뷰","디자인 확인용 가사 영역입니다.","다음 가사 라인","그 다음 가사 라인"];return ["Lyric preview","Lyrics are placeholder copy in this design mockup.","Next lyric line","Following lyric line"]}
+function listeningNote(track,artist,album){
+  const presets={
+    "怪獣の花唄":["큰 후렴으로 바로 달려가기보다, 벌스에서 리듬과 보컬이 얼마나 억제되어 있는지 들어보면 곡의 상승감이 더 선명해진다.","이 곡의 핵심은 후렴 자체의 크기보다 그곳에 도달하기까지 쌓이는 대비에 있다. 벌스에서는 리듬과 보컬이 비교적 가볍게 움직이고, 후렴에 들어서면서 음역과 밀도가 동시에 확장된다.\n\n멜로디가 반복될수록 같은 구절이 조금씩 더 큰 기억처럼 들리는 것도 흥미롭다. 처음에는 단순한 팝 훅으로 들리지만, 곡이 진행될수록 회상과 그리움의 감정이 멜로디에 덧붙는다."],
+    "EARFQUAKE":["부드러운 코드와 불안정한 보컬이 동시에 움직인다. 표면의 달콤함과 화자의 초조함이 어긋나는 지점을 따라가며 들어보면 좋다.","'EARFQUAKE'는 매우 부드러운 화성과 멜로디를 사용하지만, 곡 안의 화자는 관계가 무너질까 끊임없이 불안해한다. 이 대비가 『IGOR』 전체의 감정을 압축한다.\n\n보컬의 질감이 매끈하게 정리되지 않고 약간 찌그러진 채 남아 있다는 점도 중요하다. 아름다운 코드 위에 불완전한 목소리를 얹음으로써, 사랑 노래의 안정감보다 매달림과 초조함이 먼저 들리게 한다."],
+    "Girls Never Die":["후렴의 전진감뿐 아니라 벌스에서 반복되는 차분한 리듬을 같이 들어보면, ‘계속 나아간다’는 메시지가 과장되지 않고 축적되는 방식이 보인다.","'Girls Never Die'는 거대한 선언을 처음부터 밀어붙이기보다 비교적 담담한 벌스에서 출발해 후렴에서 집단적인 에너지를 확장한다. 이 구조 때문에 곡의 메시지가 구호보다 과정처럼 들린다.\n\n여러 목소리가 차례로 등장하고 다시 하나의 후렴으로 모이는 방식은 tripleS라는 프로젝트의 구조와도 잘 맞는다. 한 사람의 극적인 서사보다 여러 목소리가 같은 방향으로 움직이는 감각에 집중해 볼 만하다."]
+  };
+  return presets[track.title] || [`${track.title}에서는 멜로디의 전면보다 리듬, 보컬의 질감, 앞뒤 트랙과의 연결을 함께 들어보면 앨범 안에서 이 곡이 맡는 위치가 더 잘 드러난다.`,`${track.title}은(는) ${album.title} 안에서 독립된 한 곡이면서 동시에 앞뒤 트랙의 흐름을 연결하는 역할을 한다. 이 mockup의 상세 해설은 곡을 평가하기보다, 반복해서 들을 때 주목할 만한 소리와 구조를 짚어 주는 방식으로 구성했다.\n\n실제 서비스에서는 이 영역에 사용자가 직접 남긴 감상, 제작 배경에 대한 메모, 특정 악기나 보컬에 대한 listening cue 등을 함께 보관할 수 있다.`];
+}
+function openNote(kind){const a=currentArtist(),al=currentAlbum(),t=currentTrack();let context,title,subtitle,copy;if(kind==="artist"){context="Editorial note / Artist";title=a.artist;subtitle=a.artistOrigin;copy=a.artistNoteFull}else if(kind==="album"){context="Editorial note / Album";title=al.title;subtitle=`${a.artist} · ${al.year} · ${al.tracks.length} tracks`;copy=al.noteFull}else{const note=listeningNote(t,a,al);context="Listening note / Song";title=t.title;subtitle=`${a.artist} · ${al.title} · Track ${String(trackIndex+1).padStart(2,"0")}`;copy=note[1]}$("noteDrawerContext").textContent=context;$("noteDrawerTitle").textContent=title;$("noteDrawerSubtitle").textContent=subtitle;$("noteDrawerCopy").textContent=copy;$("noteDrawer").classList.add("open");$("noteBackdrop").classList.add("open");$("noteDrawer").setAttribute("aria-hidden","false")}
+function closeNote(){$("noteDrawer").classList.remove("open");$("noteBackdrop").classList.remove("open");$("noteDrawer").setAttribute("aria-hidden","true")}
+function showView(type){pageType=type;document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));$(`view-${type}`).classList.add("active");$("navPlayer").classList.toggle("active",type==="player");$("navArtist").classList.toggle("active",type==="artist");$("navAlbum").classList.toggle("active",type==="album");updateCrumbs()}
+function updateCrumbs(){const a=currentArtist(),al=currentAlbum(),t=currentTrack();if(pageType==="player")$("crumbs").innerHTML=`<button data-nav="player">Player</button><span>/</span><span>${t.title}</span>`;else if(pageType==="artist")$("crumbs").innerHTML=`<button data-nav="player">Player</button><span>/</span><span>Artist</span><span>/</span><span>${a.artist}</span>`;else $("crumbs").innerHTML=`<button data-nav="player">Player</button><span>/</span><button data-nav="artist">${a.artist}</button><span>/</span><span>${al.title}</span>`;$("crumbs").querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>showView(b.dataset.nav))}
+function updateAll(){const a=currentArtist(),al=currentAlbum(),t=currentTrack(),lyrics=lyricMock(al.lang);root.style.setProperty("--main",a.accent);
+  $("playerCover").src=al.cover;$("playerTitle").textContent=t.title;$("playerTitle").setAttribute("lang",al.lang);$("playerArtist").textContent=a.artist;$("playerAlbum").textContent=al.title;$("playerTrackNo").textContent=`${String(trackIndex+1).padStart(2,"0")} / ${String(al.tracks.length).padStart(2,"0")}`;$("playerYear").textContent=al.year;$("playerDuration").textContent=fmt(t.duration);$("playerLanguage").textContent=al.language;$("playerAlbumCount").textContent=`${al.title} / ${al.tracks.length} tracks`;$("currentLyric").textContent=lyrics[0];$("currentLyric").setAttribute("lang",al.lang);$("currentTrans").textContent=lyrics[1];$("nextLyric1").textContent=lyrics[2];$("nextLyric2").textContent=lyrics[3];$("timeTotal").textContent=fmt(t.duration);
+  $("artistPortrait").dataset.monogram=a.artistMonogram;$("artistName").textContent=a.artist;$("artistOrigin").textContent=a.artistOrigin;$("artistNoteShort").textContent=a.artistNoteShort;renderArtistAlbums();
+  $("albumHeroCover").src=al.cover;$("albumHeroTitle").textContent=al.title;$("albumHeroArtist").textContent=a.artist;$("albumYear").textContent=al.year;$("albumFormat").textContent=al.format;$("albumTrackCount").textContent=al.tracks.length;$("albumDuration").textContent=fmt(albumDuration(al));$("albumNoteShort").textContent=al.noteShort;$("sequenceCount").textContent=`${al.tracks.length} tracks`;const ln=listeningNote(t,a,al);$("playerNoteShort").textContent=ln[0];renderTracks();renderProgress();updateCrumbs();bindLinks();}
+function renderArtistAlbums(){const a=currentArtist(),holder=$("artistAlbums");holder.innerHTML="";a.albums.forEach((al,i)=>{const row=document.createElement("div");row.className="release-card";row.innerHTML=`<img src="${al.cover}" alt=""><div><div class="label">${al.year} / ${al.format}</div><h4>${al.title}</h4><div class="release-meta"><span>${al.tracks.length} tracks</span><span>${fmt(albumDuration(al))}</span><span>${al.language}</span></div></div><button>Open album</button>`;row.querySelector("button").onclick=()=>{albumIndex=i;trackIndex=Math.min(trackIndex,al.tracks.length-1);pos=Math.min(85,currentTrack().duration*.38);updateAll();showView("album")};holder.appendChild(row)})}
+function renderTracks(){const al=currentAlbum(),holder=$("albumTrackTable");holder.innerHTML="";al.tracks.forEach((t,i)=>{const row=document.createElement("div");row.className="track-item"+(i===trackIndex?" active":"");row.innerHTML=`<span class="num">${String(i+1).padStart(2,"0")}</span><b>${t.title}</b><span>${fmt(t.duration)}</span>`;row.onclick=()=>{trackIndex=i;pos=Math.min(85,t.duration*.38);updateAll();showView("player")};holder.appendChild(row)})}
+function bindLinks(){$("playerArtist").onclick=()=>showView("artist");$("playerAlbum").onclick=()=>showView("album");$("albumHeroArtist").onclick=()=>showView("artist")}
+function renderProgress(){const t=currentTrack(),pct=Math.max(0,Math.min(100,pos/t.duration*100));$("progressBar").style.width=pct+"%";$("timeNow").textContent=fmt(pos)}
+function changeTrack(delta){const al=currentAlbum();trackIndex=(trackIndex+delta+al.tracks.length)%al.tracks.length;pos=Math.min(85,currentTrack().duration*.38);updateAll()}
+function setPlayIcon(){$("playPath").setAttribute("d",playing?"M9 7h2.8v10H9zM14.2 7H17v10h-2.8z":"m9 6 9 6-9 6z")}
+function tick(ts){const dt=(ts-last)/1000;last=ts;if(playing){pos+=dt;if(pos>=currentTrack().duration){changeTrack(1);pos=0}else renderProgress()}requestAnimationFrame(tick)}
+$("navPlayer").onclick=()=>showView("player");$("navArtist").onclick=()=>showView("artist");$("navAlbum").onclick=()=>showView("album");$("playBtn").onclick=()=>{playing=!playing;setPlayIcon()};$("prevBtn").onclick=()=>changeTrack(-1);$("nextBtn").onclick=()=>changeTrack(1);$("progress").onclick=e=>{const r=$("progress").getBoundingClientRect();pos=((e.clientX-r.left)/r.width)*currentTrack().duration;renderProgress()};
+$("artistNoteMore").onclick=()=>openNote("artist");$("albumNoteMore").onclick=()=>openNote("album");$("playerNoteMore").onclick=()=>openNote("song");$("noteDrawerClose").onclick=closeNote;$("noteBackdrop").onclick=closeNote;document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNote()});
+updateAll();setPlayIcon();requestAnimationFrame(tick);
+</script>
+</body>
+</html>
