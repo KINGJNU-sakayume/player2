@@ -8,6 +8,8 @@ export type TimedLyricLine = {
 
 export type TimedLyrics = {
   language?: string;
+  instrumental?: boolean;
+  source?: string;
   lines: TimedLyricLine[];
 };
 
