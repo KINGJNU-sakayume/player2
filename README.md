@@ -1,53 +1,120 @@
 # ARC Music v7
 
-ARC Music is a personal music player/archive whose playback is provided by the **real Spotify Embed iFrame API**. The app does not create a Spotify Connect browser device and does not simulate playback.
+ARC Music is a restrained personal music archive/player built from the ARC v7 specification supplied with this implementation. It has three primary surfaces—**Now Playing**, **Artist**, and **Album**—plus one shared editorial/listening-note drawer. It deliberately does **not** include the superseded Catalogue/Specimen modes or a persistent bottom playback bar.
 
-## Production architecture
+## Stack
 
 - React + TypeScript + Vite
-- Spotify Embed iFrame API: actual in-page playback, play/pause, seek, playback position events
-- Spotify Web API + Authorization Code with PKCE: catalog search and live artist/album/track metadata
-- LRCLIB: synchronized LRC lyrics when a matching record exists
-- Source-controlled ARC editorial notes: only explicitly hard-coded entries are shown
+- React Router with hash routing (robust on GitHub Pages refreshes)
+- Spotify Authorization Code with PKCE
+- Spotify Web Playback SDK for authoritative browser playback state
+- Spotify Web API for artist/album metadata and playback requests
+- Source-controlled ARC editorial notes
+- Replaceable lyrics/translation provider interfaces; the included providers are synthetic development mocks only
+- Vitest pure/domain tests
 - GitHub Actions → GitHub Pages
 
-## Setup
+## Local setup
 
-Create a Spotify developer app and register these redirect URIs exactly:
+```bash
+npm install
+cp .env.example .env.local
+# edit .env.local and set VITE_SPOTIFY_CLIENT_ID
+npm run dev -- --host 127.0.0.1
+```
 
-- local: `http://127.0.0.1:5173/`
-- production: `https://kingjnu-sakayume.github.io/player2/`
+Open `http://127.0.0.1:5173/`.
 
-Set:
+The app is also usable without a Spotify Client ID as an archive/design preview. In that mode, the three seeded subjects can be browsed but playback controls are disabled; there is no fake independent playback timer.
 
-`VITE_SPOTIFY_CLIENT_ID=<your public Spotify client id>`
+## Spotify developer app setup
 
-For GitHub Pages, add it at **Settings → Secrets and variables → Actions → Variables**. Do not add a client secret.
+Create a Spotify developer application with Web API / Web Playback SDK access and use the **Authorization Code with PKCE** flow. This frontend never needs or accepts a Spotify client secret.
 
-## Playback
+Register redirect URIs **exactly**:
 
-Audio is played by Spotify's official Embed. The custom ARC transport controls the Embed controller and receives authoritative `playback_update` events for position/duration. Previous/next loads the adjacent Spotify track from the live album sequence.
+- Local development: `http://127.0.0.1:5173/`
+- GitHub Pages production: `https://kingjnu-sakayume.github.io/player2/`
 
-No Web Playback SDK, Spotify Connect browser device, fake progress clock, preview MP3, or mock playback is used.
+If the repository owner/name changes, update the registered production redirect URI to match the deployed Pages URL exactly.
 
-## Search / artist / album
+### Environment variable
 
-The header search queries Spotify's live catalog for artists, albums, and tracks. Artist and album pages are fetched from Spotify Web API by Spotify ID. Album track rows load the actual Spotify track into the Embed and open Now Playing.
+```text
+VITE_SPOTIFY_CLIENT_ID=<public Spotify client id>
+```
 
-## Lyrics
+For GitHub Actions, create a repository Actions **Variable** named `VITE_SPOTIFY_CLIENT_ID`. Do not put a client secret, access token, refresh token, or private provider key in the repository or a `VITE_` variable.
 
-Lyrics are fetched at runtime from LRCLIB using track title, artist, album, and duration. Only synchronized LRC data is rendered. If synchronized lyrics are unavailable, ARC says so and does not fabricate text.
+## Playback behavior
 
-## Notes
+When Spotify is connected, the app loads the Web Playback SDK and creates an `ARC Music Browser` Spotify Connect device. The Now Playing transport is the only visible transport in the product and exposes:
 
-Editorial notes live in `src/editorial/data.ts`. The UI calls the editorial lookup and renders a preview/drawer only when a matching hard-coded entry exists. No generated fallback notes are shown.
+- previous
+- play/pause
+- next
+- seek/progress
+- current and total time
+
+The progress display interpolates from the latest authoritative SDK snapshot and resets whenever Spotify reports new state. Route changes do not unmount the playback provider, so playback state survives navigation.
+
+Spotify Web Playback SDK streaming requires an eligible Spotify Premium account. Account/device/SDK errors are treated as designed UI states. If the browser device is ready, **Settings → Use browser device** transfers the current Spotify session to it without auto-starting a new track.
+
+## Archive/demo data
+
+The local archive seeds the v7 reference subjects:
+
+- Vaundy — `strobo`
+- Tyler, The Creator — `IGOR`
+- tripleS — `<ASSEMBLE24>`
+
+The track arrays exist only for the archive preview. Once a Spotify entity is opened through a real Spotify ID, its metadata and complete album track sequence are fetched from Spotify.
+
+## Editorial notes
+
+ARC editorial writing is intentionally separate from Spotify transport models.
+
+Edit:
+
+- Artist Editorial Notes: `src/editorial/data.ts` → `artistEditorial`
+- Album Editorial Notes: `src/editorial/data.ts` → `albumEditorial`
+- Song Listening Notes: `src/editorial/data.ts` → `songEditorial`
+
+Only the seeded entities show notes. Missing notes are omitted rather than filled with generated prose.
+
+## Lyrics and translation
+
+Spotify is not assumed to supply the synchronized lyrics required by the v7 layout. Provider boundaries live in:
+
+- `src/lyrics/types.ts`
+- `src/lyrics/MockLyricsProvider.ts`
+- `src/translation/TranslationProvider.ts`
+- `src/translation/MockTranslationProvider.ts`
+
+The current providers return clearly synthetic, non-copyright development text. To use a licensed lyrics service, implement `LyricsProvider`; if a translation service is used, implement `TranslationProvider`. Providers requiring a private API key must run behind a backend/serverless boundary—never expose the secret in GitHub Pages frontend code.
 
 ## Commands
 
 ```bash
-npm install
-npm run check
 npm run dev
+npm run typecheck
+npm run lint
+npm run test:run
+npm run build
+npm run check
 ```
 
-The GitHub Pages workflow runs typecheck, lint, tests, build, and deploy on pushes to `main`.
+`npm run check` is what the Pages workflow runs before deployment.
+
+## GitHub Pages
+
+`.github/workflows/deploy-pages.yml` builds and deploys `dist/` on every push to `main`. The Vite base path is derived from `GITHUB_REPOSITORY`, while hash routing keeps application routes stable under `/player2/`.
+
+In GitHub repository settings, ensure **Pages → Build and deployment → Source** is set to **GitHub Actions**.
+
+## Known limitations
+
+- Spotify playback depends on Spotify account eligibility/Premium and browser support.
+- Seed archive tracks intentionally do not embed hard-coded Spotify track URIs; they are browsing/design data. Real Spotify album tracks can request playback because the API supplies their URIs.
+- The included lyrics and translations are synthetic placeholders, not production lyric data.
+- Artist origin/role metadata exists only for the local editorial subjects; arbitrary Spotify artists use Spotify metadata such as images/genres.
