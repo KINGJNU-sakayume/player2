@@ -10,26 +10,38 @@ export type LyricWindow = {
 export const getLyricWindow = (lines: TimedLyricLine[], positionMs: number): LyricWindow => {
   if (!lines.length) return { current: null, next: null, secondNext: null, index: -1 };
 
-  let index = -1;
+  let candidateIndex = -1;
   for (let cursor = lines.length - 1; cursor >= 0; cursor -= 1) {
-    const line = lines[cursor];
-    const hasStarted = line.startMs <= positionMs;
-    const notEnded = line.endMs === undefined || positionMs < line.endMs;
-    if (hasStarted && notEnded) {
-      index = cursor;
-      break;
-    }
-    if (hasStarted && index === -1) {
-      index = cursor;
+    if (lines[cursor].startMs <= positionMs) {
+      candidateIndex = cursor;
       break;
     }
   }
 
-  if (index < 0) index = 0;
+  if (candidateIndex < 0) {
+    return {
+      current: null,
+      next: lines[0] ?? null,
+      secondNext: lines[1] ?? null,
+      index: -1,
+    };
+  }
+
+  const candidate = lines[candidateIndex];
+  const isActive = candidate.endMs === undefined || positionMs < candidate.endMs;
+  if (!isActive) {
+    return {
+      current: null,
+      next: lines[candidateIndex + 1] ?? null,
+      secondNext: lines[candidateIndex + 2] ?? null,
+      index: -1,
+    };
+  }
+
   return {
-    current: lines[index] ?? null,
-    next: lines[index + 1] ?? null,
-    secondNext: lines[index + 2] ?? null,
-    index,
+    current: candidate,
+    next: lines[candidateIndex + 1] ?? null,
+    secondNext: lines[candidateIndex + 2] ?? null,
+    index: candidateIndex,
   };
 };
