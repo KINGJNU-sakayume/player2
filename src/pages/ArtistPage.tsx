@@ -2,23 +2,33 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { NotePreview } from '../components/NotePreview';
+import { findSeedArtist } from '../data/seed';
 import type { ArtistIdentity, ArtistRelease } from '../data/types';
 import { getArtistEditorial } from '../editorial/lookup';
 import { getSpotifyArtist, getSpotifyArtistReleases } from '../spotify/client';
+import { formatTime, sumDuration } from '../utils/time';
 
 export const ArtistPage = () => {
   const { artistId = '' } = useParams();
   const navigate = useNavigate();
   const auth = useAuth();
-  const [artist, setArtist] = useState<ArtistIdentity>();
-  const [releases, setReleases] = useState<ArtistRelease[]>([]);
-  const [loading, setLoading] = useState(true);
+  const seed = findSeedArtist(artistId);
+  const [artist, setArtist] = useState<ArtistIdentity | undefined>(seed);
+  const [releases, setReleases] = useState<ArtistRelease[]>(seed?.releases ?? []);
+  const [loading, setLoading] = useState(!seed);
   const [error, setError] = useState<string>();
 
   useEffect(() => {
+    if (seed) {
+      setArtist(seed);
+      setReleases(seed.releases);
+      setLoading(false);
+      setError(undefined);
+      return;
+    }
     if (auth.status !== 'connected') {
       setLoading(false);
-      setError('Connect Spotify to load this artist from the live catalog.');
+      setError('Connect Spotify to open artists outside the local ARC archive.');
       return;
     }
     let cancelled = false;
@@ -33,13 +43,13 @@ export const ArtistPage = () => {
       .catch((cause: unknown) => { if (!cancelled) setError(cause instanceof Error ? cause.message : 'Unable to load artist.'); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [artistId, auth.status, auth.getAccessToken]);
+  }, [artistId, seed, auth.status, auth.getAccessToken]);
 
   const note = artist ? getArtistEditorial(artist.name) : undefined;
-  const subtitle = artist?.genres?.slice(0, 4).join(' · ') || 'Spotify artist';
+  const subtitle = artist ? [artist.origin, artist.role].filter(Boolean).join(' · ') || artist.genres?.slice(0, 4).join(' · ') || 'Spotify artist' : '';
   const monogram = useMemo(() => artist?.name.trim().slice(0, 1).toUpperCase() ?? 'A', [artist?.name]);
 
-  if (loading) return <div className="view active"><div className="state-page"><div className="label">Artist profile</div><h1>Loading Spotify artist…</h1></div></div>;
+  if (loading) return <div className="view active"><div className="state-page"><div className="label">Artist profile</div><h1>Loading artist…</h1></div></div>;
   if (!artist || error) return <div className="view active"><div className="state-page"><div className="label">Artist profile</div><h1>Artist unavailable</h1><p>{error}</p></div></div>;
 
   return (
@@ -50,22 +60,37 @@ export const ArtistPage = () => {
             {artist.imageUrl && <img src={artist.imageUrl} alt={`${artist.name} artist portrait`} />}
           </div>
           <div className="artist-copy">
-            <div className="artist-number">Spotify artist</div>
+            <div className="artist-number">Artist profile</div>
             <h1>{artist.name}</h1>
             <div className="origin">{subtitle}</div>
             <NotePreview kind="ARTIST" note={note} title={artist.name} subtitle={subtitle} />
           </div>
         </section>
-        <section className="artist-grid"><div className="artist-section">
-          <h3>Releases</h3>
-          {releases.map((release) => (
-            <article className="release-card" key={release.id}>
-              {release.imageUrl ? <img src={release.imageUrl} alt={`${release.name} album cover`} /> : <div className="release-cover-fallback">ARC</div>}
-              <div><div className="label">{release.releaseDate?.slice(0, 4) ?? '—'} / {release.albumType ?? 'Release'}</div><h4>{release.name}</h4><div className="release-meta"><span>{release.totalTracks ?? '—'} tracks</span></div></div>
-              <button type="button" onClick={() => navigate(`/album/${release.id}`)}>Open album</button>
-            </article>
-          ))}
-        </div></section>
+        <section className="artist-grid">
+          <div className="artist-section">
+            <h3>Albums</h3>
+            {releases.length === 0 && <div className="empty-row">No releases available.</div>}
+            {releases.map((release) => {
+              const seedRelease = seed?.releases.find((item) => item.id === release.id);
+              const duration = seedRelease ? sumDuration(seedRelease.tracks.map((item) => item.durationMs)) : release.durationMs;
+              return (
+                <article className="release-card" key={release.id}>
+                  {release.imageUrl ? <img src={release.imageUrl} alt={`${release.name} album cover`} /> : <div className="release-cover-fallback">ARC</div>}
+                  <div>
+                    <div className="label">{release.releaseDate?.slice(0, 4) ?? '—'} / {release.albumType ?? 'Release'}</div>
+                    <h4>{release.name}</h4>
+                    <div className="release-meta">
+                      {release.totalTracks !== undefined && <span>{release.totalTracks} tracks</span>}
+                      {duration !== undefined && <span>{formatTime(duration)}</span>}
+                      {seedRelease?.language && <span>{seedRelease.language}</span>}
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => navigate(`/album/${release.id}`)}>Open album</button>
+                </article>
+              );
+            })}
+          </div>
+        </section>
       </div></div>
     </div>
   );

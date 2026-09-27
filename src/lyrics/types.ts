@@ -9,7 +9,6 @@ export type TimedLyricLine = {
 export type TimedLyrics = {
   language?: string;
   lines: TimedLyricLine[];
-  source?: string;
 };
 
 export interface LyricsProvider {

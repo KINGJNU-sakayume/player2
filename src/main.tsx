@@ -5,20 +5,20 @@ import { App } from './App';
 import { ArchiveProvider } from './app/ArchiveContext';
 import { AuthProvider } from './auth/AuthContext';
 import { NoteProvider } from './components/NoteContext';
-import { SpotifyEmbedProvider } from './playback/SpotifyEmbedContext';
+import { PlaybackProvider } from './playback/PlaybackContext';
 import './styles/app.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HashRouter>
       <AuthProvider>
-        <ArchiveProvider>
-          <SpotifyEmbedProvider>
+        <PlaybackProvider>
+          <ArchiveProvider>
             <NoteProvider>
               <App />
             </NoteProvider>
-          </SpotifyEmbedProvider>
-        </ArchiveProvider>
+          </ArchiveProvider>
+        </PlaybackProvider>
       </AuthProvider>
     </HashRouter>
   </React.StrictMode>,
