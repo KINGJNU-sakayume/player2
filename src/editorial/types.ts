@@ -12,5 +12,6 @@ export type LegacyEditorialMatch = {
 
 export type EditorialEntry = EditorialBody & {
   key: string;
-  match: LegacyEditorialMatch;
+  spotifyId?: string;
+  match?: LegacyEditorialMatch;
 };
