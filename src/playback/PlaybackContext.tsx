@@ -55,6 +55,7 @@ const mapSdkState = (state: SpotifySdkState, deviceId?: string): PlayerSnapshot 
 
 export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
   const auth = useAuth();
+  const { status: authStatus, getAccessToken } = auth;
   const [status, setStatus] = useState<PlaybackStatus>('idle');
   const [snapshot, setSnapshot] = useState<PlayerSnapshot | null>(null);
   const [deviceId, setDeviceId] = useState<string>();
@@ -63,7 +64,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
   const deviceRef = useRef<string>();
 
   useEffect(() => {
-    if (auth.status !== 'connected') {
+    if (authStatus !== 'connected') {
       playerRef.current?.disconnect();
       playerRef.current = null;
       setSnapshot(null);
@@ -83,7 +84,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         const player = new Spotify.Player({
           name: 'ARC Music Browser',
           getOAuthToken: (callback) => {
-            void auth.getAccessToken().then((token) => {
+            void getAccessToken().then((token) => {
               if (token) callback(token);
             });
           },
@@ -132,7 +133,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
       playerRef.current?.disconnect();
       playerRef.current = null;
     };
-  }, [auth.status, auth.getAccessToken]);
+  }, [authStatus, getAccessToken]);
 
   const requirePlayer = useCallback(() => {
     if (!playerRef.current) throw new Error('Spotify browser player is not ready.');
@@ -150,16 +151,16 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
 
   const playTrack = useCallback(async (track: TrackIdentity, album?: AlbumIdentity) => {
     if (playerRef.current) await playerRef.current.activateElement();
-    await startSpotifyTrack(auth.getAccessToken, track, album?.uri, deviceRef.current);
-  }, [auth.getAccessToken]);
+    await startSpotifyTrack(getAccessToken, track, album?.uri, deviceRef.current);
+  }, [getAccessToken]);
 
   const activateBrowser = useCallback(async () => {
     const player = requirePlayer();
     const id = deviceRef.current;
     if (!id) throw new Error('Spotify browser device is not ready.');
     await player.activateElement();
-    await transferSpotifyPlayback(auth.getAccessToken, id);
-  }, [auth.getAccessToken, requirePlayer]);
+    await transferSpotifyPlayback(getAccessToken, id);
+  }, [getAccessToken, requirePlayer]);
 
   const value = useMemo(() => ({ status, snapshot, deviceId, error, previous, togglePlay, next, seek, playTrack, activateBrowser }), [status, snapshot, deviceId, error, previous, togglePlay, next, seek, playTrack, activateBrowser]);
   return <PlaybackContext.Provider value={value}>{children}</PlaybackContext.Provider>;
