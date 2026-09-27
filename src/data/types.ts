@@ -52,8 +52,3 @@ export type PlayerSnapshot = {
   contextUri?: string;
   updatedAt: number;
 };
-
-export type SeedArtist = ArtistIdentity & {
-  monogram: string;
-  releases: AlbumWithTracks[];
-};

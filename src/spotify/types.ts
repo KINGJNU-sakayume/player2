@@ -26,3 +26,9 @@ export type SpotifyArtist = {
   images: SpotifyImage[];
   genres?: string[];
 };
+export type SpotifyTrack = SpotifyTrackSimple & { album: SpotifyAlbumSimple };
+export type SpotifySearchResponse = {
+  tracks?: { items: SpotifyTrack[] };
+  artists?: { items: SpotifyArtist[] };
+  albums?: { items: SpotifyAlbumSimple[] };
+};

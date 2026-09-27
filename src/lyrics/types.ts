@@ -12,5 +12,5 @@ export type TimedLyrics = {
 };
 
 export interface LyricsProvider {
-  getTimedLyrics(track: TrackIdentity): Promise<TimedLyrics | null>;
+  getTimedLyrics(track: TrackIdentity, signal?: AbortSignal): Promise<TimedLyrics | null>;
 }

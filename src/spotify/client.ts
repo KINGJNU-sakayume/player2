@@ -1,10 +1,14 @@
 import type { AlbumWithTracks, ArtistIdentity, ArtistRelease, TrackIdentity } from '../data/types';
 import { mapAlbum, mapAlbumSimple, mapArtist } from './mappers';
-import type { SpotifyAlbum, SpotifyAlbumSimple, SpotifyArtist, SpotifyTrackSimple } from './types';
+import type { SpotifyAlbum, SpotifyAlbumSimple, SpotifyArtist, SpotifySearchResponse, SpotifyTrack, SpotifyTrackSimple } from './types';
 
 const API_URL = 'https://api.spotify.com/v1';
 
 type TokenProvider = () => Promise<string | null>;
+
+export class SpotifyApiError extends Error {
+  constructor(public status: number, message: string, public retryAfter?: number) { super(message); }
+}
 
 const spotifyRequest = async <T>(tokenProvider: TokenProvider, path: string, init: RequestInit = {}): Promise<T> => {
   const token = await tokenProvider();
@@ -16,9 +20,30 @@ const spotifyRequest = async <T>(tokenProvider: TokenProvider, path: string, ini
   if (response.status === 204) return undefined as T;
   if (!response.ok) {
     const body = await response.text();
-    throw new Error(`Spotify API ${response.status}: ${body || response.statusText}`);
+    const retryAfter = Number(response.headers.get('Retry-After')) || undefined;
+    const message = response.status === 401 ? 'Spotify session expired. Reconnect and try again.'
+      : response.status === 403 ? 'Spotify denied this action. Premium, app access, or an active device may be required.'
+        : response.status === 429 ? `Spotify rate limit reached${retryAfter ? `; retry in ${retryAfter} seconds` : ''}.`
+          : `Spotify API ${response.status}: ${body || response.statusText}`;
+    throw new SpotifyApiError(response.status, message, retryAfter);
   }
   return (await response.json()) as T;
+};
+
+export type SearchResults = { tracks: TrackIdentity[]; artists: ArtistIdentity[]; albums: ArtistRelease[] };
+export const searchSpotify = async (tokenProvider: TokenProvider, query: string): Promise<SearchResults> => {
+  const params = new URLSearchParams({ q: query, type: 'track,artist,album', limit: '10' });
+  const response = await spotifyRequest<SpotifySearchResponse>(tokenProvider, `/search?${params}`);
+  return {
+    tracks: (response.tracks?.items ?? []).map((track: SpotifyTrack) => ({
+      id: track.id, uri: track.uri, title: track.name, durationMs: track.duration_ms,
+      trackNumber: track.track_number, discNumber: track.disc_number,
+      artists: track.artists.map((artist) => ({ id: artist.id, name: artist.name })),
+      album: mapAlbumSimple(track.album),
+    })),
+    artists: (response.artists?.items ?? []).map(mapArtist),
+    albums: (response.albums?.items ?? []).map(mapAlbumSimple),
+  };
 };
 
 export const getSpotifyArtist = async (tokenProvider: TokenProvider, artistId: string): Promise<ArtistIdentity> => {
