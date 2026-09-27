@@ -1,5 +1,5 @@
 import type { AlbumIdentity, AlbumWithTracks, ArtistIdentity, ArtistRelease, TrackIdentity } from '../data/types';
-import type { SpotifyAlbum, SpotifyAlbumSimple, SpotifyArtist, SpotifyTrackSimple } from './types';
+import type { SpotifyAlbum, SpotifyAlbumSimple, SpotifyArtist, SpotifyTrack, SpotifyTrackSimple } from './types';
 
 export const mapArtist = (artist: SpotifyArtist): ArtistIdentity => ({
   id: artist.id,
@@ -20,7 +20,7 @@ export const mapAlbumSimple = (album: SpotifyAlbumSimple): ArtistRelease => ({
   totalTracks: album.total_tracks,
 });
 
-const mapTrack = (track: SpotifyTrackSimple, album: AlbumIdentity): TrackIdentity => ({
+export const mapTrack = (track: SpotifyTrackSimple, album: AlbumIdentity): TrackIdentity => ({
   id: track.id,
   uri: track.uri,
   title: track.name,
@@ -30,6 +30,11 @@ const mapTrack = (track: SpotifyTrackSimple, album: AlbumIdentity): TrackIdentit
   discNumber: track.disc_number,
   durationMs: track.duration_ms,
 });
+
+export const mapSearchTrack = (track: SpotifyTrack): TrackIdentity => {
+  const album: AlbumIdentity = mapAlbumSimple(track.album);
+  return mapTrack(track, album);
+};
 
 export const mapAlbum = (album: SpotifyAlbum): AlbumWithTracks => {
   const identity: AlbumIdentity = mapAlbumSimple(album);
