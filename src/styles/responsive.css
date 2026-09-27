@@ -1,0 +1,43 @@
+@media (max-width: 1180px) {
+  .player-page, .artist-page, .album-page { padding-left: 28px; padding-right: 28px; }
+  .player-shell, .album-shell { gap: 42px; }
+  .artist-hero { grid-template-columns: 310px 1fr; gap: 38px; }
+}
+
+@media (max-width: 900px) {
+  .note-preview { max-width: none; }
+  .note-drawer-body { padding: 28px 24px 44px; }
+  body { overflow: auto; }
+  .app { min-height: 100dvh; height: auto; grid-template-columns: 56px minmax(0,1fr); }
+  .rail { height: 100dvh; position: sticky; top: 0; }
+  .workspace { height: auto; min-height: 100dvh; grid-template-rows: 64px minmax(760px,auto); }
+  .stage { min-height: 760px; }
+  .player-shell, .artist-hero, .album-shell { grid-template-columns: 1fr; }
+  .player-object, .album-object { position: static; }
+  .player-cover, .album-hero-cover { width: min(100%,430px); }
+  .artist-portrait { max-width: 360px; }
+  .release-card { grid-template-columns: 130px minmax(0,1fr); }
+  .release-card img, .release-cover-fallback { width: 130px; height: 130px; }
+  .release-card button { grid-column: 2; justify-self: start; }
+  .top-mark { display: none; }
+  .topbar { grid-template-columns: minmax(0,1fr) auto; padding: 0 18px; }
+  .top-right { grid-column: 2; }
+  .player-listening { min-height: 680px; }
+}
+
+@media (max-width: 620px) {
+  .player-page, .artist-page, .album-page { padding: 20px 18px 46px; }
+  .top-right { display: none; }
+  .topbar { grid-template-columns: 1fr; }
+  .player-transport { grid-template-columns: 1fr; }
+  .progress-wrap { grid-template-columns: 38px 1fr 38px; }
+  .artist-copy h1 { font-size: clamp(48px,15vw,72px); }
+  .release-card { grid-template-columns: 92px minmax(0,1fr); gap: 14px; }
+  .release-card img, .release-cover-fallback { width: 92px; height: 92px; }
+  .release-card h4 { font-size: 21px; }
+  .settings-panel { left: 66px; bottom: 10px; width: calc(100vw - 76px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
