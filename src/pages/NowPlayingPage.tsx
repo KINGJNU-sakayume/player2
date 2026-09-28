@@ -1,154 +1,188 @@
-import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { usePageTitle } from '../app/pageTitle';
+import { useSession } from '../app/sessionContext';
+import { useAlbum } from '../catalogue/queries';
+import { ArtistLinks } from '../components/ArtistLinks';
 import { CoverImage } from '../components/CoverImage';
-import { NextIcon, PlayIcon, PreviousIcon } from '../components/icons';
 import { NotePreview } from '../components/NotePreview';
-import type { AlbumWithTracks } from '../data/types';
-import { getSongEditorial } from '../editorial/lookup';
-import { LrclibLyricsProvider } from '../lyrics/LrclibLyricsProvider';
-import { getLyricWindow } from '../lyrics/sync';
-import type { TimedLyrics } from '../lyrics/types';
-import { usePlayback } from '../playback/PlaybackContext';
-import { useInterpolatedPosition } from '../playback/useInterpolatedPosition';
-import { useAuth } from '../auth/AuthContext';
-import { getSpotifyAlbum } from '../spotify/client';
-import { formatTime, progressPercent } from '../utils/time';
+import { LyricsBlock, languageName } from '../components/player/LyricsBlock';
+import { PlaybackNotice } from '../components/player/PlaybackNotice';
+import { Transport } from '../components/player/Transport';
+import { TransportExtras } from '../components/player/TransportExtras';
+import { StateView } from '../components/StateView';
+import { getSongNote } from '../editorial/lookup';
+import { formatDuration, formatTrackNumber, joinArtistNames, releaseYear } from '../lib/format';
+import { useTimedLyrics } from '../lyrics/useTimedLyrics';
+import { useEngine, usePlayerSelector, usePlayerSnapshot } from '../playback/hooks';
+import { detectLineLanguage } from '../translation/languageDetect';
 
-const lyricProvider = new LrclibLyricsProvider();
+/** Latin script says nothing about a song's language ("Lemon" is Japanese); only CJK titles are a hint. */
+function titleLanguage(title: string): string | undefined {
+  const language = detectLineLanguage(title);
+  return language === 'en' ? undefined : language;
+}
 
-export const NowPlayingPage = () => {
-  const auth = useAuth();
-  const playback = usePlayback();
-  const snapshot = playback.snapshot;
-  const track = snapshot?.track;
-  const [album, setAlbum] = useState<AlbumWithTracks>();
-  const [lyrics, setLyrics] = useState<TimedLyrics | null>(null);
-  const [lyricsStatus, setLyricsStatus] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
-  const [feedback, setFeedback] = useState<string>();
-  const positionMs = useInterpolatedPosition(snapshot);
+/**
+ * The one Now Playing design (v7): the album object on the left — cover,
+ * title, artist · album, track / release / duration / language — and the
+ * listening column on the right — lyrics, Listening Note and the transport.
+ */
+export function NowPlayingPage() {
+  const snapshot = usePlayerSnapshot();
+  const hydrated = usePlayerSelector((s) => s.hydrated);
+  const track = snapshot.track;
+  const album = useAlbum(track?.album.id || undefined);
+  const lyricsState = useTimedLyrics(track);
+  usePageTitle('Now Playing', track?.title ?? null);
 
-  useEffect(() => {
-    if (!track || auth.status !== 'connected') {
-      setAlbum(undefined);
-      return;
-    }
-    let cancelled = false;
-    getSpotifyAlbum(auth.getAccessToken, track.album.id)
-      .then((value) => { if (!cancelled) setAlbum(value); })
-      .catch(() => { if (!cancelled) setAlbum(undefined); });
-    return () => { cancelled = true; };
-  }, [track, auth.status, auth.getAccessToken]);
+  if (!hydrated) return <NowPlayingLoading />;
+  if (!track) return <NothingPlaying />;
 
-  useEffect(() => {
-    if (!track) { setLyrics(null); return; }
-    const controller = new AbortController();
-    setLyricsStatus('loading');
-    lyricProvider.getTimedLyrics({ ...track, language: album?.language ?? track.language }, controller.signal)
-      .then((value) => {
-        if (controller.signal.aborted) return;
-        setLyrics(value);
-        setLyricsStatus(value ? 'ready' : 'missing');
-      })
-      .catch((cause: unknown) => { if (!controller.signal.aborted && !(cause instanceof DOMException && cause.name === 'AbortError')) { setLyrics(null); setLyricsStatus('error'); } });
-    return () => controller.abort();
-  // The provider needs the full track object, but lyrics should only refetch when track identity/content changes.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [track?.id, track?.durationMs, track?.language, track?.title, album?.language]);
-
-  const lyricWindow = useMemo(() => getLyricWindow(lyrics?.lines ?? [], positionMs), [lyrics, positionMs]);
-  if (!track) return <div className="view active"><div className="state-page"><div className="label">Now playing</div><h1>{auth.status === 'connected' ? 'No active track' : 'Connect Spotify'}</h1><p>{auth.status === 'connected' ? 'Start a track from Spotify Search or another Spotify device. ARC will follow the real playback session.' : 'Connect a Spotify Premium account to initialize the browser player and search the Spotify catalogue.'}</p>{auth.status !== 'connected' && auth.hasClientId && <button className="plain-action" type="button" onClick={() => void auth.connect()}>Connect Spotify</button>}</div></div>;
-
-  const durationMs = snapshot?.durationMs || track.durationMs;
-  const artist = track.artists[0];
-  const releaseYear = Number((album?.releaseDate ?? track.album.releaseDate)?.slice(0, 4)) || undefined;
-  const trackNumber = album?.tracks.find((item) => item.id === track.id)?.trackNumber ?? track.trackNumber;
-  const songNote = getSongEditorial(artist?.name ?? '', album?.name ?? track.album.name, track.title, releaseYear);
-  const controlsEnabled = auth.status === 'connected' && playback.status === 'ready' && Boolean(snapshot);
-
-  const runControl = async (action: () => Promise<void>) => {
-    setFeedback(undefined);
-    try {
-      await action();
-    } catch (cause) {
-      setFeedback(cause instanceof Error ? cause.message : 'Playback command failed.');
-    }
-  };
-
-  const contextText = snapshot
-    ? 'Spotify Web Playback SDK'
-    : auth.status === 'connected'
-      ? 'No active Spotify playback · showing archive selection'
-      : 'Archive preview · connect Spotify for live playback';
+  const detail = album.data;
+  const albumName = detail?.name ?? track.album.name;
+  const durationMs = snapshot.durationMs || track.durationMs;
+  const albumTrack = detail?.tracks.find((item) => item.id === track.spotifyTrackId || item.uri === track.uri);
+  const trackCount = detail?.totalTracks ?? (detail ? detail.tracks.length : null);
+  const year = releaseYear(detail?.releaseDate ?? null);
+  const lyricLanguage = lyricsState.status === 'ready' ? lyricsState.lyrics.language : undefined;
+  const language = languageName(lyricLanguage ?? titleLanguage(track.title));
+  const songNote = getSongNote({ id: track.spotifyTrackId, title: track.title, artistNames: track.artists.map((a) => a.name) });
+  const titleLang = lyricLanguage ?? detectLineLanguage(track.title);
+  const artistNames = joinArtistNames(track.artists) || 'Unknown artist';
 
   return (
     <div className="view active">
       <div className="player-page">
         <div className="player-shell">
-          <section className="player-object">
-            <div className="player-cover"><CoverImage src={album?.imageUrl ?? track.album.imageUrl} alt={`${track.album.name} album cover`} /></div>
+          <section className="player-object" aria-label="Now playing">
+            <div className="player-cover">
+              <CoverImage
+                images={track.album.images}
+                size={520}
+                alt={`${albumName} album cover`}
+                title={albumName}
+                subtitle={artistNames}
+                paletteKey={track.album.id}
+                shadow
+                priority
+              />
+            </div>
             <div className="player-copy">
               <div className="label">Now playing</div>
-              <h1 lang={album?.lang}>{track.title}</h1>
+              <h1 lang={titleLang}>{track.title}</h1>
               <div className="artist-line">
-                {artist ? <Link className="linkish artist" to={`/artist/${artist.id}`}>{artist.name}</Link> : 'Unknown artist'}
-                <span> · </span>
-                <Link className="linkish" to={`/album/${track.album.id}`}>{album?.name ?? track.album.name}</Link>
+                <ArtistLinks artists={track.artists} />
+                {track.album.id && (
+                  <>
+                    <span aria-hidden="true"> · </span>
+                    <Link className="linkish" to={`/album/${track.album.id}`} lang={detectLineLanguage(albumName)}>
+                      {albumName}
+                    </Link>
+                  </>
+                )}
               </div>
               <div className="player-meta">
-                <div><b>Track</b><span>{trackNumber ? `${String(trackNumber).padStart(2, '0')} / ${String(album?.totalTracks ?? album?.tracks.length ?? '—').padStart(2, '0')}` : '—'}</span></div>
-                <div><b>Release</b><span>{releaseYear ?? '—'}</span></div>
-                <div><b>Duration</b><span>{formatTime(durationMs)}</span></div>
-                <div><b>Language</b><span>{album?.language ?? track.language ?? '—'}</span></div>
+                <div>
+                  <b>Track</b>
+                  <span>
+                    {albumTrack ? `${formatTrackNumber(albumTrack.trackNumber)} / ${trackCount ? formatTrackNumber(trackCount) : '—'}` : '—'}
+                  </span>
+                </div>
+                <div>
+                  <b>Release</b>
+                  <span>{year ?? '—'}</span>
+                </div>
+                <div>
+                  <b>Duration</b>
+                  <span>{formatDuration(durationMs)}</span>
+                </div>
+                <div>
+                  <b>Language</b>
+                  <span>{language ?? '—'}</span>
+                </div>
               </div>
             </div>
           </section>
 
-          <section className="player-listening">
-            <div className="listening-head"><h2>Lyrics</h2><span>{album?.name ?? track.album.name} / {album?.totalTracks ?? album?.tracks.length ?? '—'} tracks</span></div>
-            <div className="lyrics-panel" aria-live="polite">
-              <div className="current-lyric" lang={album?.lang}>{lyricWindow.current?.text ?? (lyricsStatus === 'loading' ? 'Loading synchronized lyrics…' : lyricsStatus === 'error' ? 'Lyrics provider unavailable' : 'Synchronized lyrics unavailable')}</div>
-              <div className="next-lines">
-                {lyricWindow.next && <div className="next-line">{lyricWindow.next.text}</div>}
-                {lyricWindow.secondNext && <div className="next-line second">{lyricWindow.secondNext.text}</div>}
-              </div>
-            </div>
+          <section className="player-listening" aria-label="Lyrics and playback controls">
+            <LyricsBlock
+              key={track.spotifyTrackId}
+              track={track}
+              lyricsState={lyricsState}
+              context={`${albumName} / ${trackCount ?? '—'} tracks`}
+            />
 
             <NotePreview
               kind="SONG"
               note={songNote}
               title={track.title}
-              subtitle={`${artist?.name ?? 'Unknown artist'} · ${album?.name ?? track.album.name}${trackNumber ? ` · Track ${String(trackNumber).padStart(2, '0')}` : ''}`}
+              titleLang={titleLang}
+              subtitle={`${artistNames} · ${albumName}${albumTrack ? ` · Track ${formatTrackNumber(albumTrack.trackNumber)}` : ''}`}
               className="player-note"
             />
 
-            <div className="player-transport">
-              <div className="controls">
-                <button type="button" title="Previous" aria-label="Previous track" disabled={!controlsEnabled} onClick={() => void runControl(playback.previous)}><PreviousIcon /></button>
-                <button type="button" className="play" title="Play / Pause" aria-label={snapshot?.paused ? 'Play' : 'Pause'} disabled={!controlsEnabled} onClick={() => void runControl(playback.togglePlay)}><PlayIcon paused={snapshot?.paused ?? true} /></button>
-                <button type="button" title="Next" aria-label="Next track" disabled={!controlsEnabled} onClick={() => void runControl(playback.next)}><NextIcon /></button>
-              </div>
-              <div className="progress-wrap">
-                <span>{formatTime(positionMs)}</span>
-                <div className="progress-control">
-                  <div className="progress-visual" aria-hidden="true"><span style={{ width: `${progressPercent(positionMs, durationMs)}%` }} /></div>
-                  <input
-                    aria-label="Seek playback position"
-                    type="range"
-                    min={0}
-                    max={Math.max(1, durationMs)}
-                    step={1000}
-                    value={Math.min(positionMs, durationMs)}
-                    disabled={!controlsEnabled}
-                    onChange={(event) => void runControl(() => playback.seek(Number(event.target.value)))}
-                  />
-                </div>
-                <span>{formatTime(durationMs)}</span>
-              </div>
-            </div>
-            <div className="playback-state" role="status">{feedback ?? playback.error ?? contextText}</div>
+            <Transport />
+            <TransportExtras />
+            <PlaybackNotice />
           </section>
         </div>
       </div>
     </div>
   );
-};
+}
+
+function NowPlayingLoading() {
+  const { mode } = useSession();
+  return (
+    <StateView label="Now playing" title={mode === 'preview' ? 'Opening the preview…' : 'Reading playback…'}>
+      <p>{mode === 'preview' ? 'Loading the sample archive.' : 'ARC is reading the current playback state from Spotify.'}</p>
+    </StateView>
+  );
+}
+
+function NothingPlaying() {
+  const sdk = usePlayerSelector((s) => s.sdk);
+  const engine = useEngine();
+
+  let title = 'No active track';
+  let body = 'Start a track from your library, Search or another Spotify device. ARC follows the real playback session.';
+  if (sdk.kind === 'loading') {
+    title = 'Starting browser playback…';
+    body = 'Connecting this browser to Spotify as the ARC Music Browser device. Music started on another device will appear here.';
+  } else if (sdk.kind === 'error') {
+    title = 'Browser playback unavailable';
+    body = `${sdk.message} Start music on another Spotify device and it will appear here.`;
+  }
+
+  return (
+    <StateView
+      label="Now playing"
+      title={title}
+      actions={
+        <>
+          <Link className="plain-action" to="/library">
+            Browse your library
+          </Link>
+          {sdk.kind === 'ready' && (
+            <button
+              type="button"
+              className="plain-action"
+              onClick={() => {
+                engine.activateAudio();
+                void engine.transferToBrowser(true);
+              }}
+            >
+              Resume in this browser
+            </button>
+          )}
+          <button type="button" className="plain-action" onClick={() => void engine.resync()}>
+            Check again
+          </button>
+        </>
+      }
+    >
+      <p>{body}</p>
+      <PlaybackNotice />
+    </StateView>
+  );
+}

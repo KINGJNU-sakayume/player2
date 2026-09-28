@@ -1,78 +1,210 @@
-import { useEffect, useMemo, useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '../auth/AuthContext';
-import { AlbumIcon, ArtistIcon, MusicIcon, SettingsIcon } from '../components/icons';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useProfile } from '../catalogue/queries';
+import { AlbumIcon, ArtistIcon, LibraryIcon, MusicIcon, QueueIcon, SearchIcon, SettingsIcon } from '../components/icons';
+import { NoteProvider } from '../components/NoteContext';
 import { NoteDrawer } from '../components/NoteDrawer';
-import { SettingsPanel } from '../components/SettingsPanel';
-import { usePlayback } from '../playback/PlaybackContext';
+import { QueueDrawer } from '../components/QueueDrawer';
 import { SearchOverlay } from '../components/SearchOverlay';
+import { SettingsPanel } from '../components/SettingsPanel';
+import { usePlayerSelector } from '../playback/hooks';
+import { AccentTokens } from './AccentTokens';
+import { useAppServices, useAuthState } from './appContext';
+import { GlobalShortcuts } from './GlobalShortcuts';
+import { useCurrentPageTitle } from './pageTitle';
+import { RouteErrorBoundary } from './RouteErrorBoundary';
+import { useSessionControls } from './sessionControls';
+import { useSession } from './sessionContext';
+import { ShellContext, useShell, type ShellControls } from './shellContext';
 
-export const AppShell = () => {
-  const location = useLocation();
-  const auth = useAuth();
-  const playback = usePlayback();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const track = playback.snapshot?.track;
+function initials(name: string | null | undefined): string {
+  if (!name) return 'ARC';
+  const parts = name.split(/[\s,._-]+/).filter(Boolean);
+  return parts.slice(0, 2).map((part) => Array.from(part)[0]!.toUpperCase()).join('') || 'ARC';
+}
+
+function Rail() {
+  const track = usePlayerSelector((s) => s.snapshot.track);
+  const shell = useShell();
+  const profile = useProfile();
   const artistId = track?.artists[0]?.id;
   const albumId = track?.album.id;
-
-  useEffect(() => {
-    document.documentElement.style.setProperty('--main', '#b91f2e');
-  }, [track?.id]);
-
-  const crumbs = useMemo(() => {
-    const path = location.pathname;
-    if (path.startsWith('/artist/')) {
-      const id = path.split('/').pop() ?? '';
-      return ['Player', 'Artist', (id === artistId ? track?.artists[0]?.name : undefined) ?? 'Artist'];
-    }
-    if (path.startsWith('/album/')) {
-      const id = path.split('/').pop() ?? '';
-      return ['Player', (id === albumId ? track?.album.name : undefined) ?? 'Album'];
-    }
-    return ['Player', track?.title ?? 'Now Playing'];
-  }, [location.pathname, artistId, albumId, track]);
-
-  const topRight = !auth.hasClientId
-    ? 'Demo archive'
-    : auth.status === 'connected'
-      ? playback.status === 'ready' ? 'Spotify · browser ready' : `Spotify · ${playback.status}`
-      : auth.status === 'connecting' ? 'Spotify · connecting' : 'Connect Spotify';
+  const name = profile.data?.displayName ?? null;
 
   return (
-    <div className="app">
-      <aside className="rail" aria-label="Primary navigation">
-        <NavLink className="logo" to="/now-playing" aria-label="ARC Music — Now Playing"><b>ARC</b><span>music</span></NavLink>
-        <nav>
-          <NavLink to="/now-playing" title="Now Playing" aria-label="Now Playing"><MusicIcon /></NavLink>
-          {artistId && <NavLink to={`/artist/${artistId}`} title="Artist" aria-label="Artist"><ArtistIcon /></NavLink>}
-          {albumId && <NavLink to={`/album/${albumId}`} title="Album" aria-label="Album"><AlbumIcon /></NavLink>}
-        </nav>
-        <div className="rail-foot">
-          <button type="button" title="Settings" aria-label="Settings" onClick={() => setSettingsOpen((value) => !value)}><SettingsIcon /></button>
-          <div className="user" aria-label="Personal archive">WJ</div>
+    <aside className="rail" aria-label="Primary navigation">
+      <Link className="logo" to="/now-playing" aria-label="ARC Music — Now Playing">
+        <b>ARC</b>
+        <span>music</span>
+      </Link>
+      <nav>
+        <NavLink to="/now-playing" title="Now Playing" aria-label="Now Playing">
+          <MusicIcon />
+        </NavLink>
+        <NavLink to="/library" title="Library" aria-label="Library">
+          <LibraryIcon />
+        </NavLink>
+        <button type="button" title="Search (/)" aria-label="Search" aria-keyshortcuts="/" onClick={shell.openSearch}>
+          <SearchIcon />
+        </button>
+        {artistId && (
+          <NavLink to={`/artist/${artistId}`} title="Artist" aria-label="Current artist">
+            <ArtistIcon />
+          </NavLink>
+        )}
+        {albumId && (
+          <NavLink to={`/album/${albumId}`} title="Album" aria-label="Current album">
+            <AlbumIcon />
+          </NavLink>
+        )}
+      </nav>
+      <div className="rail-foot">
+        <button type="button" title="Queue" aria-label="Queue" aria-haspopup="dialog" onClick={shell.openQueue}>
+          <QueueIcon />
+        </button>
+        <button type="button" title="Settings" aria-label="Settings" onClick={shell.toggleSettings}>
+          <SettingsIcon />
+        </button>
+        <div className="user" role="img" title={name ?? 'Personal archive'} aria-label={name ? `Signed in as ${name}` : 'Personal archive'}>
+          {initials(name)}
         </div>
-      </aside>
+      </div>
+    </aside>
+  );
+}
 
-      <main className="workspace">
-        <header className="topbar">
-          <div className="crumbs" aria-label="Breadcrumb">
-            {crumbs.map((crumb, index) => <span key={`${crumb}-${index}`}>{index > 0 && <i>/</i>}{crumb}</span>)}
-          </div>
-          <div className="top-mark"><b>Personal Music Archive</b></div>
-          <div className="top-right">
-            <button type="button" className="search-trigger" onClick={() => setSearchOpen(true)}>Search</button>
-            {auth.hasClientId && auth.status !== 'connected' && auth.status !== 'connecting'
-              ? <button type="button" onClick={() => void auth.connect()}>{topRight}</button>
-              : <span>{topRight}</span>}
-          </div>
-        </header>
-        <section className="stage"><Outlet /></section>
-      </main>
-      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
-      <NoteDrawer />
+function TopBar() {
+  const { section, title } = useCurrentPageTitle();
+  const { pathname } = useLocation();
+  const { mode } = useSession();
+  const { auth } = useAppServices();
+  const controls = useSessionControls();
+  const shell = useShell();
+  const track = usePlayerSelector((s) => s.snapshot.track);
+  const sdk = usePlayerSelector((s) => s.sdk);
+
+  const status =
+    mode === 'preview'
+      ? 'Preview · no audio'
+      : sdk.kind === 'ready'
+        ? 'Spotify · browser ready'
+        : sdk.kind === 'loading'
+          ? 'Spotify · connecting'
+          : sdk.kind === 'reconnecting'
+            ? 'Spotify · reconnecting'
+            : 'Spotify';
+
+  return (
+    <header className="topbar">
+      <div className="crumbs" aria-label="Breadcrumb">
+        <span>Player</span>
+        {section !== 'Now Playing' && (
+          <span>
+            <i>/</i>
+            {section}
+          </span>
+        )}
+        {title && (
+          <span className="crumb-title">
+            <i>/</i>
+            {title}
+          </span>
+        )}
+      </div>
+      <div className="top-mark">
+        <b>Personal Music Archive</b>
+      </div>
+      <div className="top-right">
+        {track && pathname !== '/now-playing' && (
+          <Link className="now-marker" to="/now-playing" title={`Now playing: ${track.title}`}>
+            <i aria-hidden="true" />
+            <span>{track.title}</span>
+          </Link>
+        )}
+        <button type="button" className="search-trigger" onClick={shell.openSearch} aria-keyshortcuts="/">
+          Search <kbd>/</kbd>
+        </button>
+        {mode === 'preview' && auth ? (
+          <button type="button" onClick={controls.exitPreview}>
+            Connect Spotify
+          </button>
+        ) : (
+          <span>{status}</span>
+        )}
+      </div>
+    </header>
+  );
+}
+
+/** Shown when a stored authorization predates scopes the app now requires. */
+function ScopeNotice() {
+  const auth = useAuthState();
+  const services = useAppServices();
+  const { pathname } = useLocation();
+  if (auth.status !== 'signed-in' || auth.missingScopes.length === 0 || !services.auth) return null;
+  return (
+    <div className="scope-notice" role="status">
+      <span>ARC needs {auth.missingScopes.length} more Spotify permission(s) for every feature.</span>
+      <button type="button" className="note-more" onClick={() => void services.auth?.beginLogin(pathname)}>
+        Reconnect Spotify →
+      </button>
     </div>
   );
-};
+}
+
+/**
+ * The persistent v7 shell: rail, top bar, routed stage, and the overlays
+ * (search, settings, the shared right drawer for notes and the queue).
+ * There is no global playback footer — transport lives on Now Playing only —
+ * and playback survives every route change.
+ */
+export function AppShell() {
+  const { pathname } = useLocation();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [queueOpen, setQueueOpen] = useState(false);
+
+  const closeSettings = useCallback(() => setSettingsOpen(false), []);
+  const closeSearch = useCallback(() => setSearchOpen(false), []);
+  const closeQueue = useCallback(() => setQueueOpen(false), []);
+  const controls = useMemo<ShellControls>(
+    () => ({
+      openSearch: () => setSearchOpen(true),
+      openQueue: () => setQueueOpen(true),
+      toggleSettings: () => setSettingsOpen((value) => !value),
+    }),
+    [],
+  );
+
+  useEffect(() => {
+    setSettingsOpen(false);
+  }, [pathname]);
+
+  return (
+    <ShellContext.Provider value={controls}>
+      <NoteProvider>
+        <div className="app">
+          <a href="#main" className="skip-link" onClick={(event) => { event.preventDefault(); document.getElementById('main')?.focus(); }}>
+            Skip to content
+          </a>
+          <Rail />
+          <main className="workspace">
+            <TopBar />
+            <ScopeNotice />
+            <section className="stage" id="main" tabIndex={-1}>
+              <RouteErrorBoundary resetKey={pathname}>
+                <Outlet />
+              </RouteErrorBoundary>
+            </section>
+          </main>
+          <SettingsPanel open={settingsOpen} onClose={closeSettings} />
+          <SearchOverlay open={searchOpen} onClose={closeSearch} />
+          <QueueDrawer open={queueOpen} onClose={closeQueue} />
+          <NoteDrawer />
+          <AccentTokens />
+          <GlobalShortcuts />
+        </div>
+      </NoteProvider>
+    </ShellContext.Provider>
+  );
+}

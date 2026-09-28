@@ -1,0 +1,95 @@
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useId, useRef, useState } from 'react';
+import { useSession } from '../../app/sessionContext';
+import { useEngine, usePlayerSelector } from '../../playback/hooks';
+import { describeSpotifyError } from '../../spotify/errors';
+import { DeviceIcon } from '../icons';
+
+/** Shows the active Spotify Connect device and transfers playback to another one. */
+export function DevicePicker() {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const panelId = useId();
+  const engine = useEngine();
+  const { mode } = useSession();
+  const device = usePlayerSelector((s) => s.snapshot.device);
+  const sdk = usePlayerSelector((s) => s.sdk);
+
+  const devices = useQuery({
+    queryKey: [mode, 'devices'],
+    queryFn: () => engine.getDevices(),
+    enabled: open,
+    staleTime: 0,
+  });
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const label = device ? (device.isThisBrowser ? 'This browser' : device.name) : 'No device';
+
+  return (
+    <div className="device" ref={rootRef}>
+      <button
+        type="button"
+        className="text-toggle device-button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        aria-label={`Playback device: ${device ? device.name : 'none'}. Choose device`}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <DeviceIcon />
+        <span className="device-name">{label}</span>
+      </button>
+
+      {open && (
+        <div id={panelId} className="device-panel" role="group" aria-label="Playback devices">
+          <div className="label">Play on</div>
+          {devices.isPending ? (
+            <p className="device-note">Looking for devices…</p>
+          ) : devices.isError ? (
+            <p className="device-note">{describeSpotifyError(devices.error).body}</p>
+          ) : devices.data.length === 0 ? (
+            <p className="device-note">No Spotify devices are online. Open Spotify on a phone, computer or speaker, then check again.</p>
+          ) : (
+            <ul className="device-list">
+              {devices.data.map((d) => (
+                <li key={d.id ?? d.name}>
+                  <button
+                    type="button"
+                    disabled={!d.id || d.isRestricted || d.isActive}
+                    onClick={() => {
+                      if (!d.id) return;
+                      engine.activateAudio();
+                      void engine.transferTo(d.id, true);
+                      setOpen(false);
+                    }}
+                  >
+                    <b>{d.isThisBrowser ? 'This browser' : d.name}</b>
+                    <span>{d.isActive ? 'Playing' : d.isRestricted ? `${d.type} · not controllable` : d.type}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {sdk.kind === 'error' && <p className="device-note">Browser playback: {sdk.message}</p>}
+          <button type="button" className="note-more" onClick={() => void devices.refetch()}>
+            Check again
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

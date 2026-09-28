@@ -1,86 +1,183 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../auth/AuthContext';
+import { Link, useParams } from 'react-router-dom';
+import { usePageTitle } from '../app/pageTitle';
+import { useSession } from '../app/sessionContext';
+import { useArtist, useArtistReleases } from '../catalogue/queries';
+import { CoverImage, Portrait } from '../components/CoverImage';
 import { NotePreview } from '../components/NotePreview';
-import type { ArtistIdentity, ArtistRelease } from '../data/types';
-import { getArtistEditorial } from '../editorial/lookup';
-import { getSpotifyArtist, getSpotifyArtistReleases } from '../spotify/client';
-import { formatTime } from '../utils/time';
+import { QuietRow, StateView } from '../components/StateView';
+import type { AlbumSummary } from '../domain/types';
+import { getAlbumNote, getArtistNote } from '../editorial/lookup';
+import { albumTypeLabel, joinArtistNames, pluralise, releaseYear } from '../lib/format';
+import { isSpotifyId } from '../lib/spotifyUri';
+import { usePlay } from '../playback/hooks';
+import { describeSpotifyError, isSpotifyApiError } from '../spotify/errors';
+import { detectLineLanguage } from '../translation/languageDetect';
 
-export const ArtistPage = () => {
-  const { artistId = '' } = useParams();
-  const navigate = useNavigate();
-  const auth = useAuth();
-  const [artist, setArtist] = useState<ArtistIdentity>();
-  const [releases, setReleases] = useState<ArtistRelease[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>();
+function ReleaseRow({ release }: { release: AlbumSummary }) {
+  const play = usePlay();
+  const year = releaseYear(release.releaseDate);
+  const noted = getAlbumNote({
+    id: release.id,
+    name: release.name,
+    artistNames: release.artists.map((a) => a.name),
+    releaseDate: release.releaseDate,
+  });
+  return (
+    <article className="release-card">
+      <Link to={`/album/${release.id}`} tabIndex={-1} aria-hidden="true" className="release-cover">
+        <CoverImage images={release.images} size={180} alt="" title={release.name} subtitle={joinArtistNames(release.artists)} paletteKey={release.id} />
+      </Link>
+      <div>
+        <div className="label">
+          {year ?? '—'} / {albumTypeLabel(release.albumType)}
+          {noted && <span className="release-note"> · Editorial note</span>}
+        </div>
+        <h4 lang={detectLineLanguage(release.name)}>
+          <Link className="linkish" to={`/album/${release.id}`}>
+            {release.name}
+          </Link>
+        </h4>
+        <div className="release-meta">
+          {release.totalTracks !== null && <span>{pluralise(release.totalTracks, 'track')}</span>}
+          {release.artists.length > 1 && <span>{joinArtistNames(release.artists)}</span>}
+        </div>
+      </div>
+      <div className="release-actions">
+        <button type="button" onClick={() => play({ contextUri: release.uri }, { openNowPlaying: true })}>
+          Play
+        </button>
+        <Link className="release-open" to={`/album/${release.id}`}>
+          Open album
+        </Link>
+      </div>
+    </article>
+  );
+}
 
-  useEffect(() => {
-    if (auth.status !== 'connected') {
-      setLoading(false);
-      setError('Connect Spotify to open artists outside the local ARC archive.');
-      return;
-    }
-    let cancelled = false;
-    setLoading(true);
-    setError(undefined);
-    Promise.all([getSpotifyArtist(auth.getAccessToken, artistId), getSpotifyArtistReleases(auth.getAccessToken, artistId)])
-      .then(([artistValue, releaseValues]) => {
-        if (cancelled) return;
-        setArtist(artistValue);
-        setReleases(releaseValues);
-      })
-      .catch((cause: unknown) => { if (!cancelled) setError(cause instanceof Error ? cause.message : 'Unable to load artist.'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [artistId, auth.status, auth.getAccessToken]);
+function Releases({ artistId }: { artistId: string }) {
+  const releases = useArtistReleases(artistId);
+  const items = releases.data?.pages.flatMap((p) => p.items) ?? [];
+  const total = releases.data?.pages[0]?.total;
 
-  const note = artist ? getArtistEditorial(artist.name) : undefined;
-  const subtitle = artist ? [artist.origin, artist.role].filter(Boolean).join(' · ') || artist.genres?.slice(0, 4).join(' · ') || 'Spotify artist' : '';
-  const monogram = useMemo(() => artist?.name.trim().slice(0, 1).toUpperCase() ?? 'A', [artist?.name]);
+  return (
+    <section className="artist-grid" aria-labelledby="releases-title">
+      <div className="artist-section">
+        <h3 id="releases-title">
+          Albums{total !== undefined && <span className="section-count">{pluralise(total, 'release')}</span>}
+        </h3>
+        {releases.isPending ? (
+          <QuietRow role="status">Loading releases…</QuietRow>
+        ) : releases.isError ? (
+          <QuietRow role="alert">{describeSpotifyError(releases.error).body}</QuietRow>
+        ) : items.length === 0 ? (
+          <QuietRow>Spotify lists no albums or singles for this artist.</QuietRow>
+        ) : (
+          <>
+            {items.map((release) => (
+              <ReleaseRow key={release.id} release={release} />
+            ))}
+            {releases.hasNextPage && (
+              <div className="more-row">
+                <button type="button" className="plain-action" onClick={() => void releases.fetchNextPage()} disabled={releases.isFetchingNextPage}>
+                  {releases.isFetchingNextPage ? 'Loading…' : 'Show more releases'}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
 
-  if (loading) return <div className="view active"><div className="state-page"><div className="label">Artist profile</div><h1>Loading artist…</h1></div></div>;
-  if (!artist || error) return <div className="view active"><div className="state-page"><div className="label">Artist profile</div><h1>Artist unavailable</h1><p>{error}</p></div></div>;
+/**
+ * The v7 Artist dossier: portrait beside name, origin line and Editorial
+ * Note; releases below as restrained horizontal rows.
+ */
+export function ArtistPage() {
+  const { artistId } = useParams();
+  const artist = useArtist(artistId);
+  const play = usePlay();
+  const { mode } = useSession();
+  usePageTitle('Artist', artist.data?.name ?? null);
+
+  if (!isSpotifyId(artistId)) {
+    return (
+      <StateView label="Artist profile" title="Artist unavailable" actions={<Link className="plain-action" to="/library">Library</Link>}>
+        <p>This isn’t a valid artist address. Artists open from their Spotify ID.</p>
+      </StateView>
+    );
+  }
+
+  if (artist.isPending) {
+    return (
+      <StateView label="Artist profile" title="Loading artist…">
+        <p>Reading the artist and their releases.</p>
+      </StateView>
+    );
+  }
+
+  if (artist.isError) {
+    const notFound = isSpotifyApiError(artist.error) && artist.error.kind === 'not-found';
+    const { title, body } = describeSpotifyError(artist.error);
+    return (
+      <StateView
+        label="Artist profile"
+        title={title}
+        tone={notFound ? 'neutral' : 'alert'}
+        actions={
+          <>
+            {!notFound && (
+              <button type="button" className="plain-action" onClick={() => void artist.refetch()}>
+                Try again
+              </button>
+            )}
+            <Link className="plain-action" to="/library">
+              Library
+            </Link>
+          </>
+        }
+      >
+        <p>{body}</p>
+      </StateView>
+    );
+  }
+
+  const data = artist.data;
+  const note = getArtistNote({ id: data.id, name: data.name });
+  // Deprecated Spotify fields are shown only while Spotify still returns them.
+  const facts = [
+    data.genres.length > 0 ? data.genres.slice(0, 3).join(' / ') : null,
+    data.followers !== null ? `${new Intl.NumberFormat('en').format(data.followers)} followers` : null,
+  ].filter(Boolean);
+  const origin = note?.origin ?? (facts.length > 0 ? facts.join(' · ') : 'Spotify artist');
 
   return (
     <div className="view active">
-      <div className="artist-page"><div className="artist-shell">
-        <section className="artist-hero">
-          <div className={`artist-portrait ${artist.imageUrl ? 'has-image' : ''}`} data-monogram={monogram}>
-            {artist.imageUrl && <img src={artist.imageUrl} alt={`${artist.name} artist portrait`} />}
-          </div>
-          <div className="artist-copy">
-            <div className="artist-number">Artist profile</div>
-            <h1>{artist.name}</h1>
-            <div className="origin">{subtitle}</div>
-            <NotePreview kind="ARTIST" note={note} title={artist.name} subtitle={subtitle} />
-          </div>
-        </section>
-        <section className="artist-grid">
-          <div className="artist-section">
-            <h3>Albums</h3>
-            {releases.length === 0 && <div className="empty-row">No releases available.</div>}
-            {releases.map((release) => {
-              const duration = release.durationMs;
-              return (
-                <article className="release-card" key={release.id}>
-                  {release.imageUrl ? <img src={release.imageUrl} alt={`${release.name} album cover`} /> : <div className="release-cover-fallback">ARC</div>}
-                  <div>
-                    <div className="label">{release.releaseDate?.slice(0, 4) ?? '—'} / {release.albumType ?? 'Release'}</div>
-                    <h4>{release.name}</h4>
-                    <div className="release-meta">
-                      {release.totalTracks !== undefined && <span>{release.totalTracks} tracks</span>}
-                      {duration !== undefined && <span>{formatTime(duration)}</span>}
-                    </div>
-                  </div>
-                  <button type="button" onClick={() => navigate(`/album/${release.id}`)}>Open album</button>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      </div></div>
+      <div className="artist-page">
+        <div className="artist-shell">
+          <section className="artist-hero">
+            <Portrait images={data.images} name={data.name} />
+            <div className="artist-copy">
+              <div className="artist-number">Artist profile</div>
+              <h1 lang={detectLineLanguage(data.name)}>{data.name}</h1>
+              <div className="origin">{origin}</div>
+              <NotePreview kind="ARTIST" note={note} title={data.name} subtitle={origin} titleLang={detectLineLanguage(data.name)} />
+              <div className="object-actions">
+                <button type="button" className="plain-action primary" onClick={() => play({ contextUri: data.uri }, { openNowPlaying: true })}>
+                  Play artist
+                </button>
+                {mode === 'spotify' && (
+                  <a className="plain-action" href={`https://open.spotify.com/artist/${data.id}`} target="_blank" rel="noopener noreferrer">
+                    Open in Spotify<span className="visually-hidden"> (opens in a new tab)</span>
+                  </a>
+                )}
+              </div>
+            </div>
+          </section>
+          <Releases artistId={data.id} />
+        </div>
+      </div>
     </div>
   );
-};
+}

@@ -1,107 +1,183 @@
-import type { AlbumWithTracks, ArtistIdentity, ArtistRelease, TrackIdentity } from '../data/types';
-import { mapAlbum, mapAlbumSimple, mapArtist } from './mappers';
-import type { SpotifyAlbum, SpotifyAlbumSimple, SpotifyArtist, SpotifySearchResponse, SpotifyTrack, SpotifyTrackSimple } from './types';
+import type { SpotifyErrorBody } from './types';
+import { SpotifyApiError, classifyStatus, isAbortError, parseRetryAfter } from './errors';
 
-const API_URL = 'https://api.spotify.com/v1';
+export const SPOTIFY_API_BASE = 'https://api.spotify.com/v1';
 
-type TokenProvider = () => Promise<string | null>;
-
-export class SpotifyApiError extends Error {
-  constructor(public status: number, message: string, public retryAfter?: number) { super(message); }
+/** Supplies bearer tokens; implemented by the auth module. */
+export interface AccessTokenSource {
+  getAccessToken(): Promise<string>;
+  /** Called once after a 401. Resolves a fresh token, or null when re-authorization is required. */
+  refreshAfterUnauthorized(): Promise<string | null>;
 }
 
-const spotifyRequest = async <T>(tokenProvider: TokenProvider, path: string, init: RequestInit = {}): Promise<T> => {
-  const token = await tokenProvider();
-  if (!token) throw new Error('Spotify connection is required.');
-  const headers = new Headers(init.headers);
-  headers.set('Authorization', `Bearer ${token}`);
-  if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-  const response = await fetch(`${API_URL}${path}`, { ...init, headers });
-  if (response.status === 204) return undefined as T;
-  if (!response.ok) {
-    const body = await response.text();
-    const retryAfter = Number(response.headers.get('Retry-After')) || undefined;
-    const message = response.status === 401 ? 'Spotify session expired. Reconnect and try again.'
-      : response.status === 403 ? 'Spotify denied this action. Premium, app access, or an active device may be required.'
-        : response.status === 429 ? `Spotify rate limit reached${retryAfter ? `; retry in ${retryAfter} seconds` : ''}.`
-          : `Spotify API ${response.status}: ${body || response.statusText}`;
-    throw new SpotifyApiError(response.status, message, retryAfter);
-  }
-  return (await response.json()) as T;
-};
+export type QueryValue = string | number | boolean | null | undefined;
 
-export type SearchResults = { tracks: TrackIdentity[]; artists: ArtistIdentity[]; albums: ArtistRelease[] };
-export const searchSpotify = async (tokenProvider: TokenProvider, query: string): Promise<SearchResults> => {
-  const params = new URLSearchParams({ q: query, type: 'track,artist,album', limit: '10' });
-  const response = await spotifyRequest<SpotifySearchResponse>(tokenProvider, `/search?${params}`);
-  return {
-    tracks: (response.tracks?.items ?? []).map((track: SpotifyTrack) => ({
-      id: track.id, uri: track.uri, title: track.name, durationMs: track.duration_ms,
-      trackNumber: track.track_number, discNumber: track.disc_number,
-      artists: track.artists.map((artist) => ({ id: artist.id, name: artist.name })),
-      album: mapAlbumSimple(track.album),
-    })),
-    artists: (response.artists?.items ?? []).map(mapArtist),
-    albums: (response.albums?.items ?? []).map(mapAlbumSimple),
-  };
-};
+export interface RequestOptions {
+  query?: Record<string, QueryValue>;
+  body?: unknown;
+  signal?: AbortSignal;
+}
 
-export const getSpotifyArtist = async (tokenProvider: TokenProvider, artistId: string): Promise<ArtistIdentity> => {
-  const artist = await spotifyRequest<SpotifyArtist>(tokenProvider, `/artists/${encodeURIComponent(artistId)}`);
-  return mapArtist(artist);
-};
+export interface SpotifyClientOptions {
+  baseUrl?: string;
+  fetch?: typeof fetch;
+  /** Longest Retry-After the client will wait out transparently for GET requests. */
+  maxRateLimitWaitMs?: number;
+  sleep?: (ms: number, signal?: AbortSignal) => Promise<void>;
+}
 
-export const getSpotifyArtistReleases = async (tokenProvider: TokenProvider, artistId: string): Promise<ArtistRelease[]> => {
-  const response = await spotifyRequest<{ items: SpotifyAlbumSimple[] }>(
-    tokenProvider,
-    `/artists/${encodeURIComponent(artistId)}/albums?include_groups=album,single&limit=20`,
-  );
-  const seen = new Set<string>();
-  return response.items.map(mapAlbumSimple).filter((album) => {
-    const key = `${album.name.toLocaleLowerCase()}-${album.releaseDate?.slice(0, 4)}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-};
+type Method = 'GET' | 'PUT' | 'POST' | 'DELETE';
 
-export const getSpotifyAlbum = async (tokenProvider: TokenProvider, albumId: string): Promise<AlbumWithTracks> => {
-  const encodedId = encodeURIComponent(albumId);
-  const album = await spotifyRequest<SpotifyAlbum>(tokenProvider, `/albums/${encodedId}`);
-  const tracks = [...album.tracks.items];
-  let offset = tracks.length;
-  while (album.tracks.next && offset < album.total_tracks) {
-    const page = await spotifyRequest<{ items: SpotifyTrackSimple[]; next: string | null }>(
-      tokenProvider,
-      `/albums/${encodedId}/tracks?limit=50&offset=${offset}`,
+function defaultSleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException('Aborted', 'AbortError'));
+      return;
+    }
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer);
+        reject(new DOMException('Aborted', 'AbortError'));
+      },
+      { once: true },
     );
-    if (!page.items.length) break;
-    tracks.push(...page.items);
-    offset += page.items.length;
-    if (!page.next) break;
-  }
-  return mapAlbum({ ...album, tracks: { ...album.tracks, items: tracks, next: null } });
-};
-
-export const startSpotifyTrack = async (
-  tokenProvider: TokenProvider,
-  track: TrackIdentity,
-  contextUri?: string,
-  deviceId?: string,
-) => {
-  const query = deviceId ? `?device_id=${encodeURIComponent(deviceId)}` : '';
-  const body = contextUri && track.uri
-    ? { context_uri: contextUri, offset: { uri: track.uri } }
-    : track.uri
-      ? { uris: [track.uri] }
-      : null;
-  if (!body) throw new Error('This demo track does not have a Spotify URI. Connect and open its Spotify album first.');
-  await spotifyRequest<void>(tokenProvider, `/me/player/play${query}`, { method: 'PUT', body: JSON.stringify(body) });
-};
-
-export const transferSpotifyPlayback = async (tokenProvider: TokenProvider, deviceId: string) => {
-  await spotifyRequest<void>(tokenProvider, '/me/player', {
-    method: 'PUT',
-    body: JSON.stringify({ device_ids: [deviceId], play: false }),
   });
-};
+}
+
+export function buildUrl(base: string, path: string, query?: Record<string, QueryValue>): string {
+  const url = new URL(base.replace(/\/$/, '') + path);
+  if (query) {
+    for (const [key, value] of Object.entries(query)) {
+      if (value === undefined || value === null || value === '') continue;
+      url.searchParams.set(key, String(value));
+    }
+  }
+  return url.toString();
+}
+
+async function toApiError(response: Response, endpoint: string): Promise<SpotifyApiError> {
+  let message = response.statusText || `HTTP ${response.status}`;
+  let reason: string | undefined;
+  try {
+    const body = (await response.json()) as SpotifyErrorBody;
+    if (typeof body.error === 'object' && body.error) {
+      message = body.error.message || message;
+      reason = body.error.reason;
+    } else if (typeof body.error === 'string') {
+      message = body.error_description || body.error;
+    }
+  } catch {
+    /* body is not JSON */
+  }
+  return new SpotifyApiError({
+    kind: classifyStatus(response.status, endpoint, reason),
+    status: response.status,
+    message,
+    endpoint,
+    reason,
+    retryAfterMs: parseRetryAfter(response.headers.get('Retry-After')),
+  });
+}
+
+/**
+ * The only place that talks HTTP to the Spotify Web API. UI components never
+ * call fetch directly; they go through endpoints.ts via the catalogue source
+ * or the playback engine.
+ */
+export class SpotifyClient {
+  private readonly baseUrl: string;
+  private readonly fetchImpl: typeof fetch;
+  private readonly maxRateLimitWaitMs: number;
+  private readonly sleep: (ms: number, signal?: AbortSignal) => Promise<void>;
+
+  constructor(
+    private readonly tokens: AccessTokenSource,
+    options: SpotifyClientOptions = {},
+  ) {
+    this.baseUrl = options.baseUrl ?? SPOTIFY_API_BASE;
+    this.fetchImpl = options.fetch ?? ((input, init) => globalThis.fetch(input, init));
+    this.maxRateLimitWaitMs = options.maxRateLimitWaitMs ?? 8000;
+    this.sleep = options.sleep ?? defaultSleep;
+  }
+
+  get<T>(path: string, query?: Record<string, QueryValue>, signal?: AbortSignal): Promise<T | null> {
+    return this.request<T>('GET', path, { query, signal });
+  }
+
+  put<T = null>(path: string, options: RequestOptions = {}): Promise<T | null> {
+    return this.request<T>('PUT', path, options);
+  }
+
+  post<T = null>(path: string, options: RequestOptions = {}): Promise<T | null> {
+    return this.request<T>('POST', path, options);
+  }
+
+  delete<T = null>(path: string, options: RequestOptions = {}): Promise<T | null> {
+    return this.request<T>('DELETE', path, options);
+  }
+
+  async request<T>(method: Method, path: string, options: RequestOptions = {}): Promise<T | null> {
+    const url = buildUrl(this.baseUrl, path, options.query);
+    let token = await this.tokens.getAccessToken();
+    let refreshed = false;
+    let rateLimitAttempts = 0;
+
+    for (;;) {
+      const headers: Record<string, string> = { Authorization: `Bearer ${token}`, Accept: 'application/json' };
+      let body: string | undefined;
+      if (options.body !== undefined) {
+        headers['Content-Type'] = 'application/json';
+        body = JSON.stringify(options.body);
+      }
+
+      let response: Response;
+      try {
+        response = await this.fetchImpl(url, { method, headers, body, signal: options.signal });
+      } catch (error) {
+        if (isAbortError(error)) throw error;
+        throw new SpotifyApiError({
+          kind: 'network',
+          status: 0,
+          message: error instanceof Error ? error.message : 'Network request failed',
+          endpoint: path,
+        });
+      }
+
+      if (response.status === 401 && !refreshed) {
+        refreshed = true;
+        const next = await this.tokens.refreshAfterUnauthorized();
+        if (next) {
+          token = next;
+          continue;
+        }
+      }
+
+      // Only idempotent reads are retried transparently; commands surface the
+      // rate limit so the UI never claims a change that may not have happened.
+      if (response.status === 429 && method === 'GET' && rateLimitAttempts < 2) {
+        const wait = parseRetryAfter(response.headers.get('Retry-After')) ?? 1000 * 2 ** rateLimitAttempts;
+        if (wait <= this.maxRateLimitWaitMs) {
+          rateLimitAttempts += 1;
+          await this.sleep(wait, options.signal);
+          continue;
+        }
+      }
+
+      if (!response.ok) throw await toApiError(response, path);
+      if (response.status === 204) return null;
+
+      const text = await response.text();
+      if (!text) return null;
+      try {
+        return JSON.parse(text) as T;
+      } catch {
+        if (method === 'GET') {
+          throw new SpotifyApiError({ kind: 'unknown', status: response.status, message: 'Invalid JSON', endpoint: path });
+        }
+        return null;
+      }
+    }
+  }
+}

@@ -1,16 +1,21 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
-import { AppShell } from './app/AppShell';
-import { AlbumPage } from './pages/AlbumPage';
-import { ArtistPage } from './pages/ArtistPage';
-import { NowPlayingPage } from './pages/NowPlayingPage';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { HashRouter } from 'react-router-dom';
+import { AppServicesContext } from './app/appContext';
+import type { AppServices } from './app/services';
+import { SessionRoot } from './app/SessionRoot';
 
-export const App = () => (
-  <Routes>
-    <Route element={<AppShell />}>
-      <Route path="/now-playing" element={<NowPlayingPage />} />
-      <Route path="/artist/:artistId" element={<ArtistPage />} />
-      <Route path="/album/:albumId" element={<AlbumPage />} />
-      <Route path="*" element={<Navigate to="/now-playing" replace />} />
-    </Route>
-  </Routes>
-);
+/**
+ * Hash routing keeps deep links and refreshes working on GitHub Pages; the
+ * Spotify redirect URI stays the app root.
+ */
+export function App({ services }: { services: AppServices }) {
+  return (
+    <AppServicesContext.Provider value={services}>
+      <QueryClientProvider client={services.queryClient}>
+        <HashRouter>
+          <SessionRoot />
+        </HashRouter>
+      </QueryClientProvider>
+    </AppServicesContext.Provider>
+  );
+}

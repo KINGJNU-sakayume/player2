@@ -1,35 +1,34 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-export type NotePayload = {
+export interface NotePayload {
+  /** e.g. "Editorial note / Album". */
   context: string;
   title: string;
   subtitle?: string;
   copy: string;
-};
+  /** BCP 47 language of the title, for CJK glyph selection. */
+  titleLang?: string;
+}
 
-type NoteContextValue = {
+interface NoteContextValue {
   note: NotePayload | null;
   openNote: (note: NotePayload) => void;
   closeNote: () => void;
-  returnFocusRef: React.MutableRefObject<HTMLElement | null>;
-};
+}
 
 const NoteContext = createContext<NoteContextValue | null>(null);
 
-export const NoteProvider = ({ children }: { children: ReactNode }) => {
+/** Drawer state is UI state: opening or closing a note never touches playback. */
+export function NoteProvider({ children }: { children: ReactNode }) {
   const [note, setNote] = useState<NotePayload | null>(null);
-  const returnFocusRef = useRef<HTMLElement | null>(null);
-  const openNote = useCallback((payload: NotePayload) => {
-    returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    setNote(payload);
-  }, []);
+  const openNote = useCallback((payload: NotePayload) => setNote(payload), []);
   const closeNote = useCallback(() => setNote(null), []);
-  const value = useMemo(() => ({ note, openNote, closeNote, returnFocusRef }), [note, openNote, closeNote]);
+  const value = useMemo(() => ({ note, openNote, closeNote }), [note, openNote, closeNote]);
   return <NoteContext.Provider value={value}>{children}</NoteContext.Provider>;
-};
+}
 
-export const useNote = () => {
+export function useNote(): NoteContextValue {
   const value = useContext(NoteContext);
   if (!value) throw new Error('useNote must be used within NoteProvider.');
   return value;
-};
+}
