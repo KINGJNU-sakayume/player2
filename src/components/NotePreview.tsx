@@ -1,35 +1,48 @@
-import type { EditorialBody } from '../editorial/types';
+import type { EditorialBody, NoteKind } from '../editorial/types';
 import { useNote } from './NoteContext';
 
-export const NotePreview = ({
+const KIND_LABEL: Record<NoteKind, string> = { ARTIST: 'Artist', ALBUM: 'Album', SONG: 'Song' };
+
+/**
+ * The v7 note preview: hairline divider, kicker with the context token, a
+ * short paragraph and "Read full note →". Renders nothing when the entity has
+ * no local note.
+ */
+export function NotePreview({
   kind,
   note,
   title,
   subtitle,
-  className = '',
+  titleLang,
+  className,
 }: {
-  kind: 'ARTIST' | 'ALBUM' | 'SONG';
-  note?: EditorialBody;
+  kind: NoteKind;
+  note: EditorialBody | null | undefined;
   title: string;
   subtitle?: string;
+  titleLang?: string;
   className?: string;
-}) => {
+}) {
   const { openNote } = useNote();
-  if (!note?.short) return null;
+  if (!note?.short.trim()) return null;
+  const heading = kind === 'SONG' ? 'Listening note' : 'Editorial note';
   return (
-    <div className={`note-preview ${className}`.trim()}>
-      <div className="note-kicker"><span>{kind === 'SONG' ? 'Listening note' : 'Editorial note'}</span><span className="index">{kind}</span></div>
-      <p>{note.short}</p>
-      {note.full && (
-        <button type="button" className="note-more" onClick={() => openNote({
-          context: `${kind === 'SONG' ? 'Listening note' : 'Editorial note'} / ${kind[0]}${kind.slice(1).toLowerCase()}`,
-          title,
-          subtitle,
-          copy: note.full ?? '',
-        })}>
+    <div className={className ? `note-preview ${className}` : 'note-preview'}>
+      <div className="note-kicker">
+        <span>{heading}</span>
+        <span className="index">{kind}</span>
+      </div>
+      <p lang="ko">{note.short}</p>
+      {note.full?.trim() && (
+        <button
+          type="button"
+          className="note-more"
+          aria-haspopup="dialog"
+          onClick={() => openNote({ context: `${heading} / ${KIND_LABEL[kind]}`, title, subtitle, copy: note.full ?? '', titleLang })}
+        >
           Read full note →
         </button>
       )}
     </div>
   );
-};
+}

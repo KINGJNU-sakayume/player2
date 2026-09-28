@@ -1,22 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
 import { App } from './App';
-import { AuthProvider } from './auth/AuthContext';
-import { NoteProvider } from './components/NoteContext';
-import { PlaybackProvider } from './playback/PlaybackContext';
+import { readConfig } from './app/config';
+import { createAppServices } from './app/services';
+import { clearLegacySession } from './auth/tokenStore';
 import './styles/app.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+clearLegacySession();
+const config = readConfig(import.meta.env, window.location.origin);
+const services = createAppServices(config);
+
+const root = document.getElementById('root');
+if (!root) throw new Error('Missing #root element');
+
+ReactDOM.createRoot(root).render(
   <React.StrictMode>
-    <HashRouter>
-      <AuthProvider>
-        <PlaybackProvider>
-            <NoteProvider>
-              <App />
-            </NoteProvider>
-        </PlaybackProvider>
-      </AuthProvider>
-    </HashRouter>
+    <App services={services} />
   </React.StrictMode>,
 );

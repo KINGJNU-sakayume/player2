@@ -8,6 +8,7 @@ This package is the canonical implementation brief for the current ARC Music des
 
 When instructions conflict, use this priority:
 
+0. `DESIGN_REVISION_V7_1.md` (adds the catalogue player's features inside the v7 design; wins where it applies)
 1. `CODEX_MASTER_PROMPT.md`
 2. `DESIGN_SPEC_V7.md`
 3. `FUNCTIONAL_ARCHITECTURE.md`

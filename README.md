@@ -1,97 +1,238 @@
 # ARC Music v7 — Spotify web player
 
-ARC Music is a restrained personal music archive that keeps the canonical v7 Now Playing, Artist, and Album compositions while using Spotify for authentication, metadata, search, and audio playback. There is no mock playback path, global footer player, Catalogue mode, or Specimen mode.
+ARC Music is a restrained personal music archive: the canonical v7 Now Playing, Artist and Album compositions, one
+warm paper surface, and short hand-written **notes** — the Editorial Note for artists and albums and the Listening
+Note for songs — that open in one shared drawer. Spotify provides authentication, metadata, search and playback.
 
-## Prerequisites
+The playback, library, search, lyrics and translation features of the ARC Catalogue player
+([player1](https://github.com/KINGJNU-sakayume/player1)) have been brought over, re-set in the v7 design language
+(see [`DESIGN_REVISION_V7_1.md`](DESIGN_REVISION_V7_1.md)). There is still no global playback footer, no Catalogue
+or Specimen mode, and transport controls appear only on Now Playing.
 
-- Node.js 22 and npm
-- A Spotify account eligible for the Web Playback SDK (**Spotify Premium is required for browser streaming**)
-- A Spotify Developer application whose owner/user is allowed to use the app
-- A modern browser with Web Crypto and Media Source support
+| Surface | What it does |
+| --- | --- |
+| **Now Playing** | v7 42 / 58 spread. Cover, title, artist · album and Track / Release / Duration / Language on the left; on the right the synced current lyric with its translation and the next two lines, the Listening Note, and the transport — previous / play-pause / next and seek — with shuffle, like, queue, device and volume on one quiet line beneath it. The accent colour follows the album cover. |
+| **Artist** | Compact dossier: portrait, name, origin line and Editorial Note; releases below as horizontal rows (with *Show more*), each marked when it has a note. *Play artist*, *Open in Spotify*. |
+| **Album** | Cover, title, artist, release / format / tracks / duration and Editorial Note left; the complete Track Sequence right, with the playing track, guests, explicit marks, discs and a *Note* mark on songs with a Listening Note. *Play album*, *Save album*. |
+| **Library** | Liked songs (*Shuffle* draws from the whole library, *Play all*), followed artists, liked albums, then playlists and recently played. |
+| **Search** | The v7 overlay (`/`): tracks, artists, albums and playlists, type filters with paging, `↓` / `↑` through results. |
+| **Queue** | The real Spotify queue in the same right-hand drawer as the notes. |
 
-## Spotify application setup
+**Contents** — [Setup](#setup) · [Environment variables](#environment-variables) · [Notes](#notes-editorial-and-listening) ·
+[Lyrics and translation](#lyrics-and-translation) · [Preview mode](#preview-mode) · [Commands](#commands) ·
+[Deployment](#github-pages-deployment) · [Architecture](#architecture) · [Limitations](#known-limitations) ·
+[Troubleshooting](#troubleshooting)
 
-1. Create an app in the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
-2. Enable/use the **Web API** and **Web Playback SDK** products.
-3. Add the exact redirect URI for each environment. Redirect URI matching is exact, including protocol, port, path, and trailing slash.
-4. Copy the public Client ID. A client secret is neither needed nor safe in this SPA.
+## Setup
 
-Registered redirect URIs for this repository:
+Prerequisites: Node.js 22, a Spotify account (**Premium is required for browser playback and playback control**), a
+Spotify Developer application, and a desktop browser with Web Crypto and protected-media (DRM) support.
 
-- Development: `http://127.0.0.1:5173/`
-- Production: `https://kingjnu-sakayume.github.io/player2/`
+1. Create an app in the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) with the **Web API**
+   and **Web Playback SDK**.
+2. Register the exact redirect URI for every environment. Matching is exact (protocol, host, port, path, trailing
+   slash). The redirect URI is the app **root**; routes live in the URL hash.
+   - Development: `http://127.0.0.1:5173/`
+   - Production: `https://kingjnu-sakayume.github.io/player2/`
 
-Spotify does not accept `localhost` as a substitute when `127.0.0.1` was registered. If the Pages owner/repository changes, register and configure the corresponding `https://<owner>.github.io/<repository>/` URI.
+   Spotify does not accept `localhost` in place of `127.0.0.1`.
+3. Copy the public Client ID. A client secret is neither needed nor safe in this SPA.
+4. While the app is in Development Mode, add every listener under **User Management**.
 
 ```bash
-npm install
-cp .env.example .env.local
-# Set the public client ID; keep the development redirect URI shown above.
-npm run dev -- --host 127.0.0.1
+npm ci
+cp .env.example .env.local   # set VITE_SPOTIFY_CLIENT_ID
+npm run dev                  # http://127.0.0.1:5173/
 ```
 
-Environment variables:
+No Spotify app yet? Choose **Preview without Spotify** (or open `http://127.0.0.1:5173/?preview`).
 
-```text
-VITE_SPOTIFY_CLIENT_ID=<public client id>
-VITE_SPOTIFY_REDIRECT_URI=http://127.0.0.1:5173/
+### Scopes
+
+Declared with the feature that needs each one in [`src/spotify/scopes.ts`](src/spotify/scopes.ts):
+`streaming`, `user-read-email`, `user-read-private` (Web Playback SDK); `user-read-playback-state`,
+`user-modify-playback-state`, `user-read-currently-playing` (playback, devices, queue); `user-read-recently-played`,
+`user-library-read`, `user-follow-read`, `playlist-read-private`, `playlist-read-collaborative` (Library);
+`user-library-modify` (Like, Save album). A session authorized before a scope was added keeps working; a quiet line
+under the top bar offers **Reconnect Spotify** for the missing features.
+
+### Session
+
+Authorization Code with PKCE (S256 challenge, `state` check, single-use code). Tokens live in `localStorage`
+(`arc.spotify.session.v1`) so a reload keeps you signed in; they refresh 60 s before expiry and once after any `401`,
+never concurrently (also across tabs). A revoked refresh token shows **Reconnect Spotify**. **Settings → Disconnect**
+clears the stored session. Coming from the first v7 build, connect once more: its stored token is discarded and the
+library features ask for the new scopes.
+
+## Environment variables
+
+Every `VITE_*` value is public browser code — never put a secret in one.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `VITE_SPOTIFY_CLIENT_ID` | — | Spotify app Client ID. Without it the connect screen shows the setup steps and the preview. |
+| `VITE_SPOTIFY_REDIRECT_URI` | origin + base path | Must equal a registered redirect URI. |
+| `VITE_LYRICS_PROVIDER` | `lrclib` | `lrclib`, `mock` or `none`. |
+| `VITE_TRANSLATION_PROVIDER` | `browser` | `browser`, `http`, `mock` or `none`. |
+| `VITE_TRANSLATION_ENDPOINT` | — | URL of your own translation function (required by `http`). |
+| `VITE_TRANSLATION_TARGET` | `ko` | Language lyrics are translated into. |
+| `VITE_ENABLE_PREVIEW` | `true` | `false` hides **Preview without Spotify**. |
+
+## Notes (Editorial and Listening)
+
+Notes are ARC's own writing, hard-coded in source and kept apart from Spotify data:
+
+| File | Note | Shown on |
+| --- | --- | --- |
+| [`src/editorial/artists.ts`](src/editorial/artists.ts) | Artist **Editorial Note** (+ origin line) | Artist |
+| [`src/editorial/albums.ts`](src/editorial/albums.ts) | Album **Editorial Note** | Album |
+| [`src/editorial/songs.ts`](src/editorial/songs.ts) | Song **Listening Note** | Now Playing |
+
+Seeded notes: the v7 reference subjects — Vaundy / `strobo` / 怪獣の花唄, Tyler, The Creator / `IGOR` / EARFQUAKE,
+tripleS / `<ASSEMBLE24>` / Girls Never Die — and three example artists with representative releases:
+
+- **Kenshi Yonezu** — `STRAY SHEEP`, `LOST CORNER`; Lemon, 感電, KICK BACK
+- **tripleS** — `<ASSEMBLE24>`, `ASSEMBLE`; Girls Never Die, Rising
+- **Coldplay** — `Parachutes`, `A Rush of Blood to the Head`, `Viva la Vida or Death and All His Friends`; Yellow,
+  The Scientist, Viva la Vida
+
+Each entry has a `short` preview (2–3 lines; a song cue is shorter) and a `full` text for the drawer (paragraphs
+separated by a blank line). Matching, in [`src/editorial/lookup.ts`](src/editorial/lookup.ts):
+
+1. **Spotify IDs first** — `artistIds`, `albumIds`, `trackIds` (the 22-character part of an `open.spotify.com` link).
+   One release usually has several IDs (album cut and single, editions, markets): list the ones you know.
+2. **Names as the fallback** — the artist's `names` plus the album or song `titles`, compared case-, width- and
+   bracket-insensitively (`<ASSEMBLE24>` = `ASSEMBLE24`). Spotify localises names, so list every form it may show:
+   `['Kenshi Yonezu', '米津玄師']`, `['怪獣の花唄', 'Kaiju no Hanauta']`. Albums also check `releaseYear` when both
+   years are known.
+
+```ts
+// src/editorial/songs.ts
+{
+  key: 'lemon',
+  artist: 'kenshi-yonezu',                                  // key of the entry in artists.ts
+  trackIds: ['7Cd17G3oNQ34OWUwS8ZxfR', '04TshWXkhV1qkqHzf31Hn6'],
+  titles: ['Lemon'],
+  short: '…',
+  full: '…\n\n…',
+},
 ```
 
-Never add a client secret, access token, refresh token, lyrics key, or translation key to a `VITE_` variable. Vite variables are public browser code. ARC uses Authorization Code with PKCE (random verifier, S256 challenge, CSRF state validation, code exchange, and refresh) and stores the personal browser session locally so a reload can restore it. Disconnect removes the stored token.
+Anything without an entry gets no note — never generated filler. `npm run test:run` checks that every entry is
+complete and every album / song points at an existing artist.
 
-The minimal playback scopes are `streaming`, `user-read-email`, `user-read-private`, `user-read-playback-state`, `user-read-currently-playing`, and `user-modify-playback-state`.
+## Lyrics and translation
 
-## How playback works
+Spotify's Web API has no lyrics, so both come from replaceable providers and neither ever blocks playback.
 
-After login, one application-level `Spotify.Player` creates the **ARC Music Browser** Spotify Connect device. SDK state is authoritative for track, position, duration, pause state, context, and device readiness. The displayed clock only interpolates between SDK snapshots and is reset by every new snapshot; it never simulates a song. Search tracks and album rows send a real Web API start/resume request to that browser device. Routes live under a `HashRouter`, so navigation does not unmount the player and remains safe on GitHub Pages.
+- **Lyrics** — [LRCLIB](https://lrclib.net) (`lrclib`): keyless and CORS-enabled; matches title, artist, album and
+  duration, falls back to a search, and caches results in `localStorage` (30 days; 3 days for "not found"). It sends
+  that track metadata to lrclib.net. `mock` gives original test lines; `none` turns lyrics off.
+- **Translation** — `browser` uses Chrome's on-device Translator API (no key; a missing model downloads after one
+  click in the lyrics header). `http` posts to your own function, which keeps any DeepL / Papago / Google key
+  server-side:
 
-Use **Settings → Use browser device** if another Connect device is active. A play gesture invokes the SDK's `activateElement()` for browsers that block autoplay. Transport controls intentionally appear only on Now Playing.
+  ```text
+  POST {VITE_TRANSLATION_ENDPOINT}   { "lines": ["…"], "sourceLanguage": "ja" | null, "targetLanguage": "ko" }
+  200                                { "translations": ["…"] }   // same length and order; "" for none
+  ```
 
-## Search, metadata, and local notes
+  Each line's language is detected separately, so only lines not already in the target language are translated.
+  **Translation On / Off** sits in the lyrics header and in Settings.
 
-The top-bar Search opens a compact, keyboard-accessible Spotify search overlay. Track results play; artist and album results navigate to real ID-backed routes. Artist releases and complete album sequences come from Spotify, not local track arrays.
+To add a provider, implement `LyricsProvider` ([`src/lyrics/types.ts`](src/lyrics/types.ts)) or
+`TranslationProvider` ([`src/translation/TranslationProvider.ts`](src/translation/TranslationProvider.ts)) and
+register it in `createLyricsProvider.ts` / `createTranslationProvider.ts` and `src/app/config.ts`. A provider that
+needs a secret must sit behind your own backend. No copyrighted lyrics are stored in this repository.
 
-Hand-authored notes remain separate from Spotify models in `src/editorial/data.ts`. Edit `artistEditorial`, `albumEditorial`, and `songEditorial` there. Only matched entries render; arbitrary Spotify entities receive no generated prose. Prefer the real Spotify ID as the entry key when adding or migrating notes.
+## Preview mode
 
-## Synchronized lyrics and translation
+**Preview without Spotify** (`/?preview`) runs every surface on a sample archive with a simulated clock and no audio:
+Kenshi Yonezu, tripleS, Coldplay, Vaundy and Tyler, The Creator with their noted albums. Artist, album and noted-track
+IDs are real Spotify IDs, so the preview shows the real notes; track lists and timings are sample data and every lyric
+line is an original test line. It never calls Spotify, LRCLIB or a translation service.
 
-Production lyrics use the public LRCLIB provider through `src/lyrics/LrclibLyricsProvider.ts`. It first asks for an exact title/artist/album/duration match, falls back to restrained search, parses synchronized LRC timestamps, and caches results in memory. Requests are aborted/stale-guarded on track changes. Lyric selection uses the real/interpolated Spotify position, so pause and seek remain synchronized.
+## Keyboard
 
-To replace LRCLIB, implement the `LyricsProvider` interface in `src/lyrics/types.ts` and instantiate it in `NowPlayingPage`. A provider requiring a private credential needs a backend or serverless proxy; GitHub Pages cannot safely hold that key. `MockLyricsProvider` exists only as a test/development fixture and is not imported by production.
-
-Translation is deliberately omitted: no secure translation service is configured and fake translations are never shown. Add a `TranslationProvider` only behind a secure credential boundary.
+`/` opens search (`↓` / `↑` move, `Enter` opens or plays, `Esc` steps back). `Space` plays / pauses when focus is not
+on a control. Seek and volume take arrow keys, Page Up / Down, Home and End. The note and queue drawer closes on
+`Esc`, traps focus while open and returns it afterwards. `prefers-reduced-motion` removes motion.
 
 ## Commands
 
 ```bash
-npm install
-npm run dev
+npm run dev        # http://127.0.0.1:5173/
 npm run typecheck
 npm run lint
 npm run test:run
 npm run build
-npm run check
-npm run preview
+npm run check      # all of the above — run before pushing
+npm run preview    # serve dist/ on http://127.0.0.1:4173/
 ```
 
 ## GitHub Pages deployment
 
-`.github/workflows/deploy-pages.yml` installs, runs all checks, derives Vite's repository base path, and deploys `dist/` on `main`. Set repository **Actions variables**:
+`.github/workflows/deploy-pages.yml` runs `npm run check`, builds with the repository base path and deploys `dist/`
+on every push to `main`. Set **Settings → Pages → Source: GitHub Actions** and these repository **Actions variables**:
 
 - `VITE_SPOTIFY_CLIENT_ID`
 - `VITE_SPOTIFY_REDIRECT_URI=https://kingjnu-sakayume.github.io/player2/`
+- optionally `VITE_LYRICS_PROVIDER`, `VITE_TRANSLATION_PROVIDER`, `VITE_TRANSLATION_ENDPOINT`,
+  `VITE_TRANSLATION_TARGET`, `VITE_ENABLE_PREVIEW`
 
-Select **Settings → Pages → Source: GitHub Actions**. Do not use Actions secrets for the client ID merely to imply secrecy—it is necessarily public—but never configure a client secret.
+## Architecture
 
-Spotify Development Mode can restrict the app to its owner/allowlisted users, eligible account plans, and current platform quotas. Spotify API responses may also omit unavailable media or fields. ARC handles 401 (expired authorization), 403 (account/app/device restriction), and 429 (rate limit with `Retry-After`) as user-visible states.
+React 18 + TypeScript + Vite, TanStack Query for Spotify data, React Router (`HashRouter`), one global CSS token
+layer ([`src/styles/`](src/styles/)) — no UI kit.
+
+```text
+src/
+  app/          config, services, session (Spotify or preview), shell (rail, top bar, overlays), connect + OAuth callback
+  auth/         Authorization Code + PKCE, token store, cross-tab refresh
+  spotify/      typed Web API client (401 refresh, 429 backoff), endpoints, mappers, error taxonomy, scopes
+  playback/     the single PlayerStore, Web Playback SDK adapter, Spotify engine, playback clock
+  catalogue/    CatalogueSource (Spotify or preview) and query hooks
+  editorial/    Editorial and Listening Notes and their lookup
+  lyrics/       LyricsProvider, LRC parser, lyric sync, cache, LRCLIB and mock providers
+  translation/  TranslationProvider, language detection, browser / http / mock providers
+  palette/      cover colour extraction and the contrast-safe accent
+  preview/      sample archive, preview source and simulated engine
+  components/   covers, notes + shared drawer, search, queue, settings, transport
+  pages/        Now Playing, Artist, Album, Library
+```
+
+**One source of truth for playback.** Web Playback SDK events (this browser) or `GET /me/player` polling (another
+Spotify Connect device) feed one store with track, position anchor, duration, pause, shuffle, device, volume and
+context. The position is never counted by a timer: progress and the lyric cursor derive it from the latest anchor,
+so lyrics follow seeks, pauses, device switches and track changes. Commands update the store optimistically and
+reconcile with Spotify's next report. The engine handles SDK reconnects, token refresh, Premium / account errors,
+autoplay blocking, "no active device", transfer between devices, and browsers that cannot decrypt Spotify audio.
+
+**Colour.** [`src/palette/`](src/palette/) extracts the playing album's dominant colour once, caches it, and adjusts it
+until it reaches 3:1 (marks) and 4.5:1 (text) on the warm page — the v7 `--main` accent. Greyscale covers get the ink
+accent; surfaces, text and separators always stay neutral.
+
+## Known limitations
+
+- **Premium and browsers.** Browser playback and all playback control need Premium and a desktop browser with DRM
+  (Widevine). When the browser cannot decrypt the audio, the engine stops the silent skipping and Now Playing explains
+  the fix; otherwise ARC controls another Spotify device as a remote.
+- **Development Mode.** Allow-listed users only; search returns 10 results per type per page and discographies load
+  10 releases at a time (*Show more*). Followers and genres may be missing and are never required.
+- **Queue** is read-only (the Web API cannot reorder it). Episodes, ads and local files show the idle state.
+- **Playlists** play as a context; there is no playlist page.
+- **Autoplay.** The first play in a session may need one click or key press.
+- **Lyrics** coverage and timing on LRCLIB vary; translation is machine translation (desktop Chrome for `browser`).
+- **Cover colour** falls back to the v7 red when a cover cannot be read.
 
 ## Troubleshooting
 
-- **State mismatch / missing verifier:** restart Connect Spotify in the same tab; do not restore an old callback URL.
-- **`INVALID_CLIENT` or redirect mismatch:** copy the URI above exactly into both Spotify Dashboard and `VITE_SPOTIFY_REDIRECT_URI`.
-- **Account error / playback forbidden:** verify Premium eligibility and that the account can access the app in Development Mode.
-- **Device not ready:** keep the tab open, allow protected content/audio, then use **Use browser device** and click play once.
-- **Autoplay blocked:** interact with the page and retry; ARC calls the official SDK activation method during that gesture.
-- **No active track:** choose a track in ARC Search or from a real album page.
-- **429:** wait for the displayed retry interval; do not repeatedly search.
-- **Lyrics unavailable:** LRCLIB may not have synchronized lyrics for that exact recording; playback remains available.
+- **State mismatch / missing verifier:** start Connect Spotify again in the same tab; do not reuse an old callback URL.
+- **`INVALID_CLIENT` / redirect mismatch:** register the root URI above exactly and use the same value in
+  `VITE_SPOTIFY_REDIRECT_URI`.
+- **Playback forbidden:** check Premium and that the account is allow-listed in Development Mode.
+- **Device not ready:** keep the tab open, allow protected content, then **Settings → Use browser device** or pick a
+  device from the device menu on Now Playing.
+- **Tracks skip without playing:** update Widevine (`chrome://components`), allow protected content, disable blocking
+  extensions for the site — or play on the Spotify app and use ARC as a remote.
+- **429:** wait for the displayed interval; the client already backs off.
