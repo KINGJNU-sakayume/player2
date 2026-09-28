@@ -1,6 +1,7 @@
 import type { PlaybackIssue } from './types';
 
-const REMOTE_HINT = 'Or open Spotify on this computer or your phone — this page controls it as a remote.';
+const REMOTE_HINT =
+  'Or open Spotify on this computer or your phone and choose it in the device menu — this page controls it as a remote.';
 
 /**
  * The notice shown after the engine stops a runaway skip (see SKIP_LOOP in

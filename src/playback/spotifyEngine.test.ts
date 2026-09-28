@@ -1,9 +1,16 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import { createElement } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
+import type { Session } from '../app/session';
+import { SessionContext } from '../app/sessionContext';
 import { SpotifyClient } from '../spotify/client';
 import type { SpotifyPlaybackState, SpotifyTrack } from '../spotify/types';
+import { usePlay } from './hooks';
 import { PlayerStore } from './playerStore';
 import { SKIP_LOOP, SpotifyPlaybackEngine, type Timers } from './spotifyEngine';
 import type { WebPlaybackDevice, WebPlaybackOptions } from './spotifyPlaybackSdk';
+import type { PlayRequest } from './types';
 
 const track: SpotifyTrack = {
   id: 'trk1',
@@ -247,6 +254,116 @@ describe('SpotifyPlaybackEngine', () => {
     const play = h.requests.find((r) => r.method === 'PUT' && r.path === '/me/player/play');
     expect(play?.query.get('device_id')).toBe('web-device');
     expect(play?.body).toEqual({ context_uri: 'spotify:album:alb1', offset: { uri: 'spotify:track:trk1' } });
+    // No phone or other Spotify device is needed to find a target.
+    expect(h.requests.some((r) => r.path === '/me/player/devices')).toBe(false);
+    h.engine.stop();
+  });
+
+  it('activates the browser player inside the click, before the play request goes out', async () => {
+    const h = harness({ route: () => new Response(null, { status: 204 }) });
+    h.engine.start();
+    await h.flush();
+    h.callbacks().onReady('web-device');
+    const session = { mode: 'spotify', store: h.store, engine: h.engine } as Partial<Session> as Session;
+    const request: PlayRequest = { contextUri: 'spotify:album:alb1', offsetUri: 'spotify:track:trk1' };
+    function PlayButton() {
+      const play = usePlay();
+      return createElement('button', { type: 'button', onClick: () => play(request) }, 'Play');
+    }
+    render(createElement(MemoryRouter, null, createElement(SessionContext.Provider, { value: session }, createElement(PlayButton))));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Play' }));
+    // Synchronously within the click: the gesture has not been lost to an await.
+    expect(h.device.activateElement).toHaveBeenCalledTimes(1);
+    expect(h.requests.some((r) => r.path === '/me/player/play')).toBe(false);
+
+    await h.flush();
+    const play = h.requests.find((r) => r.method === 'PUT' && r.path === '/me/player/play');
+    expect(play?.query.get('device_id')).toBe('web-device');
+    h.engine.stop();
+  });
+
+  it('plays in this browser even while Spotify still reports another device as active', async () => {
+    // A phone whose Spotify app was closed can stay "active" in GET /me/player for a while.
+    const h = harness();
+    h.engine.start();
+    await h.flush();
+    h.callbacks().onReady('web-device');
+    await h.flush();
+    expect(h.store.getState().snapshot).toMatchObject({ source: 'remote', device: { id: 'phone', isActive: true } });
+
+    await h.engine.play({ contextUri: 'spotify:album:alb1', offsetUri: 'spotify:track:trk1' });
+    const plays = h.requests.filter((r) => r.method === 'PUT' && r.path === '/me/player/play');
+    expect(plays).toHaveLength(1);
+    expect(plays[0]?.query.get('device_id')).toBe('web-device');
+    expect(h.requests.some((r) => r.path === '/me/player/devices')).toBe(false);
+
+    // Play on the transport resumes here too, by transferring to this browser.
+    h.requests.length = 0;
+    await h.engine.resume();
+    expect(h.requests.find((r) => r.method === 'PUT' && r.path === '/me/player')?.body).toEqual({ device_ids: ['web-device'], play: true });
+    expect(h.requests.some((r) => r.path === '/me/player/play')).toBe(false);
+    h.engine.stop();
+  });
+
+  it('keeps playing on a Spotify Connect device the listener chose', async () => {
+    const h = harness();
+    h.engine.start();
+    await h.flush();
+    h.callbacks().onReady('web-device');
+    await h.flush();
+
+    await h.engine.transferTo('phone');
+    expect(h.requests.find((r) => r.method === 'PUT' && r.path === '/me/player')?.body).toEqual({ device_ids: ['phone'], play: true });
+    h.requests.length = 0;
+    await h.engine.play({ contextUri: 'spotify:album:alb1' });
+    await h.engine.resume();
+    const commands = h.requests.filter((r) => r.method === 'PUT');
+    expect(commands.map((r) => r.path)).toEqual(['/me/player/play', '/me/player/play']);
+    // No device_id: the command goes to the active device, the phone.
+    expect(commands.every((r) => !r.query.has('device_id'))).toBe(true);
+
+    // Choosing this browser again brings playback back here.
+    await h.engine.transferTo('web-device');
+    h.requests.length = 0;
+    await h.engine.play({ contextUri: 'spotify:album:alb1' });
+    expect(h.requests.find((r) => r.path === '/me/player/play')?.query.get('device_id')).toBe('web-device');
+    h.engine.stop();
+  });
+
+  it('controls the active remote device when this browser cannot play', async () => {
+    const h = harness({ supported: false });
+    h.engine.start();
+    await h.flush();
+    await h.engine.play({ contextUri: 'spotify:album:alb1' });
+    const play = h.requests.find((r) => r.method === 'PUT' && r.path === '/me/player/play');
+    expect(play).toBeDefined();
+    expect(play?.query.has('device_id')).toBe(false);
+    h.engine.stop();
+  });
+
+  it('waits for the browser player to connect instead of sending playback elsewhere', async () => {
+    const h = harness({
+      route: (_method, path) =>
+        path === '/me/player/devices' ? new Response(JSON.stringify({ devices: [] }), { status: 200 }) : new Response(null, { status: 204 }),
+    });
+    h.engine.start();
+    await h.flush();
+    expect(h.store.getState().sdk.kind).toBe('loading');
+
+    // Two clicks before the SDK is ready: only the latest one is played.
+    const first = h.engine.play({ contextUri: 'spotify:album:alb1' });
+    const second = h.engine.play({ contextUri: 'spotify:album:alb2' });
+    await h.flush();
+    expect(h.requests.some((r) => r.path === '/me/player/play' || r.path === '/me/player/devices')).toBe(false);
+
+    h.callbacks().onReady('web-device');
+    await Promise.all([first, second]);
+    const plays = h.requests.filter((r) => r.method === 'PUT' && r.path === '/me/player/play');
+    expect(plays).toHaveLength(1);
+    expect(plays[0]?.query.get('device_id')).toBe('web-device');
+    expect(plays[0]?.body).toEqual({ context_uri: 'spotify:album:alb2' });
+    expect(h.store.getState().issue).toBeNull();
     h.engine.stop();
   });
 
@@ -409,5 +526,20 @@ describe('SpotifyPlaybackEngine', () => {
     expect(h.store.getState().sdk).toMatchObject({ kind: 'reconnecting', deviceId: 'web-device' });
     h.engine.stop();
     expect(h.device.disconnect).toHaveBeenCalled();
+  });
+
+  it('keeps a browser device that comes back online by itself', async () => {
+    const h = harness();
+    h.engine.start();
+    await h.flush();
+    h.callbacks().onReady('web-device');
+    h.callbacks().onNotReady('web-device');
+    h.callbacks().onReady('web-device');
+    h.runTimers();
+    await h.flush();
+    expect(h.created).toHaveLength(1);
+    expect(h.device.disconnect).not.toHaveBeenCalled();
+    expect(h.store.getState().sdk).toMatchObject({ kind: 'ready', deviceId: 'web-device' });
+    h.engine.stop();
   });
 });
