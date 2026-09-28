@@ -234,5 +234,5 @@ accent; surfaces, text and separators always stay neutral.
 - **Device not ready:** keep the tab open, allow protected content, then **Settings → Use browser device** or pick a
   device from the device menu on Now Playing.
 - **Tracks skip without playing:** update Widevine (`chrome://components`), allow protected content, disable blocking
-  extensions for the site — or play on the Spotify app and use ARC as a remote.
+  extensions for the site — or open the Spotify app, choose it in the device menu and use ARC as a remote.
 - **429:** wait for the displayed interval; the client already backs off.

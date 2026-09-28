@@ -96,6 +96,8 @@ function isPlayingThrough(before: Spotify.PlaybackState | null, after: Spotify.P
 
 const REANCHOR_MS = 3_000;
 const MAX_RECONNECT_ATTEMPTS = 5;
+/** How long a play request waits for this browser's player to finish connecting. */
+const SDK_READY_WAIT_MS = 10_000;
 const VOLUME_KEY = 'arc.player.volume.v1';
 
 export interface SpotifyEngineOptions {
@@ -154,6 +156,9 @@ export class SpotifyPlaybackEngine implements PlaybackEngine {
   private unplayedAt: number[] = [];
   private playbackErrorsAt: number[] = [];
   private lastPlaybackError: string | null = null;
+  /** A Spotify Connect device the listener chose in this app (see transferTo). */
+  private chosenDeviceId: string | null = null;
+  private playRequests = 0;
 
   constructor(private readonly options: SpotifyEngineOptions) {
     this.store = options.store;
@@ -230,6 +235,8 @@ export class SpotifyPlaybackEngine implements PlaybackEngine {
     return {
       onReady: (deviceId) => {
         if (!live()) return;
+        // The SDK came back by itself: keep this device rather than replacing it.
+        this.clearTimer('reconnectTimer');
         this.deviceId = deviceId;
         this.reconnectAttempts = 0;
         this.authRetried = false;
@@ -472,6 +479,46 @@ export class SpotifyPlaybackEngine implements PlaybackEngine {
     return snapshot.source === 'sdk' && sdk.kind === 'ready' && this.device !== null;
   }
 
+  /** The active device is another Spotify Connect device the listener chose in this app. */
+  private remoteChosen(): boolean {
+    const { snapshot } = this.store.getState();
+    const device = snapshot.device;
+    return (
+      snapshot.source === 'remote' &&
+      this.chosenDeviceId !== null &&
+      device?.id === this.chosenDeviceId &&
+      device.isActive &&
+      !device.isRestricted
+    );
+  }
+
+  /**
+   * This browser's SDK device ID. While the player is still connecting it waits (bounded)
+   * for the SDK's `ready`, so no request goes out before the browser device exists.
+   * Null when browser playback is unavailable.
+   */
+  private async browserDeviceId(): Promise<string | null> {
+    const connecting = () => {
+      const { kind } = this.store.getState().sdk;
+      return kind === 'loading' || kind === 'reconnecting';
+    };
+    if (connecting()) {
+      await new Promise<void>((resolve) => {
+        const done = () => {
+          unsubscribe();
+          this.timers.clearTimeout(timer);
+          resolve();
+        };
+        const unsubscribe = this.store.subscribe(() => {
+          if (!connecting()) done();
+        });
+        const timer = this.timers.setTimeout(done, SDK_READY_WAIT_MS);
+      });
+    }
+    const { sdk } = this.store.getState();
+    return sdk.kind === 'ready' ? sdk.deviceId : null;
+  }
+
   private positionPatch(paused: boolean): Partial<PlayerSnapshot> {
     const { snapshot } = this.store.getState();
     const now = this.now();
@@ -479,26 +526,29 @@ export class SpotifyPlaybackEngine implements PlaybackEngine {
   }
 
   async play(request: PlayRequest): Promise<void> {
-    const { snapshot, sdk } = this.store.getState();
+    const requestId = ++this.playRequests;
+    // Playback started here goes to this browser by its SDK device ID, not to whichever device
+    // Spotify reports as active (possibly a phone whose app was closed), unless the listener
+    // chose that device.
+    const browserId = this.remoteChosen() ? null : await this.browserDeviceId();
+    // A newer request replaced this one while it waited for the browser player.
+    if (!this.running || requestId !== this.playRequests) return;
+    const { snapshot } = this.store.getState();
     const remoteActive = snapshot.source === 'remote' && snapshot.device?.isActive && !snapshot.device.isRestricted;
-    let deviceId: string | undefined;
+    let deviceId = browserId ?? undefined;
 
-    if (!remoteActive) {
-      if (sdk.kind === 'ready') {
-        deviceId = sdk.deviceId;
-      } else {
-        // Spotify needs a target when no device is active: use any controllable device.
-        const devices = await api.getDevices(this.client).catch(() => []);
-        const candidate = devices.find((d) => d.id && !d.is_restricted);
-        if (!candidate?.id) {
-          this.setIssue(
-            'no-active-device',
-            'No Spotify device is available. Open Spotify on a phone or computer, or enable browser playback.',
-          );
-          return;
-        }
-        deviceId = candidate.id;
+    if (!deviceId && !remoteActive) {
+      // Spotify needs a target when no device is active: use any controllable device.
+      const devices = await api.getDevices(this.client).catch(() => []);
+      const candidate = devices.find((d) => d.id && !d.is_restricted);
+      if (!candidate?.id) {
+        this.setIssue(
+          'no-active-device',
+          'No Spotify device is available. Open Spotify on a phone or computer, or enable browser playback.',
+        );
+        return;
       }
+      deviceId = candidate.id;
     }
 
     const contextType = parseSpotifyUri(request.contextUri)?.type;
@@ -529,10 +579,11 @@ export class SpotifyPlaybackEngine implements PlaybackEngine {
   async resume(): Promise<void> {
     const { snapshot, sdk } = this.store.getState();
     if (this.sdkIsActive()) return this.command(this.positionPatch(false), () => this.device!.resume(), false);
+    // As in play(): resume in this browser unless the listener chose the active device.
+    if (sdk.kind === 'ready' && !this.remoteChosen()) return this.transferToBrowser(true);
     if (snapshot.source === 'remote' && snapshot.device?.isActive) {
       return this.command(this.positionPatch(false), () => api.startPlayback(this.client, {}), true);
     }
-    if (sdk.kind === 'ready') return this.transferToBrowser(true);
     this.setIssue('no-active-device', 'No Spotify device is active. Choose a device to resume playback.');
   }
 
@@ -580,11 +631,13 @@ export class SpotifyPlaybackEngine implements PlaybackEngine {
       this.setIssue('no-active-device', 'Browser playback is not ready yet.');
       return;
     }
+    this.chosenDeviceId = null;
     await this.command(undefined, () => api.transferPlayback(this.client, sdk.deviceId, play), true);
   }
 
   async transferTo(deviceId: string, play = true): Promise<void> {
     if (deviceId === this.deviceId) return this.transferToBrowser(play);
+    this.chosenDeviceId = deviceId;
     await this.command(undefined, () => api.transferPlayback(this.client, deviceId, play), true);
   }
 
