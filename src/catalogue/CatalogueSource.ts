@@ -3,6 +3,7 @@ import type {
   AlbumSummary,
   ArtistDetail,
   ArtistSummary,
+  ReleaseGroup,
   CursorPage,
   Page,
   PlaylistSummary,
@@ -49,7 +50,13 @@ export interface CatalogueSource {
   /** Album with its complete track sequence. */
   getAlbum(id: string, signal?: AbortSignal): Promise<AlbumDetail>;
   getArtist(id: string, signal?: AbortSignal): Promise<ArtistDetail>;
-  getArtistReleases(artistId: string, page: PageRequest, signal?: AbortSignal): Promise<Page<AlbumSummary>>;
+  /** One page of an artist's releases in the given groups (Spotify order). */
+  getArtistReleases(
+    artistId: string,
+    groups: readonly ReleaseGroup[],
+    page: PageRequest,
+    signal?: AbortSignal,
+  ): Promise<Page<AlbumSummary>>;
   search(request: SearchRequest, signal?: AbortSignal): Promise<SearchResults>;
   checkSaved(uris: string[], signal?: AbortSignal): Promise<boolean[]>;
   setSaved(uris: string[], saved: boolean): Promise<void>;

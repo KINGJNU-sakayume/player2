@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { FrontmatterError, fileKey, parseFrontmatter } from './frontmatter';
-import { loadAlbumNotes } from './loadNotes';
+import { loadAlbumNotes, loadArtistNotes, parseEra } from './loadNotes';
 
 describe('parseFrontmatter', () => {
   it('reads scalars, numbers, quoted strings and lists', () => {
@@ -80,5 +80,27 @@ describe('note loading', () => {
     expect(() =>
       loadAlbumNotes({ './notes/albums/dated.md': '---\nartist: test\ntitles: [T]\nwritten: 2 Oct 2026\nshort: x\n---\n' }),
     ).toThrow(/dated\.md.*YYYY-MM-DD/);
+  });
+});
+
+describe('artist eras', () => {
+  it.each([
+    ['2012–2015 · 직접 노래하기 시작', { from: 2012, to: 2015, title: '직접 노래하기 시작' }],
+    ['2018– · ‘Lemon’ 이후', { from: 2018, to: null, title: '‘Lemon’ 이후' }],
+    ['2009 : 하치', { from: 2009, to: 2009, title: '하치' }],
+    ['2000-2005 | Early', { from: 2000, to: 2005, title: 'Early' }],
+  ])('parses "%s"', (line, era) => {
+    expect(parseEra(line, 'artist.md')).toEqual(era);
+  });
+
+  it.each(['Early years', '2015–2012 · backwards', '2012–2015'])('rejects "%s"', (line) => {
+    expect(() => parseEra(line, 'artist.md')).toThrow(/artist\.md/);
+  });
+
+  it('loads eras oldest first', () => {
+    const [artist] = loadArtistNotes({
+      './notes/artists/a.md': '---\nartistIds: [x]\nnames: [A]\neras:\n  - 2018– · later\n  - 2012–2017 · earlier\nshort: s\n---\n',
+    });
+    expect(artist?.eras?.map((era) => era.title)).toEqual(['earlier', 'later']);
   });
 });

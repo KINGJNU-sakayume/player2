@@ -8,14 +8,17 @@ The playback, library, search, lyrics and translation features of the ARC Catalo
 ([player1](https://github.com/KINGJNU-sakayume/player1)) have been brought over, re-set in the v7 design language
 (see [`DESIGN_REVISION_V7_1.md`](DESIGN_REVISION_V7_1.md)). v7.2 ([`DESIGN_REVISION_V7_2.md`](DESIGN_REVISION_V7_2.md))
 is built for digging through discographies. Album notes can be long critic-style reviews. Lyrics can carry a curated
-translation whose Korean speech level (존댓말 / 반말) is fixed from the song's context before any line is translated. There is still no global playback footer, no Catalogue
+translation whose Korean speech level (존댓말 / 반말) is fixed from the song's context before any line is translated.
+v7.3 ([`DESIGN_REVISION_V7_3.md`](DESIGN_REVISION_V7_3.md)) adds the discography timeline, previous / next release
+navigation and the Archive index. There is still no global playback footer, no Catalogue
 or Specimen mode, and transport controls appear only on Now Playing.
 
 | Surface | What it does |
 | --- | --- |
 | **Now Playing** | v7 42 / 58 spread. Cover, title, artist · album and Track / Release / Duration / Language on the left; on the right the synced current lyric with its translation and the next two lines, the Listening Note, and the transport — previous / play-pause / next and seek — with shuffle, like, queue, device and volume on one quiet line beneath it. The accent colour follows the album cover. |
-| **Artist** | Compact dossier: portrait, name, origin line and Editorial Note; releases below as horizontal rows (with *Show more*), each marked when it has a note. *Play artist*, *Open in Spotify*. |
-| **Album** | Cover, title, artist, release / format / tracks / duration and Editorial Note left; the complete Track Sequence right, with the playing track, guests, explicit marks, discs and a *Note* mark on songs with a Listening Note. *Play album*, *Save album*. |
+| **Artist** | Compact dossier: portrait, name, origin line and Editorial Note. Below it, the **Discography** as a chronology. Albums, Singles & EPs, Compilations and Appears on each load in full, oldest first (or newest first). Releases are grouped by year, with deluxe / remaster / regional editions folded under the original (*+2 editions*), the note's career eras marked in the timeline, and noted releases marked. *Play artist*, *Open in Spotify*. |
+| **Album** | Cover, title, artist, release / format / tracks / duration and Editorial Note left; the complete Track Sequence right, with the playing track, guests, explicit marks, discs and a *Note* mark on songs with a Listening Note. *Play album*, *Save album*. Under the sequence, the release's place in the discography (`03 / 12 · Albums`) with the previous and next release — `[` / `]` step through. |
+| **Archive** | The index of the archive's own writing: every artist with a note, their reviewed albums in release order, listening notes and curated translations, each opening its note or playing the track. No Spotify request. |
 | **Library** | Liked songs (*Shuffle* draws from the whole library, *Play all*), followed artists, liked albums, then playlists and recently played. |
 | **Search** | The v7 overlay (`/`): tracks, artists, albums and playlists, type filters with paging, `↓` / `↑` through results. |
 | **Queue** | The real Spotify queue in the same right-hand drawer as the notes. |
@@ -186,7 +189,7 @@ line is an original test line. It never calls Spotify, LRCLIB or a translation s
 
 ## Keyboard
 
-`/` opens search (`↓` / `↑` move, `Enter` opens or plays, `Esc` steps back). `Space` plays / pauses when focus is not
+`/` opens search (`↓` / `↑` move, `Enter` opens or plays, `Esc` steps back). On an album, `[` / `]` open the previous / next release in the artist's discography. `Space` plays / pauses when focus is not
 on a control. Seek and volume take arrow keys, Page Up / Down, Home and End. The note and queue drawer closes on
 `Esc`, traps focus while open and returns it afterwards. `prefers-reduced-motion` removes motion.
 
@@ -251,8 +254,10 @@ accent; surfaces, text and separators always stay neutral.
 - **Premium and browsers.** Browser playback and all playback control need Premium and a desktop browser with DRM
   (Widevine). When the browser cannot decrypt the audio, the engine stops the silent skipping and Now Playing explains
   the fix; otherwise ARC controls another Spotify device as a remote.
-- **Development Mode.** Allow-listed users only; search returns 10 results per type per page and discographies load
-  10 releases at a time (*Show more*). Followers and genres may be missing and are never required.
+- **Development Mode.** Allow-listed users only. Search returns 10 results per type per page. Spotify serves an artist's
+  releases 10 at a time, so the discography walks every page of the open group (one request per 10 releases, cached
+  for 30 minutes, capped at 300). An artist with many singles takes a moment the first time. Followers and genres may
+  be missing and are never required.
 - **Queue** is read-only (the Web API cannot reorder it). Episodes, ads and local files show the idle state.
 - **Playlists** play as a context; there is no playlist page.
 - **Autoplay.** The first play in a session may need one click or key press.

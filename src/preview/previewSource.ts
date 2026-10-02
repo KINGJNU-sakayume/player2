@@ -1,4 +1,4 @@
-import type { AlbumSummary, Page, SearchResults } from '../domain/types';
+import type { AlbumDetail, AlbumSummary, Page, ReleaseGroup, SearchResults } from '../domain/types';
 import { NOT_IN_PREVIEW, SpotifyApiError } from '../spotify/errors';
 import { normaliseTitle, type CatalogueSource, type PageRequest } from '../catalogue/CatalogueSource';
 import {
@@ -147,8 +147,15 @@ export function createPreviewCatalogueSource(now: () => number = Date.now): Cata
       return delay(artist, signal);
     },
 
-    getArtistReleases(artistId, request, signal) {
-      const albums = PREVIEW_ALBUMS.filter((a) => a.artists.some((artist) => artist.id === artistId))
+    getArtistReleases(artistId, groups, request, signal) {
+      const groupOf = (album: AlbumDetail): ReleaseGroup | null => {
+        if (album.artists.some((artist) => artist.id === artistId)) return album.albumType;
+        return album.tracks.some((track) => track.artists.some((artist) => artist.id === artistId)) ? 'appears_on' : null;
+      };
+      const albums = PREVIEW_ALBUMS.filter((album) => {
+        const group = groupOf(album);
+        return group !== null && groups.includes(group);
+      })
         .map(summary)
         .sort((a, b) => (b.releaseDate ?? '').localeCompare(a.releaseDate ?? ''));
       return delay(page(albums, request), signal);

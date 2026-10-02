@@ -35,6 +35,8 @@ export interface TrackIdentity {
 }
 
 export type AlbumType = 'album' | 'single' | 'compilation';
+/** How a release relates to an artist's discography (Spotify's `include_groups`). */
+export type ReleaseGroup = AlbumType | 'appears_on';
 export type ReleaseDatePrecision = 'year' | 'month' | 'day';
 
 export interface AlbumSummary {

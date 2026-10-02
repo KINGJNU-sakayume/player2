@@ -11,6 +11,7 @@ const Icon = ({ children, className, ...props }: IconProps) => (
 export const MusicIcon = () => <Icon><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></Icon>;
 export const ArtistIcon = () => <Icon><circle cx="12" cy="8" r="3.2"/><path d="M5 21c.5-4.2 2.8-6.3 7-6.3s6.5 2.1 7 6.3"/></Icon>;
 export const AlbumIcon = () => <Icon><rect x="4" y="4" width="16" height="16"/><circle cx="12" cy="12" r="3.5"/></Icon>;
+export const ArchiveIcon = () => <Icon><path d="M5 4h11l3 3v13H5z"/><path d="M8.5 9.5h7M8.5 13h7M8.5 16.5h4"/></Icon>;
 export const LibraryIcon = () => <Icon><path d="M5 4v16M9.5 4v16M14 5.2l4.6 14.4"/></Icon>;
 export const SearchIcon = () => <Icon><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></Icon>;
 export const QueueIcon = () => <Icon><path d="M4 6h16M4 11h16M4 16h9M17 14.5v5l3.5-2.5z"/></Icon>;

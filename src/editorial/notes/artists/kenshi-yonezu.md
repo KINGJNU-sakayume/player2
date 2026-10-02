@@ -2,6 +2,10 @@
 artistIds: [1snhtMLeb2DYoMOcVbb8iB]
 names: [Kenshi Yonezu, 米津玄師, 요네즈 켄시]
 origin: Tokushima, Japan · singer-songwriter / producer / illustrator
+eras:
+  - 2009–2011 · 하치(ハチ), 보컬로이드 프로듀서
+  - 2012–2017 · 『diorama』부터 직접 노래하기
+  - 2018– · 'Lemon' 이후
 short: >
   보컬로이드 프로듀서 ‘하치’에서 출발해 자신의 목소리로 J-pop의 한가운데에 선 음악가. 곡을 쓰는 손과 그림을 그리는 손이 같다는 점이 음악의 질감에도 그대로 남아 있다.
 ---

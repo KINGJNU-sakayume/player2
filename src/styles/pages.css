@@ -12,7 +12,6 @@
 .artist-copy h1 { margin: 12px 0 0; font-size: clamp(62px,7vw,104px); line-height: .88; letter-spacing: -.06em; font-weight: 500; overflow-wrap: anywhere; }
 .artist-copy .origin { margin-top: 18px; font-size: 13px; color: var(--muted); }
 .artist-grid { padding: 34px 0 0; }
-.artist-section h3 { display: flex; align-items: baseline; gap: 14px; margin: 0 0 14px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
 .section-count { font-weight: 400; color: var(--dim); font-size: 9.5px; letter-spacing: .12em; }
 .release-card { display: grid; grid-template-columns: 180px minmax(0,1fr) auto; gap: 22px; align-items: center; padding: 16px 0; border-top: 1px solid var(--line); }
 .release-cover { display: block; width: 180px; height: 180px; }
@@ -28,6 +27,58 @@
 .object-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
 .empty-row { padding: 22px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; line-height: 1.6; }
 .more-row { padding: 16px 0 4px; }
+
+/* Discography timeline (v7.3) */
+.discography-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px 24px; margin-bottom: 14px; }
+.discography-head h3 { display: flex; align-items: baseline; gap: 14px; margin: 0; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+.discography-tools { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 24px; }
+.discography-filters { margin-top: 0; }
+.timeline { border-bottom: 1px solid var(--line); }
+.year-section { display: grid; grid-template-columns: 88px minmax(0,1fr); gap: 0 20px; border-top: 1px solid var(--line); }
+.year-label { padding-top: 18px; font-size: 11px; letter-spacing: .12em; color: var(--dim); font-variant-numeric: tabular-nums; }
+.year-releases > .release-card:first-child { border-top: 0; }
+.year-releases.object-rows { border-top: 0; }
+.year-releases .object-row:last-of-type { border-bottom: 0; }
+.era-marker { display: flex; align-items: baseline; gap: 14px; padding: 26px 0 12px; border-top: 1px solid var(--ink); font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--ink); }
+.timeline > .era-marker:first-child { padding-top: 6px; }
+.era-marker + .year-section { border-top-color: var(--line-soft); }
+.era-years { color: var(--main-text); font-variant-numeric: tabular-nums; }
+.editions-toggle { padding: 0; font-size: 9.5px; }
+.object-row-meta .editions-toggle { margin-left: 12px; }
+.edition-list { display: grid; gap: 6px; margin: 10px 0 0; padding: 10px 0 0; border-top: 1px solid var(--line-soft); font-size: 12px; }
+.edition-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.edition-list li span { font-size: 11px; color: var(--dim); }
+.edition-item { list-style: none; padding: 0 0 12px 74px; border-bottom: 1px solid var(--line-soft); }
+.edition-item .edition-list { margin-top: 0; }
+
+/* Archive: the index of notes and translations */
+.archive-artist { display: grid; grid-template-columns: minmax(220px,300px) minmax(0,1fr); gap: 0 54px; padding: 26px 0 30px; border-top: 1px solid var(--ink); }
+.archive-artist-head h2 { margin: 0; font-size: clamp(26px,2.4vw,36px); line-height: 1; letter-spacing: -.04em; font-weight: 500; overflow-wrap: anywhere; }
+.archive-origin { margin-top: 10px; font-size: 11.5px; color: var(--muted); }
+.archive-count { margin-top: 8px; font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+.archive-rows { border-bottom: 0; }
+.archive-row { display: grid; grid-template-columns: 74px minmax(0,1fr) auto; gap: 16px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line-soft); }
+.archive-row:first-child { padding-top: 4px; }
+.archive-row:last-child { border-bottom: 0; }
+.archive-kind { font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); font-variant-numeric: tabular-nums; }
+.archive-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.archive-text b { font-size: 14px; font-weight: 500; overflow-wrap: anywhere; }
+.archive-preview, .archive-meta { font-size: 12px; line-height: 1.65; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.archive-actions { display: inline-flex; gap: 14px; }
+
+/* Album: previous / next release in the artist's discography */
+.discography-nav { margin-top: 34px; }
+.discography-nav-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; padding-bottom: 10px; border-bottom: 1px solid var(--ink); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+.discography-nav-head span:first-child { color: var(--ink); }
+.discography-nav-head a { color: var(--muted); }
+.discography-steps { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
+.discography-step { display: flex; flex-direction: column; gap: 6px; padding: 16px 0; min-width: 0; transition: padding .2s var(--ease), background .2s ease; }
+.discography-step.next { text-align: right; align-items: flex-end; border-left: 1px solid var(--line-soft); }
+.discography-step b { font-size: clamp(17px,1.5vw,22px); font-weight: 500; letter-spacing: -.02em; overflow-wrap: anywhere; }
+a.discography-step:hover { background: color-mix(in srgb,var(--main) 4%,transparent); }
+a.discography-step.prev:hover { padding-left: 8px; }
+a.discography-step.next:hover { padding-right: 8px; }
+.discography-step.is-edge { justify-content: center; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
 
 /* Album */
 .album-page { height: 100%; overflow: auto; padding: 32px 44px 70px; }

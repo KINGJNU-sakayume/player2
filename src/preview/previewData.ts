@@ -28,6 +28,8 @@ interface TrackDef {
   name: string;
   durationMs: number;
   lyrics?: LyricSet;
+  /** Featured artists besides the album artists (makes the album an "Appears on" release for them). */
+  guestIds?: string[];
 }
 
 interface AlbumDef {
@@ -111,6 +113,25 @@ const ALBUMS: AlbumDef[] = [
     releaseDate: '2024-08-21',
     precision: 'day',
     totalTracks: null,
+  },
+  // Sample entries (0Arc… IDs) so the preview discography shows an edition group and more than one single.
+  {
+    id: '0ArcPvStraySheepDeluxe',
+    name: 'STRAY SHEEP (Deluxe Edition)',
+    artistIds: [KENSHI],
+    albumType: 'album',
+    releaseDate: '2020-08-05',
+    precision: 'day',
+    totalTracks: 15,
+  },
+  {
+    id: '0ArcPvKickBackSingle01',
+    name: 'KICK BACK',
+    artistIds: [KENSHI],
+    albumType: 'single',
+    releaseDate: '2022-10-12',
+    precision: 'day',
+    totalTracks: 2,
   },
   {
     id: '4Ezkdjk13wY1bdXc5kDJHG',
@@ -310,7 +331,7 @@ const ALBUMS: AlbumDef[] = [
       ['Thin Line', 201, 'mixed'],
       ['Catalogue Number', 227, null],
       ['Last Proof', 305, 'en'],
-    ]),
+    ]).map((track) => (track.name === 'Index Card' ? { ...track, guestIds: [KENSHI] } : track)),
   },
 ];
 
@@ -334,7 +355,7 @@ function toAlbumTrack(def: TrackDef, album: AlbumDef, index: number): AlbumTrack
     id: def.id,
     uri: `spotify:track:${def.id}`,
     name: def.name,
-    artists: artistRefs(album.artistIds),
+    artists: artistRefs([...album.artistIds, ...(def.guestIds ?? [])]),
     durationMs: def.durationMs,
     trackNumber: index + 1,
     discNumber: 1,

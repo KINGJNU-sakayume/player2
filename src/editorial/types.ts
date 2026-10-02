@@ -36,6 +36,16 @@ export interface ArtistNote extends EditorialBody {
   names: string[];
   /** Origin / role line under the artist name, e.g. "Tokyo, Japan · singer / songwriter". */
   origin?: string;
+  /** Periods of the career, oldest first; the Artist page marks them in the discography timeline. */
+  eras?: ArtistEra[];
+}
+
+/** A period of an artist's career, written in the note as `- 2012–2015 · 직접 노래하기 시작`. */
+export interface ArtistEra {
+  from: number;
+  /** Last year of the era; null while it is ongoing (`2020– · …`). A single year has `to === from`. */
+  to: number | null;
+  title: string;
 }
 
 export interface AlbumNote extends EditorialBody {

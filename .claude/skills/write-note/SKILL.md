@@ -71,6 +71,17 @@ WebSearch / WebFetch로 확인한 사실만 쓴다. 조사할 것:
 - `short`: 2–3줄, 이 음악가를 듣는 관점.
 - 본문: 경력을 **시기(era)** 로 나눠 디스코그래피의 흐름을 보여준다. 시기마다 대표 앨범과 무엇이 달라졌는지.
   끝에 "처음 듣는다면" 들어갈 앨범을 제안할 수 있다. 소제목(`## 초기 (2012–2015)` 등)을 써도 된다.
+- `eras`(선택): 본문의 시기 구분을 frontmatter에도 적으면 Artist 페이지의 디스코그래피 타임라인에 시기 표시가 붙는다.
+  한 줄에 하나, `연도–연도 · 짧은 이름` 형식으로 쓴다. 진행 중인 시기는 끝 연도를 비우고(`2018– · …`), 한 해짜리는
+  연도 하나만 쓴다. 이름은 10자 안팎으로 짧게, 본문과 같은 구분을 쓴다. 근거가 분명한 전환점(데뷔, 활동명 변경,
+  레이블 이적, 결정적인 히트)만 시기로 나눈다.
+
+  ```yaml
+  eras:
+    - 2009–2011 · 하치(ハチ), 보컬로이드 프로듀서
+    - 2012–2017 · 『diorama』부터 직접 노래하기
+    - 2018– · 'Lemon' 이후
+  ```
 
 ### 곡 — Listening Note
 
@@ -108,7 +119,7 @@ short: >
 
 | 종류 | 필수 | 선택 |
 | --- | --- | --- |
-| artists | `artistIds`, `names`, `short` | `origin`, `written`, `updated`, `sources` |
+| artists | `artistIds`, `names`, `short` | `origin`, `eras`, `written`, `updated`, `sources` |
 | albums | `artist`, `titles`, `short` | `albumIds`, `releaseYear`, `written`, `updated`, `sources` |
 | songs | `artist`, `titles`, `short` | `trackIds`, `written`, `updated`, `sources` |
 

@@ -19,7 +19,6 @@ import {
   type SearchRequest,
 } from './CatalogueSource';
 
-const RELEASE_GROUPS = 'album,single,compilation';
 const MAX_ALBUM_TRACK_PAGES = 40;
 
 export function createSpotifyCatalogueSource(client: SpotifyClient): CatalogueSource {
@@ -78,11 +77,11 @@ export function createSpotifyCatalogueSource(client: SpotifyClient): CatalogueSo
       return mapArtistDetail(await api.getArtist(client, id, signal));
     },
 
-    async getArtistReleases(artistId, page: PageRequest, signal) {
+    async getArtistReleases(artistId, groups, page: PageRequest, signal) {
       const result = await api.getArtistAlbums(
         client,
         artistId,
-        { includeGroups: RELEASE_GROUPS, limit: page.limit, offset: page.offset },
+        { includeGroups: groups.join(','), limit: page.limit, offset: page.offset },
         signal,
       );
       return mapPage(result, mapAlbumSummary);

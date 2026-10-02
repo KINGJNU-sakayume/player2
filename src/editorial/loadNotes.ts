@@ -1,5 +1,5 @@
 import { FieldReader, fileKey, FrontmatterError, parseFrontmatter } from './frontmatter';
-import type { AlbumNote, ArtistNote, EditorialBody, SongNote } from './types';
+import type { AlbumNote, ArtistEra, ArtistNote, EditorialBody, SongNote } from './types';
 
 /**
  * Turns the Markdown note files into typed notes. The file name is the key
@@ -29,6 +29,18 @@ function body(fields: FieldReader, full: string, file: string): EditorialBody {
   };
 }
 
+const ERA_LINE = /^(\d{4})(?:\s*([–—-])\s*(\d{4})?)?\s*[·:|]\s*(.+)$/;
+
+/** `2012–2015 · title`, `2020– · title` (ongoing) or `2009 · title` (one year). */
+export function parseEra(line: string, file: string): ArtistEra {
+  const match = ERA_LINE.exec(line.trim());
+  if (!match) throw new FrontmatterError(`${file}: era "${line}" must look like "2012–2015 · title".`);
+  const from = Number(match[1]);
+  const to = match[3] ? Number(match[3]) : match[2] ? null : from;
+  if (to !== null && to < from) throw new FrontmatterError(`${file}: era "${line}" ends before it starts.`);
+  return { from, to, title: match[4]!.trim() };
+}
+
 function load<T>(files: NoteFiles, build: (key: string, fields: FieldReader, full: string, file: string) => T): T[] {
   return Object.keys(files)
     .sort()
@@ -44,6 +56,7 @@ export function loadArtistNotes(files: NoteFiles): ArtistNote[] {
     artistIds: fields.list('artistIds'),
     names: fields.list('names'),
     origin: fields.optionalString('origin'),
+    eras: fields.optionalList('eras')?.map((line) => parseEra(line, file)).sort((a, b) => a.from - b.from),
     ...body(fields, full, file),
   }));
 }
