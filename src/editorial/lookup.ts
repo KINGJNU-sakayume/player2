@@ -50,6 +50,12 @@ function namesOf(artistKey: string, sources: NoteSources): string[] {
   return sources.artists.find((artist) => artist.key === artistKey)?.names.map(normaliseTitle) ?? [];
 }
 
+/** True when any of `artistNames` is one of `knownNames`, compared as normalised titles. */
+export function namesMatch(knownNames: readonly string[], artistNames: readonly string[]): boolean {
+  const known = knownNames.map(normaliseTitle);
+  return artistNames.some((name) => known.includes(normaliseTitle(name)));
+}
+
 function artistMatches(artistKey: string, artistNames: readonly string[], sources: NoteSources): boolean {
   const known = namesOf(artistKey, sources);
   return artistNames.some((name) => known.includes(normaliseTitle(name)));

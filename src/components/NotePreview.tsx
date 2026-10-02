@@ -38,7 +38,18 @@ export function NotePreview({
           type="button"
           className="note-more"
           aria-haspopup="dialog"
-          onClick={() => openNote({ context: `${heading} / ${KIND_LABEL[kind]}`, title, subtitle, copy: note.full ?? '', titleLang })}
+          onClick={() =>
+            openNote({
+              context: `${heading} / ${KIND_LABEL[kind]}`,
+              title,
+              subtitle,
+              copy: note.full ?? '',
+              titleLang,
+              written: note.written,
+              updated: note.updated,
+              sources: note.sources,
+            })
+          }
         >
           Read full note →
         </button>

@@ -20,6 +20,19 @@ ARC local editorial data owns:
 
 Never inject long editorial prose into Spotify transport models.
 
+## Storage (v7.2)
+
+- Notes are Markdown files: `src/editorial/notes/{artists,albums,songs}/<key>.md`. The file name is the key; the
+  frontmatter holds the match fields (Spotify IDs, names / titles, release year), the `short` preview and optional
+  `written` / `updated` / `sources`; the body is the long-form note. Loaded by `src/editorial/loadNotes.ts`.
+- Album notes are critic-style reviews without scores. The writing rules are in
+  `.claude/skills/write-note/SKILL.md`.
+- Curated lyric translations are JSON files: `src/translations/<artist>/<song>.json`, holding a translation brief and
+  translated lines keyed by original-line hash (see "Lyrics copyright/data rule" below).
+
+The type sketches below are the original v7 plan; the current types are in `src/editorial/types.ts` and
+`src/translation/curated/types.ts`.
+
 ## Types
 
 ```ts
@@ -150,3 +163,15 @@ The v7 mockup contains non-copyright placeholder lyric text such as “Lyric pre
 Do not replace this by hard-coding copyrighted song lyrics into the repository.
 
 Production lyrics must come through an appropriately licensed/authorized provider or another user-approved source. Until then, keep the mock provider explicitly synthetic.
+
+### Curated translations (v7.2)
+
+The repository owner decided to keep hand-made Korean translations of lyrics in this public repository
+(`src/translations/`), accepting that a translation is a derivative of the original lyrics. To limit what is stored:
+
+- the original lyrics are **never** stored — not in translation files, notes, tests, fixtures or commit messages;
+- each translated line is keyed by a hash of the original line and matched at runtime against lyrics loaded from
+  LRCLIB, so the files are unreadable as lyrics without that source;
+- a brief may quote at most a few words of the original as evidence.
+
+Tests use the synthetic preview test lines as fixtures, never real lyrics.

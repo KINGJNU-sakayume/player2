@@ -6,7 +6,9 @@ Note for songs — that open in one shared drawer. Spotify provides authenticati
 
 The playback, library, search, lyrics and translation features of the ARC Catalogue player
 ([player1](https://github.com/KINGJNU-sakayume/player1)) have been brought over, re-set in the v7 design language
-(see [`DESIGN_REVISION_V7_1.md`](DESIGN_REVISION_V7_1.md)). There is still no global playback footer, no Catalogue
+(see [`DESIGN_REVISION_V7_1.md`](DESIGN_REVISION_V7_1.md)). v7.2 ([`DESIGN_REVISION_V7_2.md`](DESIGN_REVISION_V7_2.md))
+is built for digging through discographies. Album notes can be long critic-style reviews. Lyrics can carry a curated
+translation whose Korean speech level (존댓말 / 반말) is fixed from the song's context before any line is translated. There is still no global playback footer, no Catalogue
 or Specimen mode, and transport controls appear only on Now Playing.
 
 | Surface | What it does |
@@ -80,13 +82,13 @@ Every `VITE_*` value is public browser code — never put a secret in one.
 
 ## Notes (Editorial and Listening)
 
-Notes are ARC's own writing, hard-coded in source and kept apart from Spotify data:
+Notes are ARC's own writing, one Markdown file per note, kept apart from Spotify data:
 
-| File | Note | Shown on |
+| Directory | Note | Shown on |
 | --- | --- | --- |
-| [`src/editorial/artists.ts`](src/editorial/artists.ts) | Artist **Editorial Note** (+ origin line) | Artist |
-| [`src/editorial/albums.ts`](src/editorial/albums.ts) | Album **Editorial Note** | Album |
-| [`src/editorial/songs.ts`](src/editorial/songs.ts) | Song **Listening Note** | Now Playing |
+| [`src/editorial/notes/artists/`](src/editorial/notes/artists/) | Artist **Editorial Note** (+ origin line) | Artist |
+| [`src/editorial/notes/albums/`](src/editorial/notes/albums/) | Album **Editorial Note**, written as a critic-style review | Album |
+| [`src/editorial/notes/songs/`](src/editorial/notes/songs/) | Song **Listening Note** | Now Playing |
 
 Seeded notes: the v7 reference subjects — Vaundy / `strobo` / 怪獣の花唄, Tyler, The Creator / `IGOR` / EARFQUAKE,
 tripleS / `<ASSEMBLE24>` / Girls Never Die — and three example artists with representative releases:
@@ -96,8 +98,12 @@ tripleS / `<ASSEMBLE24>` / Girls Never Die — and three example artists with re
 - **Coldplay** — `Parachutes`, `A Rush of Blood to the Head`, `Viva la Vida or Death and All His Friends`; Yellow,
   The Scientist, Viva la Vida
 
-Each entry has a `short` preview (2–3 lines; a song cue is shorter) and a `full` text for the drawer (paragraphs
-separated by a blank line). Matching, in [`src/editorial/lookup.ts`](src/editorial/lookup.ts):
+The file name is the key. The frontmatter holds the match fields and a `short` preview (2–3 lines; a song cue is
+shorter). The body is the long-form note for the drawer. It can use paragraphs, `##` sections, lists, quotes, emphasis
+and links. Optional `written` / `updated` dates and `sources` appear at the foot of the drawer. To have Claude
+write one, ask for it (*"STRAY SHEEP 리뷰 써줘"*); the procedure and style rules are in
+[`.claude/skills/write-note/SKILL.md`](.claude/skills/write-note/SKILL.md). Matching, in
+[`src/editorial/lookup.ts`](src/editorial/lookup.ts):
 
 1. **Spotify IDs first** — `artistIds`, `albumIds`, `trackIds` (the 22-character part of an `open.spotify.com` link).
    One release usually has several IDs (album cut and single, editions, markets): list the ones you know.
@@ -106,20 +112,25 @@ separated by a blank line). Matching, in [`src/editorial/lookup.ts`](src/editori
    `['Kenshi Yonezu', '米津玄師']`, `['怪獣の花唄', 'Kaiju no Hanauta']`. Albums also check `releaseYear` when both
    years are known.
 
-```ts
-// src/editorial/songs.ts
-{
-  key: 'lemon',
-  artist: 'kenshi-yonezu',                                  // key of the entry in artists.ts
-  trackIds: ['7Cd17G3oNQ34OWUwS8ZxfR', '04TshWXkhV1qkqHzf31Hn6'],
-  titles: ['Lemon'],
-  short: '…',
-  full: '…\n\n…',
-},
+```markdown
+<!-- src/editorial/notes/songs/lemon.md -->
+---
+artist: kenshi-yonezu
+trackIds: [7Cd17G3oNQ34OWUwS8ZxfR, 04TshWXkhV1qkqHzf31Hn6]
+titles: [Lemon]
+written: 2026-10-02
+short: >
+  …
+---
+
+…
+
+## …
 ```
 
-Anything without an entry gets no note — never generated filler. `npm run test:run` checks that every entry is
-complete and every album / song points at an existing artist.
+`artist` is the file name of the artist's note. Anything without a file gets no note — never generated filler.
+`npm run test:run` checks that every file parses, every entry is complete and every album / song points at an
+existing artist.
 
 ## Lyrics and translation
 
@@ -139,6 +150,27 @@ Spotify's Web API has no lyrics, so both come from replaceable providers and nei
 
   Each line's language is detected separately, so only lines not already in the target language are translated.
   **Translation On / Off** sits in the lyrics header and in Settings.
+
+### Curated translations
+
+Machine translation works line by line, so it cannot know who is speaking to whom, and the Korean speech level drifts
+from line to line. A **curated translation** decides that first. Its *brief* names the speaker, the addressee, their
+relationship, and the speech level kept throughout (하십시오체 / 해요체 / 해체 / 해라체), with the reasoning and
+sources. The whole song is then translated against the brief. Files live in
+[`src/translations/`](src/translations/) and are written in a Claude session
+([`.claude/skills/translate-lyrics/SKILL.md`](.claude/skills/translate-lyrics/SKILL.md)):
+
+```bash
+npm run lyrics:lines -- --title "Lemon" --artist "Kenshi Yonezu" --duration 4:15   # line table with hashes
+npm run lyrics:lines -- --check src/translations/kenshi-yonezu/lemon.json         # coverage against LRCLIB
+```
+
+The files never contain the original lyrics: each translated line is keyed by a hash of the original line and
+matched against the lyrics loaded from LRCLIB at runtime. A curated translation wins over the machine provider (and
+works with `VITE_TRANSLATION_PROVIDER=none`). Lines it does not cover still go to the machine provider. The lyrics
+header shows `Curated · 반말 · 해체`, and **Translation note →** opens the brief and a line-by-line 대역 in the note
+drawer. The tool talks to lrclib.net. When that host is unreachable, `--file` reads a local LRC or text file kept
+outside the repository.
 
 To add a provider, implement `LyricsProvider` ([`src/lyrics/types.ts`](src/lyrics/types.ts)) or
 `TranslationProvider` ([`src/translation/TranslationProvider.ts`](src/translation/TranslationProvider.ts)) and
@@ -167,6 +199,7 @@ npm run lint
 npm run test:run
 npm run build
 npm run check      # all of the above — run before pushing
+npm run lyrics:lines -- …   # curated-translation tool (see Lyrics and translation)
 npm run preview    # serve dist/ on http://127.0.0.1:4173/
 ```
 
@@ -192,9 +225,10 @@ src/
   spotify/      typed Web API client (401 refresh, 429 backoff), endpoints, mappers, error taxonomy, scopes
   playback/     the single PlayerStore, Web Playback SDK adapter, Spotify engine, playback clock
   catalogue/    CatalogueSource (Spotify or preview) and query hooks
-  editorial/    Editorial and Listening Notes and their lookup
+  editorial/    Editorial and Listening Notes (Markdown files in notes/), frontmatter loader and lookup
   lyrics/       LyricsProvider, LRC parser, lyric sync, cache, LRCLIB and mock providers
-  translation/  TranslationProvider, language detection, browser / http / mock providers
+  translation/  TranslationProvider, language detection, browser / http / mock providers, curated translations
+  translations/ curated lyric translations (JSON: brief + hashed lines, no original lyrics)
   palette/      cover colour extraction and the contrast-safe accent
   preview/      sample archive, preview source and simulated engine
   components/   covers, notes + shared drawer, search, queue, settings, transport
