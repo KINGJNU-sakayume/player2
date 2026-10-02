@@ -6,14 +6,19 @@ Note for songs — that open in one shared drawer. Spotify provides authenticati
 
 The playback, library, search, lyrics and translation features of the ARC Catalogue player
 ([player1](https://github.com/KINGJNU-sakayume/player1)) have been brought over, re-set in the v7 design language
-(see [`DESIGN_REVISION_V7_1.md`](DESIGN_REVISION_V7_1.md)). There is still no global playback footer, no Catalogue
+(see [`DESIGN_REVISION_V7_1.md`](DESIGN_REVISION_V7_1.md)). v7.2 ([`DESIGN_REVISION_V7_2.md`](DESIGN_REVISION_V7_2.md))
+is built for digging through discographies. Album notes can be long critic-style reviews. Lyrics can carry a curated
+translation whose Korean speech level (존댓말 / 반말) is fixed from the song's context before any line is translated.
+v7.3 ([`DESIGN_REVISION_V7_3.md`](DESIGN_REVISION_V7_3.md)) adds the discography timeline, previous / next release
+navigation and the Archive index. There is still no global playback footer, no Catalogue
 or Specimen mode, and transport controls appear only on Now Playing.
 
 | Surface | What it does |
 | --- | --- |
 | **Now Playing** | v7 42 / 58 spread. Cover, title, artist · album and Track / Release / Duration / Language on the left; on the right the synced current lyric with its translation and the next two lines, the Listening Note, and the transport — previous / play-pause / next and seek — with shuffle, like, queue, device and volume on one quiet line beneath it. The accent colour follows the album cover. |
-| **Artist** | Compact dossier: portrait, name, origin line and Editorial Note; releases below as horizontal rows (with *Show more*), each marked when it has a note. *Play artist*, *Open in Spotify*. |
-| **Album** | Cover, title, artist, release / format / tracks / duration and Editorial Note left; the complete Track Sequence right, with the playing track, guests, explicit marks, discs and a *Note* mark on songs with a Listening Note. *Play album*, *Save album*. |
+| **Artist** | Compact dossier: portrait, name, origin line and Editorial Note. Below it, the **Discography** as a chronology. Albums, Singles & EPs, Compilations and Appears on each load in full, oldest first (or newest first). Releases are grouped by year, with deluxe / remaster / regional editions folded under the original (*+2 editions*), the note's career eras marked in the timeline, and noted releases marked. *Play artist*, *Open in Spotify*. |
+| **Album** | Cover, title, artist, release / format / tracks / duration and Editorial Note left; the complete Track Sequence right, with the playing track, guests, explicit marks, discs and a *Note* mark on songs with a Listening Note. *Play album*, *Save album*. Under the sequence, the release's place in the discography (`03 / 12 · Albums`) with the previous and next release — `[` / `]` step through. |
+| **Archive** | The index of the archive's own writing: every artist with a note, their reviewed albums in release order, listening notes and curated translations, each opening its note or playing the track. No Spotify request. |
 | **Library** | Liked songs (*Shuffle* draws from the whole library, *Play all*), followed artists, liked albums, then playlists and recently played. |
 | **Search** | The v7 overlay (`/`): tracks, artists, albums and playlists, type filters with paging, `↓` / `↑` through results. |
 | **Queue** | The real Spotify queue in the same right-hand drawer as the notes. |
@@ -80,13 +85,13 @@ Every `VITE_*` value is public browser code — never put a secret in one.
 
 ## Notes (Editorial and Listening)
 
-Notes are ARC's own writing, hard-coded in source and kept apart from Spotify data:
+Notes are ARC's own writing, one Markdown file per note, kept apart from Spotify data:
 
-| File | Note | Shown on |
+| Directory | Note | Shown on |
 | --- | --- | --- |
-| [`src/editorial/artists.ts`](src/editorial/artists.ts) | Artist **Editorial Note** (+ origin line) | Artist |
-| [`src/editorial/albums.ts`](src/editorial/albums.ts) | Album **Editorial Note** | Album |
-| [`src/editorial/songs.ts`](src/editorial/songs.ts) | Song **Listening Note** | Now Playing |
+| [`src/editorial/notes/artists/`](src/editorial/notes/artists/) | Artist **Editorial Note** (+ origin line) | Artist |
+| [`src/editorial/notes/albums/`](src/editorial/notes/albums/) | Album **Editorial Note**, written as a critic-style review | Album |
+| [`src/editorial/notes/songs/`](src/editorial/notes/songs/) | Song **Listening Note** | Now Playing |
 
 Seeded notes: the v7 reference subjects — Vaundy / `strobo` / 怪獣の花唄, Tyler, The Creator / `IGOR` / EARFQUAKE,
 tripleS / `<ASSEMBLE24>` / Girls Never Die — and three example artists with representative releases:
@@ -96,8 +101,12 @@ tripleS / `<ASSEMBLE24>` / Girls Never Die — and three example artists with re
 - **Coldplay** — `Parachutes`, `A Rush of Blood to the Head`, `Viva la Vida or Death and All His Friends`; Yellow,
   The Scientist, Viva la Vida
 
-Each entry has a `short` preview (2–3 lines; a song cue is shorter) and a `full` text for the drawer (paragraphs
-separated by a blank line). Matching, in [`src/editorial/lookup.ts`](src/editorial/lookup.ts):
+The file name is the key. The frontmatter holds the match fields and a `short` preview (2–3 lines; a song cue is
+shorter). The body is the long-form note for the drawer. It can use paragraphs, `##` sections, lists, quotes, emphasis
+and links. Optional `written` / `updated` dates and `sources` appear at the foot of the drawer. To have Claude
+write one, ask for it (*"STRAY SHEEP 리뷰 써줘"*); the procedure and style rules are in
+[`.claude/skills/write-note/SKILL.md`](.claude/skills/write-note/SKILL.md). Matching, in
+[`src/editorial/lookup.ts`](src/editorial/lookup.ts):
 
 1. **Spotify IDs first** — `artistIds`, `albumIds`, `trackIds` (the 22-character part of an `open.spotify.com` link).
    One release usually has several IDs (album cut and single, editions, markets): list the ones you know.
@@ -106,20 +115,25 @@ separated by a blank line). Matching, in [`src/editorial/lookup.ts`](src/editori
    `['Kenshi Yonezu', '米津玄師']`, `['怪獣の花唄', 'Kaiju no Hanauta']`. Albums also check `releaseYear` when both
    years are known.
 
-```ts
-// src/editorial/songs.ts
-{
-  key: 'lemon',
-  artist: 'kenshi-yonezu',                                  // key of the entry in artists.ts
-  trackIds: ['7Cd17G3oNQ34OWUwS8ZxfR', '04TshWXkhV1qkqHzf31Hn6'],
-  titles: ['Lemon'],
-  short: '…',
-  full: '…\n\n…',
-},
+```markdown
+<!-- src/editorial/notes/songs/lemon.md -->
+---
+artist: kenshi-yonezu
+trackIds: [7Cd17G3oNQ34OWUwS8ZxfR, 04TshWXkhV1qkqHzf31Hn6]
+titles: [Lemon]
+written: 2026-10-02
+short: >
+  …
+---
+
+…
+
+## …
 ```
 
-Anything without an entry gets no note — never generated filler. `npm run test:run` checks that every entry is
-complete and every album / song points at an existing artist.
+`artist` is the file name of the artist's note. Anything without a file gets no note — never generated filler.
+`npm run test:run` checks that every file parses, every entry is complete and every album / song points at an
+existing artist.
 
 ## Lyrics and translation
 
@@ -140,6 +154,27 @@ Spotify's Web API has no lyrics, so both come from replaceable providers and nei
   Each line's language is detected separately, so only lines not already in the target language are translated.
   **Translation On / Off** sits in the lyrics header and in Settings.
 
+### Curated translations
+
+Machine translation works line by line, so it cannot know who is speaking to whom, and the Korean speech level drifts
+from line to line. A **curated translation** decides that first. Its *brief* names the speaker, the addressee, their
+relationship, and the speech level kept throughout (하십시오체 / 해요체 / 해체 / 해라체), with the reasoning and
+sources. The whole song is then translated against the brief. Files live in
+[`src/translations/`](src/translations/) and are written in a Claude session
+([`.claude/skills/translate-lyrics/SKILL.md`](.claude/skills/translate-lyrics/SKILL.md)):
+
+```bash
+npm run lyrics:lines -- --title "Lemon" --artist "Kenshi Yonezu" --duration 4:15   # line table with hashes
+npm run lyrics:lines -- --check src/translations/kenshi-yonezu/lemon.json         # coverage against LRCLIB
+```
+
+The files never contain the original lyrics: each translated line is keyed by a hash of the original line and
+matched against the lyrics loaded from LRCLIB at runtime. A curated translation wins over the machine provider (and
+works with `VITE_TRANSLATION_PROVIDER=none`). Lines it does not cover still go to the machine provider. The lyrics
+header shows `Curated · 반말 · 해체`, and **Translation note →** opens the brief and a line-by-line 대역 in the note
+drawer. The tool talks to lrclib.net. When that host is unreachable, `--file` reads a local LRC or text file kept
+outside the repository.
+
 To add a provider, implement `LyricsProvider` ([`src/lyrics/types.ts`](src/lyrics/types.ts)) or
 `TranslationProvider` ([`src/translation/TranslationProvider.ts`](src/translation/TranslationProvider.ts)) and
 register it in `createLyricsProvider.ts` / `createTranslationProvider.ts` and `src/app/config.ts`. A provider that
@@ -154,7 +189,7 @@ line is an original test line. It never calls Spotify, LRCLIB or a translation s
 
 ## Keyboard
 
-`/` opens search (`↓` / `↑` move, `Enter` opens or plays, `Esc` steps back). `Space` plays / pauses when focus is not
+`/` opens search (`↓` / `↑` move, `Enter` opens or plays, `Esc` steps back). On an album, `[` / `]` open the previous / next release in the artist's discography. `Space` plays / pauses when focus is not
 on a control. Seek and volume take arrow keys, Page Up / Down, Home and End. The note and queue drawer closes on
 `Esc`, traps focus while open and returns it afterwards. `prefers-reduced-motion` removes motion.
 
@@ -167,6 +202,7 @@ npm run lint
 npm run test:run
 npm run build
 npm run check      # all of the above — run before pushing
+npm run lyrics:lines -- …   # curated-translation tool (see Lyrics and translation)
 npm run preview    # serve dist/ on http://127.0.0.1:4173/
 ```
 
@@ -192,9 +228,10 @@ src/
   spotify/      typed Web API client (401 refresh, 429 backoff), endpoints, mappers, error taxonomy, scopes
   playback/     the single PlayerStore, Web Playback SDK adapter, Spotify engine, playback clock
   catalogue/    CatalogueSource (Spotify or preview) and query hooks
-  editorial/    Editorial and Listening Notes and their lookup
+  editorial/    Editorial and Listening Notes (Markdown files in notes/), frontmatter loader and lookup
   lyrics/       LyricsProvider, LRC parser, lyric sync, cache, LRCLIB and mock providers
-  translation/  TranslationProvider, language detection, browser / http / mock providers
+  translation/  TranslationProvider, language detection, browser / http / mock providers, curated translations
+  translations/ curated lyric translations (JSON: brief + hashed lines, no original lyrics)
   palette/      cover colour extraction and the contrast-safe accent
   preview/      sample archive, preview source and simulated engine
   components/   covers, notes + shared drawer, search, queue, settings, transport
@@ -217,8 +254,10 @@ accent; surfaces, text and separators always stay neutral.
 - **Premium and browsers.** Browser playback and all playback control need Premium and a desktop browser with DRM
   (Widevine). When the browser cannot decrypt the audio, the engine stops the silent skipping and Now Playing explains
   the fix; otherwise ARC controls another Spotify device as a remote.
-- **Development Mode.** Allow-listed users only; search returns 10 results per type per page and discographies load
-  10 releases at a time (*Show more*). Followers and genres may be missing and are never required.
+- **Development Mode.** Allow-listed users only. Search returns 10 results per type per page. Spotify serves an artist's
+  releases 10 at a time, so the discography walks every page of the open group (one request per 10 releases, cached
+  for 30 minutes, capped at 300). An artist with many singles takes a moment the first time. Followers and genres may
+  be missing and are never required.
 - **Queue** is read-only (the Web API cannot reorder it). Episodes, ads and local files show the idle state.
 - **Playlists** play as a context; there is no playlist page.
 - **Autoplay.** The first play in a session may need one click or key press.

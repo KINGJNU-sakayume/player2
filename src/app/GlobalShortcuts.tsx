@@ -1,11 +1,7 @@
 import { useEffect } from 'react';
 import { useEngine } from '../playback/hooks';
+import { shortcutBlocked } from './shortcuts';
 import { useShell } from './shellContext';
-
-function isTypingTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
-}
 
 /**
  * "/" opens search; Space toggles playback when focus is not on a control
@@ -17,9 +13,7 @@ export function GlobalShortcuts() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) return;
-      if (isTypingTarget(event.target)) return;
-      if (document.querySelector('[role="dialog"][aria-modal="true"]:not([aria-hidden="true"])')) return;
+      if (shortcutBlocked(event)) return;
 
       if (event.key === '/') {
         event.preventDefault();

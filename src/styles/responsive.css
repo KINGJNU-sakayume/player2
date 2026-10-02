@@ -32,6 +32,10 @@
   .player-listening { min-height: 680px; }
   .object-rows { grid-template-columns: 1fr; }
   .scope-notice { padding: 9px 18px; }
+  .year-section, .archive-artist { grid-template-columns: 1fr; }
+  .archive-artist-head { margin-bottom: 14px; }
+  .year-label { padding: 14px 0 0; }
+  .edition-item { padding-left: 0; }
 }
 
 @media (max-width: 620px) {

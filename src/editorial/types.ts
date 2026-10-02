@@ -2,6 +2,7 @@
  * ARC's hand-written notes. They are local, source-controlled data and stay
  * separate from Spotify models: pages look a note up and render it only when
  * one exists — no note is ever generated for an arbitrary Spotify entity.
+ * Each note is one Markdown file in `src/editorial/notes/` (see loadNotes.ts).
  *
  * - Artist → Editorial Note
  * - Album  → Editorial Note
@@ -11,8 +12,16 @@
 export interface EditorialBody {
   /** Preview shown on the page: about 2–3 lines (a song cue is usually shorter). */
   short: string;
-  /** Long form for the note drawer. Paragraphs are separated by a blank line. */
+  /**
+   * Long form for the note drawer, in the small Markdown subset NoteBody
+   * renders: paragraphs, `##` / `###` headings, lists, quotes, emphasis, links.
+   */
   full?: string;
+  /** ISO dates (YYYY-MM-DD) the note was written and last revised. */
+  written?: string;
+  updated?: string;
+  /** References the note relies on: interviews, liner notes, credits (URLs or citations). */
+  sources?: string[];
 }
 
 export interface ArtistNote extends EditorialBody {
@@ -27,6 +36,16 @@ export interface ArtistNote extends EditorialBody {
   names: string[];
   /** Origin / role line under the artist name, e.g. "Tokyo, Japan · singer / songwriter". */
   origin?: string;
+  /** Periods of the career, oldest first; the Artist page marks them in the discography timeline. */
+  eras?: ArtistEra[];
+}
+
+/** A period of an artist's career, written in the note as `- 2012–2015 · 직접 노래하기 시작`. */
+export interface ArtistEra {
+  from: number;
+  /** Last year of the era; null while it is ongoing (`2020– · …`). A single year has `to === from`. */
+  to: number | null;
+  title: string;
 }
 
 export interface AlbumNote extends EditorialBody {

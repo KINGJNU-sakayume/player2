@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from '../app/sessionContext';
-import type { SearchResults, SearchType } from '../domain/types';
+import { loadDiscography } from '../discography/loadDiscography';
+import type { ReleaseGroup, SearchResults, SearchType } from '../domain/types';
 import { isSpotifyId } from '../lib/spotifyUri';
 import { drawLikedShuffle } from './likedShuffle';
 
@@ -100,15 +101,17 @@ export function useArtist(artistId: string | undefined) {
   });
 }
 
-export function useArtistReleases(artistId: string | undefined, pageSize = 10) {
+/**
+ * Every release of one group (albums, singles & EPs, compilations or
+ * "appears on"), loaded completely so it can be ordered as a chronology.
+ * Artist and Album pages share the cache.
+ */
+export function useDiscography(artistId: string | null | undefined, group: ReleaseGroup, enabled = true) {
   const { catalogue } = useSession();
-  return useInfiniteQuery({
-    queryKey: [catalogue.mode, 'artist-releases', artistId, pageSize],
-    queryFn: ({ pageParam, signal }) =>
-      catalogue.getArtistReleases(artistId!, { offset: pageParam, limit: pageSize }, signal),
-    initialPageParam: 0,
-    getNextPageParam: (last) => (last.hasMore ? last.offset + last.items.length : undefined),
-    enabled: isSpotifyId(artistId),
+  return useQuery({
+    queryKey: [catalogue.mode, 'discography', artistId, group],
+    queryFn: ({ signal }) => loadDiscography(catalogue, artistId!, group, signal),
+    enabled: enabled && isSpotifyId(artistId ?? undefined),
     staleTime: 30 * MINUTE,
   });
 }

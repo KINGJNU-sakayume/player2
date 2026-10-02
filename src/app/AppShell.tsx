@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useProfile } from '../catalogue/queries';
-import { AlbumIcon, ArtistIcon, LibraryIcon, MusicIcon, QueueIcon, SearchIcon, SettingsIcon } from '../components/icons';
+import { AlbumIcon, ArchiveIcon, ArtistIcon, LibraryIcon, MusicIcon, QueueIcon, SearchIcon, SettingsIcon } from '../components/icons';
 import { NoteProvider } from '../components/NoteContext';
 import { NoteDrawer } from '../components/NoteDrawer';
 import { QueueDrawer } from '../components/QueueDrawer';
@@ -43,6 +43,9 @@ function Rail() {
         </NavLink>
         <NavLink to="/library" title="Library" aria-label="Library">
           <LibraryIcon />
+        </NavLink>
+        <NavLink to="/archive" title="Archive" aria-label="Archive">
+          <ArchiveIcon />
         </NavLink>
         <button type="button" title="Search (/)" aria-label="Search" aria-keyshortcuts="/" onClick={shell.openSearch}>
           <SearchIcon />

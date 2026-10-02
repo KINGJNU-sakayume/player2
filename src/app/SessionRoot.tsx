@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import type { SessionMode } from '../catalogue/CatalogueSource';
 import { AlbumPage } from '../pages/AlbumPage';
+import { ArchivePage } from '../pages/ArchivePage';
 import { ArtistPage } from '../pages/ArtistPage';
 import { LibraryPage } from '../pages/LibraryPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
@@ -29,6 +30,7 @@ function SessionScope({ session }: { session: Session }) {
           <Route index element={<Navigate to="/now-playing" replace />} />
           <Route path="now-playing" element={<NowPlayingPage />} />
           <Route path="library" element={<LibraryPage />} />
+          <Route path="archive" element={<ArchivePage />} />
           <Route path="artist/:artistId" element={<ArtistPage />} />
           <Route path="album/:albumId" element={<AlbumPage />} />
           <Route path="*" element={<NotFoundPage />} />

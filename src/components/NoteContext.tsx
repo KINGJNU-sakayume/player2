@@ -5,9 +5,16 @@ export interface NotePayload {
   context: string;
   title: string;
   subtitle?: string;
+  /** Long-form note text (the Markdown subset NoteBody renders). */
   copy: string;
+  /** Rendered after the copy, for notes that carry more than text (e.g. a translation's line table). */
+  extra?: ReactNode;
   /** BCP 47 language of the title, for CJK glyph selection. */
   titleLang?: string;
+  /** Quiet foot: when the note was written / revised and what it relies on. */
+  written?: string;
+  updated?: string;
+  sources?: string[];
 }
 
 interface NoteContextValue {

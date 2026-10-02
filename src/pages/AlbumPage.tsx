@@ -4,6 +4,7 @@ import { usePageTitle } from '../app/pageTitle';
 import { useAlbum, useSavedState, useToggleSaved } from '../catalogue/queries';
 import { ArtistLinks } from '../components/ArtistLinks';
 import { CoverImage } from '../components/CoverImage';
+import { DiscographyNav } from '../components/DiscographyNav';
 import { NotePreview } from '../components/NotePreview';
 import { PlayingMark } from '../components/PlayingMark';
 import { StateView } from '../components/StateView';
@@ -250,6 +251,7 @@ export function AlbumPage() {
                   : 'The preview archive has this release’s details but not its track sequence. Connect Spotify to load the complete album.'}
               </div>
             )}
+            <DiscographyNav album={loaded} />
           </section>
         </div>
       </div>

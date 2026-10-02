@@ -32,14 +32,15 @@ describe('seeded notes', () => {
   });
 
   it('seeds representative albums and songs for the three example artists', () => {
-    const albumKeysOf = (artist: string) => albumNotes.filter((a) => a.artist === artist).map((a) => a.key);
-    const songKeysOf = (artist: string) => songNotes.filter((s) => s.artist === artist).map((s) => s.key);
-    expect(albumKeysOf('kenshi-yonezu')).toEqual(['stray-sheep', 'lost-corner']);
-    expect(songKeysOf('kenshi-yonezu')).toEqual(['lemon', 'kanden', 'kick-back']);
-    expect(albumKeysOf('triples')).toEqual(['assemble24', 'assemble']);
+    // Note files have no inherent order: compare as sorted sets.
+    const albumKeysOf = (artist: string) => albumNotes.filter((a) => a.artist === artist).map((a) => a.key).sort();
+    const songKeysOf = (artist: string) => songNotes.filter((s) => s.artist === artist).map((s) => s.key).sort();
+    expect(albumKeysOf('kenshi-yonezu')).toEqual(['lost-corner', 'stray-sheep']);
+    expect(songKeysOf('kenshi-yonezu')).toEqual(['kanden', 'kick-back', 'lemon']);
+    expect(albumKeysOf('triples')).toEqual(['assemble', 'assemble24']);
     expect(songKeysOf('triples')).toEqual(['girls-never-die', 'rising']);
-    expect(albumKeysOf('coldplay')).toEqual(['parachutes', 'a-rush-of-blood', 'viva-la-vida']);
-    expect(songKeysOf('coldplay')).toEqual(['yellow', 'the-scientist', 'viva-la-vida']);
+    expect(albumKeysOf('coldplay')).toEqual(['a-rush-of-blood', 'parachutes', 'viva-la-vida']);
+    expect(songKeysOf('coldplay')).toEqual(['the-scientist', 'viva-la-vida', 'yellow']);
   });
 });
 
