@@ -53,7 +53,7 @@ describe('seeded notes', () => {
     expect(flamingo?.full).toBeUndefined();
     expect(flamingo?.translation).toBeDefined();
     expect(albumKeysOf('triples')).toEqual(['assemble', 'assemble24']);
-    expect(songKeysOf('triples')).toEqual(['girls-never-die', 'rising']);
+    expect(songKeysOf('triples')).toEqual(['beam', 'before-the-rise', 'chowall', 'colorful', 'girls-never-die', 'new-look', 'rising', 'the-baddest']);
     expect(albumKeysOf('coldplay')).toEqual(['a-rush-of-blood', 'parachutes', 'viva-la-vida']);
     expect(songKeysOf('coldplay')).toEqual(['the-scientist', 'viva-la-vida', 'yellow']);
   });
