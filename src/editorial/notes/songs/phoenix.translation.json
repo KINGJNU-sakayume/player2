@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 2,
+  "timing": {
+    "lrclibId": 24448334,
+    "durationMs": 164000
+  },
+  "segments": [
+    {
+      "startMs": 2310,
+      "endMs": 3740,
+      "translation": "숨을 들이쉬어, 숨을 들이쉬어"
+    },
+    {
+      "startMs": 3740,
+      "endMs": 9620,
+      "translation": "이제 때가 됐어, 이제 갈 때야"
+    },
+    {
+      "startMs": 9620,
+      "endMs": 14270,
+      "translation": "추락은 두려워하지 마"
+    },
+    {
+      "startMs": 14270,
+      "endMs": 17650,
+      "translation": "(불사조) 너무나 자욱해"
+    },
+    {
+      "startMs": 17650,
+      "endMs": 21770,
+      "translation": "잿더미 속에서, 잿더미 속에서 (한 번 더)"
+    },
+    {
+      "startMs": 21770,
+      "endMs": 23550,
+      "translation": "(불사조) 다시 태어나"
+    },
+    {
+      "startMs": 23550,
+      "endMs": 26800,
+      "translation": "우린 맞물려 있었어, 잿더미에서 나온 거야"
+    },
+    {
+      "startMs": 26800,
+      "endMs": 28980,
+      "translation": "잿더미에서 (가자)"
+    },
+    {
+      "startMs": 42840,
+      "endMs": 44470,
+      "translation": "일어나, 불 속에서 깨어나"
+    },
+    {
+      "startMs": 50350,
+      "endMs": 51730,
+      "translation": "모든 속박을 부숴"
+    },
+    {
+      "startMs": 57400,
+      "endMs": 60710,
+      "translation": "(불사조) 너무나 자욱해, 잿더미 속에서"
+    },
+    {
+      "startMs": 60710,
+      "endMs": 61510,
+      "translation": "잿더미 속에서"
+    },
+    {
+      "startMs": 61510,
+      "endMs": 62620,
+      "translation": "(점점 거칠어져, 점점 거칠어져)"
+    },
+    {
+      "startMs": 62620,
+      "endMs": 63200,
+      "translation": "잿더미 속에서"
+    },
+    {
+      "startMs": 63200,
+      "endMs": 64540,
+      "translation": "(점점 거칠어져, 점점 거칠어져)"
+    },
+    {
+      "startMs": 64540,
+      "endMs": 67780,
+      "translation": "(불사조) 잿더미에서 다시 태어나"
+    },
+    {
+      "startMs": 67780,
+      "endMs": 68520,
+      "translation": "잿더미에서"
+    },
+    {
+      "startMs": 68520,
+      "endMs": 69920,
+      "translation": "(살아 있어, 살아 있어)"
+    },
+    {
+      "startMs": 69920,
+      "endMs": 70630,
+      "translation": "잿더미에서"
+    },
+    {
+      "startMs": 70630,
+      "endMs": 71920,
+      "translation": "(살아 있어, 살아 있어)"
+    },
+    {
+      "startMs": 84430,
+      "endMs": 86300,
+      "translation": "내 삶을 맞이할 준비가 됐어"
+    },
+    {
+      "startMs": 93160,
+      "endMs": 96750,
+      "translation": "난 싸우고 또 싸워"
+    },
+    {
+      "startMs": 100000,
+      "endMs": 101720,
+      "translation": "일어나, 불 속에서 깨어나"
+    },
+    {
+      "startMs": 107550,
+      "endMs": 109100,
+      "translation": "모든 속박을 부숴"
+    },
+    {
+      "startMs": 114750,
+      "endMs": 116150,
+      "translation": "불 속에서 깨어나"
+    },
+    {
+      "startMs": 122070,
+      "endMs": 123400,
+      "translation": "모든 속박을 부숴"
+    },
+    {
+      "startMs": 128990,
+      "endMs": 132930,
+      "translation": "(불사조) 난 절대, 절대로 멈추지 않을 거야"
+    },
+    {
+      "startMs": 132930,
+      "endMs": 135830,
+      "translation": "(불사조) 너무나 자욱해, 잿더미 속에서"
+    },
+    {
+      "startMs": 135830,
+      "endMs": 136620,
+      "translation": "잿더미 속에서"
+    },
+    {
+      "startMs": 136620,
+      "endMs": 137980,
+      "translation": "(점점 거칠어져, 점점 거칠어져)"
+    },
+    {
+      "startMs": 137980,
+      "endMs": 138670,
+      "translation": "잿더미 속에서"
+    },
+    {
+      "startMs": 138670,
+      "endMs": 139750,
+      "translation": "(점점 거칠어져, 점점 거칠어져)"
+    },
+    {
+      "startMs": 139750,
+      "endMs": 143000,
+      "translation": "(불사조) 잿더미에서 다시 태어나"
+    },
+    {
+      "startMs": 143000,
+      "endMs": 143740,
+      "translation": "잿더미에서"
+    },
+    {
+      "startMs": 143740,
+      "endMs": 145160,
+      "translation": "(살아 있어, 살아 있어)"
+    },
+    {
+      "startMs": 145160,
+      "endMs": 145590,
+      "translation": "잿더미에서"
+    },
+    {
+      "startMs": 145590,
+      "endMs": 147000,
+      "translation": "(살아 있어, 살아 있어)"
+    },
+    {
+      "startMs": 147000,
+      "endMs": 149640,
+      "translation": "계속 솟아올라"
+    },
+    {
+      "startMs": 152000,
+      "endMs": 154110,
+      "translation": "난 내 길을 가고 있어"
+    }
+  ]
+}

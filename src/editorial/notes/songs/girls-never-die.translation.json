@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 2,
+  "timing": {
+    "lrclibId": 20681860,
+    "durationMs": 224000
+  },
+  "segments": [
+    {
+      "startMs": 2220,
+      "endMs": 7670,
+      "translation": "더 높이, 부정할 수 없어, 절대 죽지 않아"
+    },
+    {
+      "startMs": 7670,
+      "endMs": 12760,
+      "translation": "더 높이, 부정할 수 없어, 절대 죽지 않아 (다시 해 보자)"
+    },
+    {
+      "startMs": 12760,
+      "endMs": 17660,
+      "translation": "더 높이 (예), 부정할 수 없어, 절대 죽지 않아 (가자)"
+    },
+    {
+      "startMs": 17660,
+      "endMs": 22010,
+      "translation": "더 높이 (우), 부정할 수 없어 (가자), 절대 죽지 않아 (예)"
+    },
+    {
+      "startMs": 32730,
+      "endMs": 35420,
+      "translation": "가자, 높이 올라가자"
+    },
+    {
+      "startMs": 35420,
+      "endMs": 37270,
+      "translation": "지금 가자"
+    },
+    {
+      "startMs": 97430,
+      "endMs": 102860,
+      "translation": "날 더 가까이 안아 줘, 부서진 나 자신으로, 예"
+    },
+    {
+      "startMs": 113570,
+      "endMs": 115870,
+      "translation": "가자, 높이 올라가자"
+    },
+    {
+      "startMs": 115870,
+      "endMs": 118150,
+      "translation": "지금 가자"
+    },
+    {
+      "startMs": 138580,
+      "endMs": 142950,
+      "translation": "우리는 하나로 뭉쳐, 스물네 개의 꿈 (예, 예, 예)"
+    },
+    {
+      "startMs": 154020,
+      "endMs": 156280,
+      "translation": "가자 (아주 높이), 높이 올라가자"
+    },
+    {
+      "startMs": 156280,
+      "endMs": 158510,
+      "translation": "지금 가자"
+    },
+    {
+      "startMs": 174230,
+      "endMs": 176620,
+      "translation": "가자, 높이 올라가자"
+    },
+    {
+      "startMs": 176620,
+      "endMs": 178810,
+      "translation": "지금 가자"
+    }
+  ]
+}

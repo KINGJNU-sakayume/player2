@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 2,
+  "timing": {
+    "lrclibId": 3436977,
+    "durationMs": 159000
+  },
+  "segments": [
+    {
+      "startMs": 5730,
+      "endMs": 11180,
+      "translation": "넌 날 깎아내리고 있어, 깎아내리고 있어"
+    },
+    {
+      "startMs": 134110,
+      "endMs": 139300,
+      "translation": "난 네가 필요 없고, 네게 맞춰 주지도 않을 거야"
+    },
+    {
+      "startMs": 144820,
+      "endMs": 149900,
+      "translation": "난 너처럼 되고 싶지 않아, 다른 사람이나 찾아가"
+    }
+  ]
+}

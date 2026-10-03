@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 2,
+  "timing": {
+    "lrclibId": 24456603,
+    "durationMs": 172000
+  },
+  "segments": [
+    {
+      "startMs": 7190,
+      "endMs": 11460,
+      "translation": "그러니 널 잘 사랑하는 법을 알려 줘"
+    },
+    {
+      "startMs": 38580,
+      "endMs": 42310,
+      "translation": "평생 진짜 사랑을 좇으며 보냈어"
+    },
+    {
+      "startMs": 46840,
+      "endMs": 47800,
+      "translation": "모양 같은 건 상관없어"
+    },
+    {
+      "startMs": 50670,
+      "endMs": 51660,
+      "translation": "모양 같은 건 상관없어"
+    },
+    {
+      "startMs": 53770,
+      "endMs": 58370,
+      "translation": "아, 우린 상처받고 울고, 가끔은 웃어"
+    },
+    {
+      "startMs": 58370,
+      "endMs": 59330,
+      "translation": "모양 같은 건 상관없어"
+    },
+    {
+      "startMs": 61300,
+      "endMs": 65130,
+      "translation": "그러니 네 마음이 식을 때 말해 줘"
+    },
+    {
+      "startMs": 92260,
+      "endMs": 96080,
+      "translation": "평생 진짜 사랑을 좇으며 보냈어"
+    },
+    {
+      "startMs": 100660,
+      "endMs": 101690,
+      "translation": "모양 같은 건 상관없어"
+    },
+    {
+      "startMs": 104470,
+      "endMs": 105450,
+      "translation": "모양 같은 건 상관없어"
+    },
+    {
+      "startMs": 107480,
+      "endMs": 112140,
+      "translation": "아, 우린 상처받고 울고, 가끔은 웃어"
+    },
+    {
+      "startMs": 112140,
+      "endMs": 113220,
+      "translation": "모양 같은 건 상관없어"
+    },
+    {
+      "startMs": 115820,
+      "endMs": 118880,
+      "translation": "널 잡을 거야, 널 잡을 거야, 야생 같은 일이야"
+    },
+    {
+      "startMs": 122970,
+      "endMs": 126840,
+      "translation": "우린 영원히 젊고 거칠고 자유롭고 싶어 한다는 걸 알아"
+    },
+    {
+      "startMs": 138950,
+      "endMs": 139900,
+      "translation": "모양 같은 건 상관없어"
+    },
+    {
+      "startMs": 142760,
+      "endMs": 143810,
+      "translation": "모양 같은 건 상관없어"
+    },
+    {
+      "startMs": 146070,
+      "endMs": 150630,
+      "translation": "아, 우린 상처받고 울고, 가끔은 웃어"
+    },
+    {
+      "startMs": 150630,
+      "endMs": 151480,
+      "translation": "모양 같은 건 상관없어"
+    },
+    {
+      "startMs": 154210,
+      "endMs": 157440,
+      "translation": "널 잡을 거야, 널 잡을 거야, 야생 같은 일이야"
+    },
+    {
+      "startMs": 161720,
+      "endMs": 165010,
+      "translation": "널 잡을 거야, 널 잡을 거야, 야생 같은 일이야"
+    }
+  ]
+}

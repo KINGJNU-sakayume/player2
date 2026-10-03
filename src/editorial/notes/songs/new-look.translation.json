@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 2,
+  "timing": {
+    "lrclibId": 16253096,
+    "durationMs": 208000
+  },
+  "segments": [
+    {
+      "startMs": 12070,
+      "endMs": 12920,
+      "translation": "안녕"
+    },
+    {
+      "startMs": 12920,
+      "endMs": 15830,
+      "translation": "시간 낭비하고 싶지 않아"
+    },
+    {
+      "startMs": 45130,
+      "endMs": 46340,
+      "translation": "뉴 룩"
+    },
+    {
+      "startMs": 55470,
+      "endMs": 57580,
+      "translation": "난 새로운 룩을 원해"
+    },
+    {
+      "startMs": 67400,
+      "endMs": 70570,
+      "translation": "새로워"
+    },
+    {
+      "startMs": 70570,
+      "endMs": 73060,
+      "translation": "나도, 나도, 나도 새것들을 가져 볼래"
+    },
+    {
+      "startMs": 73060,
+      "endMs": 76570,
+      "translation": "새로워"
+    },
+    {
+      "startMs": 84930,
+      "endMs": 90800,
+      "translation": "90년대 스타일, 완전 새것 같은 기분이야"
+    },
+    {
+      "startMs": 90800,
+      "endMs": 93530,
+      "translation": "엄청난 럭셔리, 럭셔리, 원해, 원해"
+    },
+    {
+      "startMs": 112040,
+      "endMs": 113440,
+      "translation": "뉴 룩 (뉴 룩)"
+    },
+    {
+      "startMs": 122480,
+      "endMs": 124560,
+      "translation": "난 새로운 룩을 원해 (뉴 룩)"
+    },
+    {
+      "startMs": 133650,
+      "endMs": 137580,
+      "translation": "새로워"
+    },
+    {
+      "startMs": 137580,
+      "endMs": 140040,
+      "translation": "나도, 나도, 나도 새것들을 가져 볼래"
+    },
+    {
+      "startMs": 140040,
+      "endMs": 142620,
+      "translation": "새로워"
+    },
+    {
+      "startMs": 163240,
+      "endMs": 167850,
+      "translation": "하지만 아름답기만 하다면, 이제 상관없다는 거 알잖아"
+    },
+    {
+      "startMs": 167850,
+      "endMs": 169140,
+      "translation": "뉴 룩"
+    },
+    {
+      "startMs": 178210,
+      "endMs": 180370,
+      "translation": "난 새로운 룩을 원해 (뉴 룩)"
+    },
+    {
+      "startMs": 190210,
+      "endMs": 193440,
+      "translation": "새로워"
+    },
+    {
+      "startMs": 193440,
+      "endMs": 195820,
+      "translation": "나도, 나도, 나도 새것들을 가져 볼래"
+    },
+    {
+      "startMs": 195820,
+      "endMs": 198310,
+      "translation": "새로워"
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 2,
+  "timing": {
+    "lrclibId": 24962632,
+    "durationMs": 176000
+  },
+  "segments": [
+    {
+      "startMs": 2600,
+      "endMs": 6070,
+      "translation": "난, 난 슈퍼, 슈퍼히어로야 (팡, 예)"
+    },
+    {
+      "startMs": 7360,
+      "endMs": 9770,
+      "translation": "난, 난 슈퍼, 슈퍼히어로야"
+    },
+    {
+      "startMs": 12970,
+      "endMs": 14430,
+      "translation": "불타오르게 해, 불타오르게 (예)"
+    },
+    {
+      "startMs": 17810,
+      "endMs": 18840,
+      "translation": "달리고 싶어, 달리고, 달리고"
+    },
+    {
+      "startMs": 18840,
+      "endMs": 21200,
+      "translation": "널 흔들어 줄게, 지금 쓰러뜨려 줄게"
+    },
+    {
+      "startMs": 23620,
+      "endMs": 26030,
+      "translation": "그래, 안 돼, 안 돼, 내 스웨그를 건드리지 마"
+    },
+    {
+      "startMs": 26030,
+      "endMs": 28540,
+      "translation": "그래, 워, 워, 금방 돌아올게"
+    },
+    {
+      "startMs": 43560,
+      "endMs": 45590,
+      "translation": "널 절대 실망시키지 않아, 나와 함께해"
+    },
+    {
+      "startMs": 45590,
+      "endMs": 48070,
+      "translation": "내가 네 슈퍼히어로가 되어 줄게"
+    },
+    {
+      "startMs": 48070,
+      "endMs": 50450,
+      "translation": "어이, 쌩, 쌩, 자, 어서"
+    },
+    {
+      "startMs": 57820,
+      "endMs": 60020,
+      "translation": "영 더하기 영은 무한대"
+    },
+    {
+      "startMs": 62280,
+      "endMs": 64580,
+      "translation": "어이, 휙, 휙, 자, 어서"
+    },
+    {
+      "startMs": 64580,
+      "endMs": 67540,
+      "translation": "자기야, 넌 나의 슈퍼히어로야"
+    },
+    {
+      "startMs": 71650,
+      "endMs": 74340,
+      "translation": "모든 게 가짜여도 난 가짜가 아니야"
+    },
+    {
+      "startMs": 76710,
+      "endMs": 78560,
+      "translation": "난 블랙 위도우처럼 영웅이야"
+    },
+    {
+      "startMs": 83070,
+      "endMs": 86330,
+      "translation": "쾅, 쾅, 쾅, 쾅, 후, 내가 널 지켜 줄게"
+    },
+    {
+      "startMs": 101210,
+      "endMs": 103160,
+      "translation": "널 절대 실망시키지 않아, 나와 함께해"
+    },
+    {
+      "startMs": 103160,
+      "endMs": 105960,
+      "translation": "내가 네 슈퍼히어로가 되어 줄게"
+    },
+    {
+      "startMs": 105960,
+      "endMs": 108150,
+      "translation": "어이, 쌩, 쌩, 자, 어서"
+    },
+    {
+      "startMs": 115620,
+      "endMs": 117990,
+      "translation": "영 더하기 영은 무한대"
+    },
+    {
+      "startMs": 119630,
+      "endMs": 122320,
+      "translation": "어이, 휙, 휙, 자, 어서"
+    },
+    {
+      "startMs": 122320,
+      "endMs": 125570,
+      "translation": "자기야, 넌 나의 슈퍼히어로야"
+    },
+    {
+      "startMs": 127890,
+      "endMs": 129600,
+      "translation": "자기야, 뭘 기다리고 있어?"
+    },
+    {
+      "startMs": 129600,
+      "endMs": 131810,
+      "translation": "지금이 바로 그때니까"
+    },
+    {
+      "startMs": 131810,
+      "endMs": 134720,
+      "translation": "그리고 마침내 우린 이길 거야"
+    },
+    {
+      "startMs": 134720,
+      "endMs": 136620,
+      "translation": "어이, 쌩, 쌩, 자, 어서"
+    },
+    {
+      "startMs": 144360,
+      "endMs": 146470,
+      "translation": "영 더하기 영은 무한대 (우, 예)"
+    },
+    {
+      "startMs": 146470,
+      "endMs": 148540,
+      "translation": "(내가 구해 줄게)"
+    },
+    {
+      "startMs": 148540,
+      "endMs": 151210,
+      "translation": "어이, 휙, 휙, 자, 어서"
+    },
+    {
+      "startMs": 151210,
+      "endMs": 153670,
+      "translation": "자기야, 넌 나의 슈퍼히어로야"
+    },
+    {
+      "startMs": 158520,
+      "endMs": 160740,
+      "translation": "쾅, 팡, 세상을 뒤흔들 거야, 예"
+    },
+    {
+      "startMs": 168350,
+      "endMs": 169980,
+      "translation": "쌩, 쌩, 자, 어서"
+    },
+    {
+      "startMs": 169980,
+      "endMs": 176000,
+      "translation": "자기야, 넌 나의 슈퍼히어로야"
+    }
+  ]
+}
