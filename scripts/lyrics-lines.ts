@@ -3,6 +3,8 @@
  *
  *   npm run lyrics:lines -- --title "Lemon" --artist "Kenshi Yonezu" [--album "Lemon"] [--duration 4:15]
  *   npm run lyrics:lines -- --id 123456
+ *       Add --lang ja|ko|zh|en (the song's lyric language) to skip romanised / translated uploads and to refuse an --id
+ *       whose lyrics are in another language.
  *       Prints the LRCLIB record, the "timing" object for <song-key>.translation.json, and one row per lyric
  *       line: number, startMs, endMs (the next line's start), original text. Segments are written in these times.
  *
@@ -25,6 +27,7 @@ import { normaliseLines } from '../src/lyrics/lyricSync';
 import { LRCLIB_BASE_URL, recordToTimedLyrics, type LrclibRecord } from '../src/lyrics/providers/LrclibLyricsProvider';
 import type { TimedLyrics } from '../src/lyrics/types';
 import { checkTimeline, formatLineTable } from '../src/translation/curated/authoring';
+import { sameLanguage } from '../src/translation/languageDetect';
 
 const NOTES_DIR = 'src/editorial/notes/songs';
 const CLIENT = 'ARC Music translation tool (https://github.com/KINGJNU-sakayume/player2)';
@@ -82,14 +85,32 @@ async function findRecord(options: Map<string, string>): Promise<LrclibRecord> {
   if (exact?.syncedLyrics) return exact;
 
   const results = (await lrclib<LrclibRecord[]>(`/search?${new URLSearchParams({ track_name: title, artist_name: artist })}`)) ?? [];
-  const synced = results.filter((record) => record.syncedLyrics);
-  if (synced.length === 0) throw new Error('LRCLIB has no synced lyrics for this search.');
+  const lang = options.get('lang');
+  const withLyrics = results.filter((record) => record.syncedLyrics);
+  const synced = withLyrics.filter((record) => matchesLanguage(record, lang));
+  if (synced.length === 0) {
+    throw new Error(
+      withLyrics.length === 0
+        ? 'LRCLIB has no synced lyrics for this search.'
+        : `LRCLIB has ${withLyrics.length} synced candidate(s), none in --lang ${lang} (romanised or translated uploads only). Try --id or --file.`,
+    );
+  }
+  if (lang && synced.length < withLyrics.length) console.error(`Skipped ${withLyrics.length - synced.length} candidate(s) not in --lang ${lang}.`);
   console.error('Candidates (pick one with --id if the first is not the right version):');
   for (const record of synced.slice(0, 8)) {
-    console.error(`  --id ${record.id}  ${record.trackName} — ${record.artistName} / ${record.albumName ?? '?'} (${record.duration ?? '?'} s)`);
+    console.error(`  --id ${record.id}  ${record.trackName} — ${record.artistName} / ${record.albumName ?? '?'} (${record.duration ?? '?'} s, ${recordToTimedLyrics(record)?.language ?? '?'})`);
   }
   const best = duration ? synced.find((record) => Math.abs((record.duration ?? 0) - duration) <= 3) : undefined;
   return best ?? synced[0]!;
+}
+
+/**
+ * Candidates whose lyrics are not in the song's language (romanised or English-only uploads of J-pop / K-pop)
+ * are dropped. Without --lang nothing is filtered.
+ */
+function matchesLanguage(record: LrclibRecord, lang: string | undefined): boolean {
+  if (!lang) return true;
+  return sameLanguage(recordToTimedLyrics(record)?.language, lang);
 }
 
 function readLocalLyrics(path: string, durationMs: number | null): TimedLyrics {
@@ -152,6 +173,10 @@ async function main(): Promise<void> {
 
   const record = await findRecord(options);
   const lyrics = recordLyrics(record);
+  const lang = options.get('lang');
+  if (lang && !sameLanguage(lyrics.language, lang)) {
+    throw new Error(`LRCLIB ${record.id} lyrics look ${lyrics.language ?? 'unknown'}, not --lang ${lang}: likely a romanised or translated upload.`);
+  }
   console.log(`LRCLIB ${record.id}: ${record.trackName} — ${record.artistName} / ${record.albumName ?? '?'} (${record.duration ?? '?'} s, ${lyrics.language ?? '?'})`);
   console.log(`"timing": ${JSON.stringify(lyrics.timing && { lrclibId: lyrics.timing.lrclibId, durationMs: lyrics.timing.durationMs })}`);
   console.log('');
