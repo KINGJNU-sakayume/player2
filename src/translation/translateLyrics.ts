@@ -7,7 +7,7 @@ import { TranslationUnavailableError, type TranslationProvider } from './Transla
 
 /** How much of the lyrics a curated translation covered. */
 export interface CuratedCoverage {
-  translation: CuratedTranslation;
+  translation: CuratedTranslation | import('../lyrics/curated/types').CuratedLyrics;
   /** Lines with text, and how many of them the curated file covered. */
   total: number;
   matched: number;

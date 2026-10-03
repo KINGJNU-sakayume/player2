@@ -4,6 +4,7 @@ import { useSession } from '../app/sessionContext';
 import type { TrackIdentity } from '../domain/types';
 import { hashString } from '../lib/hash';
 import type { TimedLyrics } from '../lyrics/types';
+import type { CuratedLyrics } from '../lyrics/curated/types';
 import { getCuratedTranslation, type CuratedTranslation } from './curated';
 import { translateLyrics, translateWithCurated, type LyricTranslationResult } from './translateLyrics';
 
@@ -23,34 +24,39 @@ export function useLyricTranslation(
   track: TrackIdentity | null,
   lyrics: TimedLyrics | null,
   enabled: boolean,
-): { state: TranslationState; prepare: (() => Promise<void>) | null; curated: CuratedTranslation | null } {
+): { state: TranslationState; prepare: (() => Promise<void>) | null; curated: CuratedTranslation | CuratedLyrics | null } {
   const { translation: provider, translationTarget, mode } = useSession();
   const queryClient = useQueryClient();
   const trackId = track?.spotifyTrackId ?? null;
   const curated = useMemo(
     () =>
-      track
+      lyrics?.curated ?? (track
         ? getCuratedTranslation({
             id: track.spotifyTrackId,
             title: track.title,
             artistNames: track.artists.map((artist) => artist.name),
             targetLanguage: translationTarget,
           })
-        : null,
-    [track, translationTarget],
+        : null),
+    [track, lyrics?.curated, translationTarget],
   );
   const lyricsHash = lyrics ? hashString(lyrics.lines.map((l) => l.text).join('\n')) : null;
   const queryKey = [mode, 'translation', provider?.id, curated?.key ?? null, trackId, translationTarget, lyricsHash];
 
-  const query = useQuery({
+  const query = useQuery<LyricTranslationResult>({
     queryKey,
     enabled: Boolean(enabled && (provider || curated) && trackId && lyrics),
     staleTime: Number.POSITIVE_INFINITY,
     retry: false,
-    queryFn: () =>
-      curated
-        ? translateWithCurated(provider, trackId!, lyrics!, curated, translationTarget)
-        : translateLyrics(provider!, trackId!, lyrics!, translationTarget),
+    queryFn: () => {
+      if (lyrics?.curated) {
+        const result: LyricTranslationResult = { status: 'ready', lines: lyrics.curated.lines.map((line) => line.translation), curated: { translation: lyrics.curated, total: lyrics.curated.lines.length, matched: lyrics.curated.lines.length, machine: [] } };
+        return Promise.resolve(result);
+      }
+      return curated
+        ? translateWithCurated(provider, trackId!, lyrics!, curated as CuratedTranslation, translationTarget)
+        : translateLyrics(provider!, trackId!, lyrics!, translationTarget);
+    },
   });
 
   const data = query.data;

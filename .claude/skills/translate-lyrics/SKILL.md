@@ -1,6 +1,6 @@
 ---
 name: translate-lyrics
-description: ARC Music에 곡의 큐레이션 가사 번역을 만들 때 사용한다. "OO 가사 번역해줘", "이 곡 번역 올려줘", "존댓말/반말 맞춰서 번역" 같은 요청. 곡의 맥락(화자·청자·관계)을 먼저 조사해 한국어 어체를 정하고, 곡 전체를 한 번에 번역해 src/translations/에 JSON으로 저장한다.
+description: ARC Music에 곡의 큐레이션 가사 번역을 만들 때 사용한다. "OO 가사 번역해줘", "이 곡 번역 올려줘", "존댓말/반말 맞춰서 번역" 같은 요청. 곡의 맥락(화자·청자·관계)을 먼저 조사해 한국어 어체를 정하고, 곡 전체를 한 번에 번역해 source lyric, timestamp, translation이 함께 있는 src/lyrics/curated/ 패키지로 저장한다.
 ---
 
 # 가사 번역 (맥락 → 어체 → 번역)
@@ -9,28 +9,15 @@ description: ARC Music에 곡의 큐레이션 가사 번역을 만들 때 사용
 **번역 전에 맥락을 정하고**, 그 결정을 근거와 함께 **번역 브리프**로 남긴 뒤, 브리프에 맞춰 곡 전체를 번역한다.
 앱은 이 번역을 기계 번역보다 우선 보여주고, 가사 헤더에 어체를, 드로어에 브리프와 대역을 보여준다.
 
-## 저작권 규칙 (반드시 지킨다)
+## 큐레이션 패키지 원칙
 
-- **원문 가사는 저장소의 어떤 파일에도 쓰지 않는다.** JSON, 노트, 테스트, 주석, 커밋 메시지 모두 해당한다.
-  번역 파일의 줄은 원문 줄의 해시로만 연결된다. 원문은 앱이 실행될 때 LRCLIB에서 받아 온다.
-- 브리프의 근거 설명에 원문을 인용해야 하면 몇 단어 이내의 짧은 구절만 쓴다.
-- 한국어 번역을 공개 저장소에 커밋하는 것은 저장소 소유자가 위험을 알고 결정한 사항이다. 원문을 남기지 않는 원칙은 그대로 지킨다.
-- 사용자가 붙여 넣은 가사 파일은 저장소 밖(스크래치 디렉터리)에 둔다.
+완전한 큐레이션 곡은 `src/lyrics/curated/<artist-key>/<song-key>.json`에 원문, 동기화 시각, 번역을 **같은 line 객체**로 커밋한다. 앱은 이 패키지를 LRCLIB와 기계 번역보다 먼저 사용한다. 기존 `src/translations/` 해시 파일은 미이관 곡의 호환용일 뿐 새 작업에 쓰지 않는다.
 
-## 1. 원문 줄과 키 얻기
+## 1. 녹음 버전과 동기화 원문 확정
 
-```bash
-npm run lyrics:lines -- --title "Lemon" --artist "Kenshi Yonezu" --album "Lemon" --duration 4:15
-npm run lyrics:lines -- --id 123456          # 후보 중 특정 버전
-npm run lyrics:lines -- --file /scratch/lemon.lrc   # LRCLIB에 접근할 수 없을 때
-```
-
-- 출력: LRCLIB 레코드, 파일에 넣을 `lyricsSource` 한 줄, 그리고 `번호  해시  원문` 표.
-- Spotify 재생 시간과 길이가 맞는 버전(±3초)을 고른다. 앱도 같은 방식으로 LRCLIB 가사를 고른다.
-- 반복되는 줄은 해시가 같다. 표에서 `#2`, `#3`으로 표시되며, 그 회차만 다르게 번역할 때만 `해시#n` 키를 쓴다.
-- `lrclib.net`에 접근할 수 없으면(샌드박스 네트워크 정책) 사용자에게 허용 도메인에 추가해 달라고 하거나,
-  LRC/가사 텍스트를 받아 `--file`로 처리한다. `--file`로 만든 해시는 LRCLIB와 줄 텍스트가 같을 때만 앱에서
-  맞는다. 공백·대소문자·전각·따옴표 차이는 무시되지만, 단어가 다르면 맞지 않는다.
+1. Spotify track ID와 정확한 녹음/리마스터 버전을 확인한다.
+2. LRCLIB 또는 검증 가능한 LRC에서 해당 버전의 동기화 원문을 얻고 재생 시간과 대조한다.
+3. 곡 전체를 읽고 인접 줄과 문장 경계를 파악한다. 원문과 시각을 추측하지 않는다.
 
 ## 2. 맥락 조사
 
@@ -42,7 +29,7 @@ WebSearch / WebFetch와 저장소 안의 자료로 확인한다:
 
 정할 것: **화자**(누가 부르는가), **청자**(누구에게, 혹은 혼잣말인가), **관계**, **상황**(시점·장소·사건).
 
-## 3. 어체 결정
+## 3. 화자·청자·관계·상황과 어체 결정
 
 `brief.register`는 하나를 고르고, 곡 전체에서 유지한다.
 
@@ -77,45 +64,13 @@ WebSearch / WebFetch와 저장소 안의 자료로 확인한다:
 - 자체 점검: ① 모든 줄의 문말이 정한 어체인지 ② 호칭이 일관된지 ③ 같은 원문 줄이 같은 번역인지
   (`#n`은 의도한 경우만) ④ 빠진 줄이 없는지.
 
-## 5. 파일 쓰기
+## 5. 완전한 패키지 쓰기
 
-위치: `src/translations/<artist-key>/<song-key>.json`. 키는 소문자·하이픈이고, 가능하면 노트와 같은 키를 쓴다
-(`kenshi-yonezu/lemon.json`). 스키마는 `src/translation/curated/types.ts`에 있다.
-
-```json
-{
-  "trackIds": ["04TshWXkhV1qkqHzf31Hn6", "7Cd17G3oNQ34OWUwS8ZxfR"],
-  "titles": ["Lemon"],
-  "artistNames": ["Kenshi Yonezu", "米津玄師", "요네즈 켄시"],
-  "sourceLanguage": "ja",
-  "targetLanguage": "ko",
-  "lyricsSource": { "provider": "lrclib", "id": 123456, "durationMs": 255000 },
-  "brief": {
-    "speaker": "…",
-    "addressee": "…",
-    "relationship": "…",
-    "situation": "…",
-    "register": "haeche",
-    "pronouns": [{ "source": "あなた", "target": "너", "note": "…" }],
-    "glossary": [{ "source": "…", "target": "…", "note": "…" }],
-    "reasoning": "…",
-    "sources": ["https://…"]
-  },
-  "lines": {
-    "9d08eaa6": "번역 줄",
-    "9d08eaa6#3": "세 번째로 나올 때만 다른 번역"
-  },
-  "written": "2026-10-02"
-}
-```
-
-- `trackIds`: 노트와 같은 방법으로 찾는다(`write-note` 스킬 1단계). `titles`·`artistNames`는 ID가 없는 판본을 위한 fallback이다.
-- 고쳐 쓸 때는 `updated`를 추가하고 `written`은 그대로 둔다.
+위치: `src/lyrics/curated/<artist-key>/<song-key>.json`. `trackIds`, title/artist aliases, source/target language, `brief`, dates와 출처를 기록한다. 각 `lines` 원소에는 검증한 `startMs`, `text`, `translation`을 함께 둔다. 시각상 나뉜 “There's a starman” / “waiting in the sky”도 독립 문장처럼 번역하지 말고 이웃 줄과 완전한 문장의 맥락을 반영한다. 빈 번역이나 누락된 원문은 허용하지 않는다.
 
 ## 6. 확인하고 커밋
 
-1. `npm run lyrics:lines -- --check src/translations/<artist>/<song>.json`: 번역되지 않은 줄과 어디에도 맞지 않는 키를
-   보여준다(LRCLIB 접근이 안 되면 `--file`을 함께 준다).
-2. `npm run check`: 스키마 검사(어체 값, 해시 형식, 빈 줄, 날짜)가 테스트에 들어 있다.
-3. 커밋 메시지 예: `translations: add Lemon (ja → ko, 해체)`. 원문을 메시지에 넣지 않는다.
+1. 패키지의 모든 원문·시각·번역이 같은 녹음과 줄에 대응하는지 검토한다.
+2. `npm run check`: 스키마 검사(어체, 시각 순서, 빈 원문/번역, 날짜)를 실행한다.
+3. 완성된 큐레이션 패키지를 커밋한다.
 4. 사용자에게 화자·청자·어체 결정을 한두 문장으로 알리고, 확신이 낮은 해석이 있으면 말한다.

@@ -1,0 +1,250 @@
+{
+  "trackIds": [
+    "6A1qZSENVbwBTZSljp1viz"
+  ],
+  "titles": [
+    "Starman"
+  ],
+  "artistNames": [
+    "David Bowie",
+    "데이비드 보위"
+  ],
+  "sourceLanguage": "en",
+  "targetLanguage": "ko",
+  "lyricsSource": {
+    "provider": "Dailymotion synchronized transcript",
+    "durationMs": 254000,
+    "url": "https://www.dailymotion.com/video/x9bzzyu"
+  },
+  "brief": {
+    "speaker": "라디오에서 정체불명의 우주 메시지를 들은 젊은 청자",
+    "addressee": "같은 방송을 들었는지 확인하려 전화한 친구 '너'",
+    "relationship": "부모 몰래 새로운 음악과 신호를 공유하는 또래 친구",
+    "situation": "늦은 밤 라디오에서 DJ가 아닌 듯한 목소리를 듣고, 그 존재가 아이들에게 자유롭게 춤추고 써 보라고 전한 메시지를 친구에게 흥분해서 전달한다.",
+    "register": "haeche",
+    "pronouns": [
+      {
+        "source": "I",
+        "target": "나"
+      },
+      {
+        "source": "you",
+        "target": "너"
+      },
+      {
+        "source": "we / us",
+        "target": "우리"
+      },
+      {
+        "source": "he / starman",
+        "target": "그 / 스타맨"
+      }
+    ],
+    "glossary": [
+      {
+        "source": "Starman",
+        "target": "스타맨",
+        "note": "앨범의 고유한 우주적 존재이므로 음역을 유지했다."
+      },
+      {
+        "source": "cosmic jive",
+        "target": "우주의 자이브",
+        "note": "라디오에서 들어온 낯선 음악·말투의 감각을 살렸다."
+      },
+      {
+        "source": "boogie",
+        "target": "부기 춤을 추다",
+        "note": "단순한 '춤'보다 당시 팝 문화의 어감을 남겼다."
+      }
+    ],
+    "reasoning": "화자는 친구에게 전화를 걸어 '너도 들었구나'라고 들뜬 채 말을 건다. 또 부모에게 들키지 말라고 당부하는 또래의 비밀스러운 관계가 중심이라 친근한 **해체**가 가장 자연스럽다.",
+    "sources": [
+      "https://www.davidbowie.com/1999/1999/12/31/the-rise-and-fall-of-ziggy-stardust-and-the-spiders-from-mars",
+      "https://www.davidbowie.com/blog/2022/6/15/starman-top-of-the-pops-version-2022-mix-streaming-single",
+      "https://korneffaudio.com/new-monday-136/"
+    ]
+  },
+  "written": "2026-10-03",
+  "lines": [
+    {
+      "startMs": 0,
+      "text": "I didn't know what time it was, the lights were low",
+      "translation": "몇 시인지도 몰랐어, 불빛은 어두웠고"
+    },
+    {
+      "startMs": 25000,
+      "text": "I leaned back on my radio, oh, oh",
+      "translation": "라디오에 기대 누웠지"
+    },
+    {
+      "startMs": 30000,
+      "text": "Some cat was layin' down some rock'n'roll, 'lotta soul, he said",
+      "translation": "어떤 녀석이 로큰롤을 틀고 있었어, 소울도 한가득이었지, 그러더니"
+    },
+    {
+      "startMs": 38000,
+      "text": "Then the loud sound did seem to fade",
+      "translation": "그 큰 소리가 점점 사라지는 듯하더니"
+    },
+    {
+      "startMs": 42000,
+      "text": "Came back like a slow voice on a wave of phase",
+      "translation": "위상이 출렁이는 파도 위 느린 목소리처럼 돌아왔어"
+    },
+    {
+      "startMs": 47000,
+      "text": "That weren't no D.J. that was hazy cosmic jive",
+      "translation": "그건 DJ가 아니었어, 흐릿한 우주의 자이브였지"
+    },
+    {
+      "startMs": 55000,
+      "text": "There's a starman waiting in the sky",
+      "translation": "하늘에서 스타맨이 기다리고 있어"
+    },
+    {
+      "startMs": 61000,
+      "text": "He'd like to come and meet us but he thinks he'd blow our minds",
+      "translation": "우리와 만나고 싶어 하지만 우리 정신을 날려 버릴까 봐 걱정한대"
+    },
+    {
+      "startMs": 65000,
+      "text": "There's a starman waiting in the sky",
+      "translation": "하늘에서 스타맨이 기다리고 있어"
+    },
+    {
+      "startMs": 70000,
+      "text": "He's told us not to blow it 'cause he knows it's all worthwhile",
+      "translation": "망치지 말라고 우리에게 전했어, 다 그럴 가치가 있다는 걸 아니까"
+    },
+    {
+      "startMs": 75000,
+      "text": "He told me",
+      "translation": "그가 내게 말했어"
+    },
+    {
+      "startMs": 76000,
+      "text": "Let the children lose it",
+      "translation": "아이들이 마음껏 풀어 놓게 해"
+    },
+    {
+      "startMs": 78000,
+      "text": "Let the children use it",
+      "translation": "아이들이 그걸 써 보게 해"
+    },
+    {
+      "startMs": 80000,
+      "text": "Let all the children boogie",
+      "translation": "모든 아이들이 부기 춤을 추게 해"
+    },
+    {
+      "startMs": 85000,
+      "text": "I had to phone someone so I picked on you, oh, oh",
+      "translation": "누군가에게 전화해야 해서 네가 떠올랐어"
+    },
+    {
+      "startMs": 104000,
+      "text": "Hey, that’s far out, so you heard him too, oh, oh",
+      "translation": "야, 엄청난데, 너도 그걸 들었구나"
+    },
+    {
+      "startMs": 109000,
+      "text": "Switch on the TV, we may pick him up on channel two",
+      "translation": "TV를 켜, 2번 채널에서 잡힐지도 몰라"
+    },
+    {
+      "startMs": 116000,
+      "text": "Look out your window, I can see his light",
+      "translation": "창밖을 봐, 그의 빛이 보여"
+    },
+    {
+      "startMs": 121000,
+      "text": "If we can sparkle he may land tonight",
+      "translation": "우리가 반짝일 수 있다면 오늘 밤 내려올지도 몰라"
+    },
+    {
+      "startMs": 126000,
+      "text": "Don't tell your poppa or he'll get us locked up in fright",
+      "translation": "아빠한텐 말하지 마, 겁먹고 우릴 가둬 버릴 테니까"
+    },
+    {
+      "startMs": 134000,
+      "text": "There's a starman waiting in the sky",
+      "translation": "하늘에서 스타맨이 기다리고 있어"
+    },
+    {
+      "startMs": 140000,
+      "text": "He'd like to come and meet us but he thinks he'd blow our minds",
+      "translation": "우리와 만나고 싶어 하지만 우리 정신을 날려 버릴까 봐 걱정한대"
+    },
+    {
+      "startMs": 144000,
+      "text": "There's a starman waiting in the sky",
+      "translation": "하늘에서 스타맨이 기다리고 있어"
+    },
+    {
+      "startMs": 149000,
+      "text": "He's told us not to blow it 'cause he knows it's all worthwhile",
+      "translation": "망치지 말라고 우리에게 전했어, 다 그럴 가치가 있다는 걸 아니까"
+    },
+    {
+      "startMs": 153000,
+      "text": "He told me",
+      "translation": "그가 내게 말했어"
+    },
+    {
+      "startMs": 154000,
+      "text": "Let the children lose it",
+      "translation": "아이들이 마음껏 풀어 놓게 해"
+    },
+    {
+      "startMs": 157000,
+      "text": "Let the children use it",
+      "translation": "아이들이 그걸 써 보게 해"
+    },
+    {
+      "startMs": 159000,
+      "text": "Let all the children boogie",
+      "translation": "모든 아이들이 부기 춤을 추게 해"
+    },
+    {
+      "startMs": 162000,
+      "text": "There's a starman waiting in the sky",
+      "translation": "하늘에서 스타맨이 기다리고 있어"
+    },
+    {
+      "startMs": 166000,
+      "text": "He'd like to come and meet us but he thinks he'd blow our minds",
+      "translation": "우리와 만나고 싶어 하지만 우리 정신을 날려 버릴까 봐 걱정한대"
+    },
+    {
+      "startMs": 171000,
+      "text": "There's a starman waiting in the sky",
+      "translation": "하늘에서 스타맨이 기다리고 있어"
+    },
+    {
+      "startMs": 176000,
+      "text": "He's told us not to blow it 'cause he knows it's all worthwhile",
+      "translation": "망치지 말라고 우리에게 전했어, 다 그럴 가치가 있다는 걸 아니까"
+    },
+    {
+      "startMs": 180000,
+      "text": "He told me",
+      "translation": "그가 내게 말했어"
+    },
+    {
+      "startMs": 181000,
+      "text": "Let the children lose it",
+      "translation": "아이들이 마음껏 풀어 놓게 해"
+    },
+    {
+      "startMs": 184000,
+      "text": "Let the children use it",
+      "translation": "아이들이 그걸 써 보게 해"
+    },
+    {
+      "startMs": 186000,
+      "text": "Let all the children boogie",
+      "translation": "모든 아이들이 부기 춤을 추게 해"
+    }
+  ]
+}

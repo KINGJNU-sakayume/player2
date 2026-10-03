@@ -1,4 +1,13 @@
-# Curated lyric translations
+# Legacy curated lyric translations
+
+> New curated work belongs in `src/lyrics/curated/`, where each validated
+> object keeps its synchronized timestamp, original text, and Korean
+> translation together. Complete local packages are resolved before LRCLIB
+> and never use machine translation.
+
+This directory is retained as a migration-safe compatibility archive for songs
+that have not yet been converted. Its hash matching and partial machine fallback
+apply only to those legacy files; do not author new translations here.
 
 One JSON file per song: `<artist-key>/<song-key>.json` (for example `kenshi-yonezu/lemon.json`). Each file holds a
 **translation brief** — speaker, addressee, relationship, the Korean speech level kept throughout and why — and the

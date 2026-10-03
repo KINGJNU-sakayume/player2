@@ -1,4 +1,5 @@
 import type { TrackIdentity } from '../domain/types';
+import type { CuratedLyrics } from './curated/types';
 
 export interface TimedLyricLine {
   startMs: number;
@@ -14,6 +15,8 @@ export interface TimedLyrics {
   source?: string;
   /** The provider reports the track as instrumental (no lines expected). */
   instrumental?: boolean;
+  /** Present only when every line and translation came from one validated local package. */
+  curated?: CuratedLyrics;
 }
 
 export interface LyricsRequestOptions {
