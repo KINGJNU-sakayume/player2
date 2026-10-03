@@ -64,6 +64,38 @@ describe('LrclibLyricsProvider', () => {
     expect(lyrics?.timing).toEqual({ lrclibId: 4, durationMs: 186_000 });
   });
 
+  it('skips romanised / English-only uploads for a track whose metadata says Korean or Japanese', async () => {
+    const krTrack: TrackIdentity = { ...track, title: 'Song', isrc: 'KRABC2400001' };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(json({ code: 404, name: 'TrackNotFound', message: 'Failed to find specified track' }, 404))
+      .mockResolvedValueOnce(
+        json([
+          { id: 2, duration: 187, syncedLyrics: '[00:01.00]romanised line one\n[00:02.00]romanised line two' },
+          { id: 3, duration: 187, syncedLyrics: '[00:01.00]안녕 line one\n[00:02.00]두번째 줄' },
+        ]),
+      );
+    const lyrics = await new LrclibLyricsProvider(fetchMock).getTimedLyrics(krTrack);
+    expect(lyrics?.timing?.lrclibId).toBe(3);
+
+    const onlyRomanised = vi
+      .fn()
+      .mockResolvedValueOnce(json({ code: 404, name: 'TrackNotFound', message: 'x' }, 404))
+      .mockResolvedValueOnce(json([{ id: 2, duration: 187, syncedLyrics: '[00:01.00]romanised line one' }]));
+    expect(await new LrclibLyricsProvider(onlyRomanised).getTimedLyrics(krTrack)).toBeNull();
+
+    const exactRomanised = vi
+      .fn()
+      .mockResolvedValueOnce(json({ id: 5, duration: 187, syncedLyrics: '[00:01.00]romanised line one' }))
+      .mockResolvedValueOnce(json([]));
+    expect(await new LrclibLyricsProvider(exactRomanised).getTimedLyrics({ ...krTrack, isrc: undefined, title: '노래' })).toBeNull();
+  });
+
+  it('keeps English lyrics for a track with no Korean or Japanese hint', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(json({ id: 5, duration: 187, syncedLyrics: '[00:01.00]plain english line' }));
+    expect((await new LrclibLyricsProvider(fetchMock).getTimedLyrics(track))?.timing?.lrclibId).toBe(5);
+  });
+
   it('loads the pinned LRCLIB record directly when its length matches the track', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(json({ id: 77, duration: 186, syncedLyrics: '[00:01.00]line one' }));
     const lyrics = await new LrclibLyricsProvider(fetchMock).getTimedLyrics(track, { lrclibId: 77 });

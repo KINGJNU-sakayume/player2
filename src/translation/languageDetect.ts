@@ -77,3 +77,31 @@ export function sameLanguage(a: string | undefined, b: string | undefined): bool
   if (!a || !b) return false;
   return a.split('-')[0]!.toLowerCase() === b.split('-')[0]!.toLowerCase();
 }
+
+/** Share of lines in the expected language below which lyrics are taken for a romanised or translated upload. */
+const MIN_EXPECTED_LINE_SHARE = 0.1;
+
+/**
+ * The language a track's lyrics should be in, when its metadata says so: kana / Hangul in the title, album or
+ * artist, else the ISRC country (JP → Japanese, KR → Korean). Latin-only metadata of an unmarked track says nothing.
+ */
+export function expectedLyricsLanguage(track: { title: string; artists: ReadonlyArray<{ name: string }>; album: { name: string }; isrc?: string }): string | undefined {
+  for (const text of [track.title, track.album.name, ...track.artists.map((artist) => artist.name)]) {
+    const language = detectLineLanguage(text);
+    if (language === 'ja' || language === 'ko') return language;
+  }
+  const country = track.isrc?.slice(0, 2).toUpperCase();
+  if (country === 'JP') return 'ja';
+  if (country === 'KR') return 'ko';
+  return undefined;
+}
+
+/**
+ * Whether lyrics are really in `expected`. J-pop / K-pop uploaded as romanisation or English only have no line in
+ * the expected language, while genuine lyrics with English hooks still do.
+ */
+export function lyricsMatchLanguage(lines: readonly string[], expected: string | undefined): boolean {
+  if (!expected || lines.length === 0) return true;
+  const matching = detectLineLanguages(lines, expected).filter((language) => sameLanguage(language, expected)).length;
+  return matching / lines.length >= MIN_EXPECTED_LINE_SHARE;
+}
