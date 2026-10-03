@@ -38,6 +38,44 @@ describe('parseFrontmatter', () => {
     expect(body).toBe('Body paragraph.\n\n## Heading');
   });
 
+  it('reads a nested block with folded text and a list of maps', () => {
+    const { data } = parseFrontmatter(
+      [
+        '---',
+        'titles: [Test]',
+        'translation:',
+        '  register: haeche',
+        '  situation: >',
+        '    first part',
+        '    second part',
+        '  pronouns:',
+        '    - source: you',
+        '      target: 너',
+        '      note: "a: quoted note"',
+        '    - source: me',
+        '      target: 나',
+        '  written: 2026-10-02',
+        'sources:',
+        '  - Liner notes: 2020',
+        '---',
+      ].join('\n'),
+    );
+    expect(data).toEqual({
+      titles: ['Test'],
+      translation: {
+        register: 'haeche',
+        situation: 'first part second part',
+        pronouns: [
+          { source: 'you', target: '너', note: 'a: quoted note' },
+          { source: 'me', target: '나' },
+        ],
+        written: '2026-10-02',
+      },
+      // Top-level lists stay text.
+      sources: ['Liner notes: 2020'],
+    });
+  });
+
   it('accepts Windows line endings and an empty body', () => {
     expect(parseFrontmatter('---\r\nshort: x\r\n---\r\n')).toEqual({ data: { short: 'x' }, body: '' });
   });
@@ -49,6 +87,9 @@ describe('parseFrontmatter', () => {
     ['a duplicate key', '---\nshort: x\nshort: y\n---\n'],
     ['an unclosed quote in a list', '---\ntitles: ["a, b]\n---\n'],
     ['a block list item without a dash', '---\nsources:\n  https://example.com\n---\n'],
+    ['a nested line at the wrong indentation', '---\ntranslation:\n  register: haeche\n    speaker: x\n---\n'],
+    ['a duplicate nested key', '---\ntranslation:\n  register: a\n  register: b\n---\n'],
+    ['a list mixing text and maps', '---\ntranslation:\n  pronouns:\n    - you\n    - source: me\n      target: 나\n---\n'],
   ])('rejects %s', (_label, source) => {
     expect(() => parseFrontmatter(source)).toThrow(FrontmatterError);
   });

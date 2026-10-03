@@ -20,9 +20,12 @@ export class MockLyricsProvider implements LyricsProvider {
 
   async getTimedLyrics(track: TrackIdentity): Promise<TimedLyrics | null> {
     if (this.options.delayMs) await new Promise((resolve) => setTimeout(resolve, this.options.delayMs));
+    // Test lines follow no LRCLIB record, so curated translations (timed on one) never land on them;
+    // a fixture may still bring its own `timing`.
+    const timing = { lrclibId: null, durationMs: null };
     const fixed = this.options.byTrackId?.[track.spotifyTrackId];
-    if (fixed) return { source: this.label, ...fixed };
+    if (fixed) return { source: this.label, timing, ...fixed };
     if (!this.options.generic) return null;
-    return { language: 'en', source: this.label, lines: buildTimedLines(TEST_LINES_EN, track.durationMs) };
+    return { language: 'en', source: this.label, timing, lines: buildTimedLines(TEST_LINES_EN, track.durationMs) };
   }
 }

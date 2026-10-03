@@ -37,6 +37,7 @@ describe('LrclibLyricsProvider', () => {
     expect(lyrics).toEqual({
       language: 'en',
       source: 'LRCLIB',
+      timing: { lrclibId: 1, durationMs: 187_000 },
       lines: [
         { startMs: 1000, endMs: 3000, text: 'hello' },
         { startMs: 3000, text: 'world' },
@@ -60,6 +61,7 @@ describe('LrclibLyricsProvider', () => {
     expect(searchUrl.pathname).toBe('/api/search');
     expect(searchUrl.searchParams.get('track_name')).toBe('Song Title');
     expect(lyrics?.lines[0]?.text).toBe('right one');
+    expect(lyrics?.timing).toEqual({ lrclibId: 4, durationMs: 186_000 });
   });
 
   it('returns null when nothing is found and throws retryable errors for outages', async () => {
@@ -73,7 +75,12 @@ describe('LrclibLyricsProvider', () => {
   });
 
   it('recognises instrumental records and plain-only records', () => {
-    expect(recordToTimedLyrics({ id: 1, instrumental: true })).toEqual({ lines: [], instrumental: true, source: 'LRCLIB' });
+    expect(recordToTimedLyrics({ id: 1, instrumental: true })).toEqual({
+      lines: [],
+      instrumental: true,
+      source: 'LRCLIB',
+      timing: { lrclibId: 1, durationMs: null },
+    });
     expect(recordToTimedLyrics({ id: 1, plainLyrics: 'no timing' })).toBeNull();
   });
 
@@ -89,7 +96,11 @@ describe('MockLyricsProvider', () => {
   it('serves fixed lyrics per track and generic test lines only when asked', async () => {
     const fixed: TimedLyrics = { language: 'ja', lines: [{ startMs: 0, text: 'テスト' }] };
     const strict = new MockLyricsProvider({ byTrackId: { trk1: fixed } });
-    await expect(strict.getTimedLyrics(track)).resolves.toMatchObject({ source: 'Test lines', language: 'ja' });
+    await expect(strict.getTimedLyrics(track)).resolves.toMatchObject({
+      source: 'Test lines',
+      language: 'ja',
+      timing: { lrclibId: null, durationMs: null },
+    });
     await expect(strict.getTimedLyrics({ ...track, spotifyTrackId: 'other' })).resolves.toBeNull();
 
     const generic = await new MockLyricsProvider({ generic: true }).getTimedLyrics(track);
@@ -111,6 +122,16 @@ describe('withLyricsCache', () => {
     const cached = withLyricsCache(inner, new BoundedCache({ prefix: 'test.lyrics:', maxEntries: 10 }));
     await cached.getTimedLyrics(track);
     await cached.getTimedLyrics(track);
+    expect(inner.getTimedLyrics).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the LRCLIB record ID and duration in the stored result', async () => {
+    const result: TimedLyrics = { lines: [{ startMs: 0, text: 'line one' }], timing: { lrclibId: 7, durationMs: 200_000 } };
+    const inner = { id: 'z', label: 'Z', getTimedLyrics: vi.fn(async () => result) };
+    await withLyricsCache(inner, new BoundedCache({ prefix: 'test.lyrics3:', maxEntries: 10 })).getTimedLyrics(track);
+    // A fresh cache over the same storage reads the stored copy, timing included.
+    const reread = withLyricsCache(inner, new BoundedCache({ prefix: 'test.lyrics3:', maxEntries: 10 }));
+    await expect(reread.getTimedLyrics(track)).resolves.toEqual(result);
     expect(inner.getTimedLyrics).toHaveBeenCalledTimes(1);
   });
 

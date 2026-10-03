@@ -10,15 +10,23 @@
  * - an inline list (`titles: [Lemon, "感電, Kanden"]`)
  * - a block list: `key:` followed by indented `- item` lines
  * - a folded block: `key: >` followed by indented lines, joined with spaces
+ * - a nested map: `key:` followed by indented `key: value` lines (any of the
+ *   values above). Inside a nested map, a block list may hold maps:
+ *   `- source: …` with its other fields indented under the first one. A song
+ *   note's `translation:` block uses this.
  *
  * Lines starting with `#` are comments. Anything else is an error, so a
  * mistyped note fails the tests instead of silently losing a field.
  */
 
-export type FrontmatterValue = string | number | string[];
+export interface FrontmatterMap {
+  [key: string]: FrontmatterValue;
+}
+
+export type FrontmatterValue = string | number | string[] | FrontmatterMap | FrontmatterMap[];
 
 export interface ParsedDocument {
-  data: Record<string, FrontmatterValue>;
+  data: FrontmatterMap;
   body: string;
 }
 
@@ -83,6 +91,68 @@ function scalar(raw: string): FrontmatterValue {
   return unquote(value);
 }
 
+const indentOf = (line: string): number => line.length - line.trimStart().length;
+
+/** The lines after `start` indented deeper than `indent` (a nested block). */
+function blockAfter(lines: readonly string[], start: number, indent: number): string[] {
+  const block: string[] = [];
+  for (let i = start + 1; i < lines.length && lines[i]!.trim() && indentOf(lines[i]!) > indent; i += 1) block.push(lines[i]!);
+  return block;
+}
+
+/** `key: value` lines at one indentation; nested values follow deeper. */
+function parseMap(lines: readonly string[], path: string): FrontmatterMap {
+  const data: FrontmatterMap = {};
+  const indent = indentOf(lines[0]!);
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i]!;
+    if (indentOf(line) !== indent) throw new FrontmatterError(`Unexpected indentation in ${path}: ${line.trim()}`);
+    const match = KEY_LINE.exec(line.trim());
+    if (!match) throw new FrontmatterError(`Unexpected line in ${path}: ${line.trim()}`);
+    const key = match[1]!;
+    const rest = match[2]?.trim() ?? '';
+    if (key in data) throw new FrontmatterError(`Duplicate key in ${path}: ${key}`);
+    if (rest !== '' && rest !== '>') {
+      data[key] = scalar(rest);
+      continue;
+    }
+    const block = blockAfter(lines, i, indent);
+    i += block.length;
+    data[key] = rest === '>' ? block.map((item) => item.trim()).join(' ') : nestedValue(block, `${path}.${key}`);
+  }
+  return data;
+}
+
+/** The value of a nested `key:` line: a block list (of text or of maps) or a nested map. */
+function nestedValue(block: readonly string[], path: string): FrontmatterValue {
+  if (block.length === 0) throw new FrontmatterError(`"${path}" has no value.`);
+  return block[0]!.trim().startsWith('- ') ? parseList(block, path, true) : parseMap(block, path);
+}
+
+function parseList(lines: readonly string[], path: string, allowMaps: boolean): string[] | FrontmatterMap[] {
+  const indent = indentOf(lines[0]!);
+  const texts: string[] = [];
+  const maps: FrontmatterMap[] = [];
+  for (let i = 0; i < lines.length; i += 1) {
+    const item = lines[i]!.trim();
+    if (indentOf(lines[i]!) !== indent || !item.startsWith('- ')) {
+      throw new FrontmatterError(`"${path}" list items must start with "- ": ${item}`);
+    }
+    const content = item.slice(2).trim();
+    const rest = blockAfter(lines, i, indent);
+    i += rest.length;
+    if (allowMaps && KEY_LINE.test(content)) {
+      // `- key: value` with the item's other fields aligned under `key`.
+      maps.push(parseMap([`${' '.repeat(indent + 2)}${content}`, ...rest], `${path}[${maps.length}]`));
+    } else {
+      if (rest.length > 0) throw new FrontmatterError(`"${path}" text items cannot continue on the next line: ${content}`);
+      texts.push(unquote(content));
+    }
+  }
+  if (texts.length > 0 && maps.length > 0) throw new FrontmatterError(`"${path}" mixes text items and map items.`);
+  return maps.length > 0 ? maps : texts;
+}
+
 export function parseFrontmatter(source: string): ParsedDocument {
   const text = source.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
   if (!text.startsWith('---\n')) throw new FrontmatterError('The file must start with a "---" frontmatter line.');
@@ -92,7 +162,7 @@ export function parseFrontmatter(source: string): ParsedDocument {
   const header = text.slice(4, end).split('\n');
   const body = afterFence < 0 ? '' : text.slice(afterFence + 1);
 
-  const data: Record<string, FrontmatterValue> = {};
+  const data: FrontmatterMap = {};
   for (let i = 0; i < header.length; i += 1) {
     const line = header[i]!;
     if (!line.trim() || line.trimStart().startsWith('#')) continue;
@@ -103,21 +173,18 @@ export function parseFrontmatter(source: string): ParsedDocument {
     if (key in data) throw new FrontmatterError(`Duplicate frontmatter key: ${key}`);
 
     if (rest === '' || rest === '>') {
-      // Block list or folded text: the following indented lines.
-      const block: string[] = [];
-      while (i + 1 < header.length && /^\s+\S/.test(header[i + 1]!)) {
-        block.push(header[i + 1]!.trim());
-        i += 1;
-      }
+      // Block list, folded text or nested map: the following indented lines.
+      const block = blockAfter(header, i, 0);
+      i += block.length;
       if (rest === '>') {
-        data[key] = block.join(' ');
+        data[key] = block.map((item) => item.trim()).join(' ');
       } else if (block.length === 0) {
         throw new FrontmatterError(`"${key}" has no value.`);
+      } else if (KEY_LINE.test(block[0]!.trim()) && !block[0]!.trim().startsWith('- ')) {
+        data[key] = parseMap(block, key);
       } else {
-        data[key] = block.map((item) => {
-          if (!item.startsWith('- ')) throw new FrontmatterError(`"${key}" list items must start with "- ": ${item}`);
-          return unquote(item.slice(2).trim());
-        });
+        // Top-level lists hold text only (`- Liner notes: 2020` stays one string).
+        data[key] = parseList(block, key, false);
       }
       continue;
     }
@@ -129,17 +196,24 @@ export function parseFrontmatter(source: string): ParsedDocument {
 /** Typed field readers for the loaders; they throw with the file name on a bad field. */
 export class FieldReader {
   constructor(
-    private readonly data: Record<string, FrontmatterValue>,
+    private readonly data: FrontmatterMap,
     private readonly file: string,
+    /** Prefix for field names in errors, e.g. "translation." for a nested map. */
+    private readonly path = '',
   ) {}
 
-  private fail(message: string): never {
+  /** The keys present, for rejecting unknown fields. */
+  keys(): string[] {
+    return Object.keys(this.data);
+  }
+
+  fail(message: string): never {
     throw new FrontmatterError(`${this.file}: ${message}`);
   }
 
   string(key: string): string {
     const value = this.optionalString(key);
-    if (value === undefined) this.fail(`"${key}" is required.`);
+    if (value === undefined) this.fail(`"${this.path}${key}" is required.`);
     return value;
   }
 
@@ -147,29 +221,49 @@ export class FieldReader {
     const value = this.data[key];
     if (value === undefined) return undefined;
     if (typeof value === 'number') return String(value);
-    if (typeof value !== 'string') this.fail(`"${key}" must be text.`);
+    if (typeof value !== 'string') this.fail(`"${this.path}${key}" must be text.`);
     return value.trim() || undefined;
   }
 
   list(key: string): string[] {
     const value = this.optionalList(key);
-    if (!value?.length) this.fail(`"${key}" must list at least one value.`);
+    if (!value?.length) this.fail(`"${this.path}${key}" must list at least one value.`);
     return value;
   }
 
   optionalList(key: string): string[] | undefined {
     const value = this.data[key];
     if (value === undefined) return undefined;
-    if (!Array.isArray(value)) this.fail(`"${key}" must be a list.`);
-    return value.map((item) => item.trim()).filter(Boolean);
+    if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) this.fail(`"${this.path}${key}" must be a list of text.`);
+    return (value as string[]).map((item) => item.trim()).filter(Boolean);
   }
 
   optionalNumber(key: string): number | undefined {
     const value = this.data[key];
     if (value === undefined) return undefined;
-    if (typeof value !== 'number') this.fail(`"${key}" must be a number.`);
+    if (typeof value !== 'number') this.fail(`"${this.path}${key}" must be a number.`);
     return value;
   }
+
+  /** A nested `key:` map, read with the same helpers. */
+  optionalMap(key: string): FieldReader | undefined {
+    const value = this.data[key];
+    if (value === undefined) return undefined;
+    if (!isMap(value)) this.fail(`"${this.path}${key}" must be a nested block of "field: value" lines.`);
+    return new FieldReader(value, this.file, `${this.path}${key}.`);
+  }
+
+  /** A block list of maps (`- source: …` items). */
+  optionalMapList(key: string): FieldReader[] | undefined {
+    const value = this.data[key];
+    if (value === undefined) return undefined;
+    if (!Array.isArray(value) || value.some((item) => !isMap(item))) this.fail(`"${this.path}${key}" must be a list of "- field: value" items.`);
+    return (value as FrontmatterMap[]).map((item, i) => new FieldReader(item, this.file, `${this.path}${key}[${i}].`));
+  }
+}
+
+function isMap(value: FrontmatterValue): value is FrontmatterMap {
+  return typeof value === 'object' && !Array.isArray(value);
 }
 
 /** `./notes/albums/stray-sheep.md` → `stray-sheep`. */

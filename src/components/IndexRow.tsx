@@ -65,7 +65,7 @@ export function TrackIndexRow({
       </span>
       <span className="index-aside">
         {noted && (
-          <span className="track-note" title="Listening note">
+          <span className="track-note" title="Song note">
             Note
           </span>
         )}

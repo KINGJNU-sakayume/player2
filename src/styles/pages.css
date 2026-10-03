@@ -64,6 +64,8 @@
 .archive-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .archive-text b { font-size: 14px; font-weight: 500; overflow-wrap: anywhere; }
 .archive-preview, .archive-meta { font-size: 13.5px; line-height: 1.65; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.archive-marks { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--main-text); }
+.archive-mark span { text-transform: none; letter-spacing: .04em; }
 .archive-actions { display: inline-flex; gap: 14px; }
 
 /* Album: previous / next release in the artist's discography */

@@ -4,9 +4,14 @@
  * Korean speech level stays deliberate and consistent across the whole song
  * instead of drifting line by line as machine translation does.
  *
- * The files (`src/translations/<artist>/<song>.json`) never contain the
- * original lyrics: each translated line is keyed by a hash of the original
- * line (see lineHash.ts) and matched against the lyrics loaded at runtime.
+ * A translation belongs to the song's note (`src/editorial/notes/songs/`):
+ * - the note's frontmatter holds the brief (`translation:` block),
+ * - the note's `## 번역에 대하여` section holds the reasoning,
+ * - `<song-key>.translation.json` holds the timed segments.
+ *
+ * The repository never holds the original lyrics. Segments are time ranges in
+ * one LRCLIB record; the original lines are loaded from LRCLIB at runtime and
+ * each segment is placed on the lines it overlaps (see align.ts).
  */
 
 /**
@@ -33,8 +38,14 @@ export interface TermMapping {
   note?: string;
 }
 
-/** The context worked out before translating; it decides every line's voice. */
+/** The context worked out before translating (the note's `translation:` block); it decides every line's voice. */
 export interface TranslationBrief {
+  /** Language of the original lyrics (BCP 47). */
+  sourceLanguage: string;
+  /** Language of the translation (BCP 47), usually "ko". */
+  targetLanguage: string;
+  /** The speech level the translation keeps throughout. */
+  register: SpeechLevel;
   /** Who sings the lines, as the song presents them. */
   speaker: string;
   /** Who the lines are addressed to ("너", "떠난 사람", "자기 자신", "청중"). */
@@ -42,40 +53,35 @@ export interface TranslationBrief {
   relationship?: string;
   /** Time, place and situation of the song. */
   situation?: string;
-  /** The speech level the translation keeps throughout. */
-  register: SpeechLevel;
   /** How pronouns and forms of address are carried over (君 → 너, あなた → 당신 …). */
   pronouns?: TermMapping[];
   /** Recurring words, names and images and how they are rendered. */
   glossary?: TermMapping[];
-  /** Why this voice: evidence from the lyrics, interviews, the tie-in, the album. Markdown subset. */
-  reasoning: string;
-  /** References for the context: interviews, liner notes, articles. */
-  sources?: string[];
-}
-
-export interface CuratedTranslation {
-  /** File name without extension, e.g. "lemon". */
-  key: string;
-  /** Spotify track IDs (album cut, single, editions). */
-  trackIds: string[];
-  /** Titles as Spotify may show them; with `artistNames`, the fallback match. */
-  titles: string[];
-  artistNames: string[];
-  /** Language of the original lyrics (BCP 47). */
-  sourceLanguage: string;
-  /** Language of the translation (BCP 47), usually "ko". */
-  targetLanguage: string;
-  /** The lyrics version the hashes were taken from, for re-checking later. */
-  lyricsSource?: { provider: string; id?: number | string; durationMs?: number };
-  brief: TranslationBrief;
-  /**
-   * Translated lines keyed by the original line's hash. A repeated line uses
-   * one entry; `<hash>#<n>` overrides the n-th occurrence (1-based) when a
-   * repeat needs a different rendering.
-   */
-  lines: Record<string, string>;
-  /** ISO dates (YYYY-MM-DD). */
+  /** ISO dates (YYYY-MM-DD) the translation was written and last revised. */
   written: string;
   updated?: string;
+}
+
+/** One unit of translation: a sentence that may span several LRCLIB lines, or share one with the next sentence. */
+export interface TranslationSegment {
+  startMs: number;
+  endMs: number;
+  translation: string;
+}
+
+/** `<song-key>.translation.json`. */
+export interface TranslationTimeline {
+  schemaVersion: 2;
+  /** The LRCLIB record the segment times were taken from. */
+  timing: { lrclibId: number; durationMs: number };
+  /** Sorted by `startMs`, never overlapping. */
+  segments: TranslationSegment[];
+}
+
+/** A song note's curated translation, as loaded. */
+export interface SongTranslation {
+  brief: TranslationBrief;
+  /** The note's `## 번역에 대하여` section (Markdown subset): why this voice. */
+  about: string;
+  timeline: TranslationTimeline;
 }

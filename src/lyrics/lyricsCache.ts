@@ -8,11 +8,13 @@ const MISSING_TTL_MS = 3 * 24 * 60 * 60_000;
 /**
  * Wraps a provider with a persistent cache keyed by provider + track ID.
  * "No lyrics" results are cached briefly so they are retried later; transient
- * errors are never cached.
+ * errors are never cached. The whole result is stored, including `timing`
+ * (LRCLIB record ID and duration) that curated translations check against;
+ * v2 entries are the first to carry it.
  */
 export function withLyricsCache(
   provider: LyricsProvider,
-  cache: BoundedCache<TimedLyrics | null> = new BoundedCache({ prefix: 'arc.lyrics.v1:', maxEntries: 150 }),
+  cache: BoundedCache<TimedLyrics | null> = new BoundedCache({ prefix: 'arc.lyrics.v2:', maxEntries: 150 }),
 ): LyricsProvider {
   return {
     id: provider.id,

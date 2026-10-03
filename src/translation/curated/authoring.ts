@@ -1,7 +1,7 @@
 import type { TimedLyrics } from '../../lyrics/types';
-import { applyCuratedTranslation } from './index';
-import { lyricLineHash } from './lineHash';
-import type { CuratedTranslation } from './types';
+import { alignSegments, SNAP_MS } from './align';
+import { DURATION_TOLERANCE_MS } from './index';
+import type { TranslationTimeline } from './types';
 
 /**
  * Helpers for writing a curated translation (used by scripts/lyrics-lines.ts).
@@ -9,61 +9,65 @@ import type { CuratedTranslation } from './types';
  * lyrics to a file.
  */
 
-export interface LineKeyRow {
+export interface LineRow {
   /** 1-based line number among lines with text. */
   number: number;
-  /** The key to use in the translation file: `<hash>` or, for a repeat, `<hash>#<n>` if it needs its own rendering. */
-  hash: string;
-  occurrence: number;
+  /** Index in `lyrics.lines`. */
+  index: number;
+  startMs: number;
+  /** The next line's start; the last line runs to the end of the track. */
+  endMs: number | null;
   text: string;
 }
 
-export function lineKeyRows(lyrics: TimedLyrics): LineKeyRow[] {
-  const seen = new Map<string, number>();
-  const rows: LineKeyRow[] = [];
-  for (const line of lyrics.lines) {
-    const hash = lyricLineHash(line.text);
-    if (!hash) continue;
-    const occurrence = (seen.get(hash) ?? 0) + 1;
-    seen.set(hash, occurrence);
-    rows.push({ number: rows.length + 1, hash, occurrence, text: line.text.trim() });
-  }
+export function lineRows(lyrics: TimedLyrics, durationMs?: number | null): LineRow[] {
+  const rows: LineRow[] = [];
+  lyrics.lines.forEach((line, index) => {
+    if (!line.text.trim()) return;
+    const next = lyrics.lines[index + 1];
+    rows.push({ number: rows.length + 1, index, startMs: line.startMs, endMs: next ? next.startMs : (durationMs ?? null), text: line.text.trim() });
+  });
   return rows;
 }
 
-/** `  1  a1b2c3d4      窓の外で…`; a repeat shows `#n`, the key that overrides only that occurrence. */
-export function formatLineTable(lyrics: TimedLyrics): string {
-  return lineKeyRows(lyrics)
-    .map((row) => {
-      const repeat = row.occurrence > 1 ? `#${row.occurrence}`.padEnd(4) : '    ';
-      return `${String(row.number).padStart(3)}  ${row.hash}${repeat}  ${row.text}`;
-    })
+/** `  1    12340    18900  …` — number, start, end (ms), original text. */
+export function formatLineTable(lyrics: TimedLyrics, durationMs?: number | null): string {
+  return lineRows(lyrics, durationMs)
+    .map((row) => `${String(row.number).padStart(3)}  ${String(row.startMs).padStart(7)}  ${String(row.endMs ?? '?').padStart(7)}  ${row.text}`)
     .join('\n');
 }
 
-export interface TranslationCheck {
+export interface TimelineCheck {
   total: number;
-  matched: number;
-  /** Lines with text the file does not translate (1-based numbers, as in the table). */
-  untranslated: LineKeyRow[];
-  /** Keys in the file that match no line of these lyrics (typos or another lyrics version). */
-  unusedKeys: string[];
+  covered: number;
+  /** The loaded record is the one in `timing`, and has its length (±3 s). */
+  lrclibIdMatches: boolean;
+  durationMatches: boolean;
+  /** Segments whose start is not within ±400 ms of any line start. */
+  offGrid: { segment: number; startMs: number; nearestLineMs: number | null }[];
+  /** Lines with text that no segment covers. */
+  uncovered: LineRow[];
 }
 
-export function checkTranslation(lyrics: TimedLyrics, curated: CuratedTranslation): TranslationCheck {
-  const rows = lineKeyRows(lyrics);
-  const applied = applyCuratedTranslation(lyrics, curated);
-  const used = new Set<string>();
-  for (const row of rows) {
-    const occurrenceKey = `${row.hash}#${row.occurrence}`;
-    if (occurrenceKey in curated.lines) used.add(occurrenceKey);
-    else if (row.hash in curated.lines) used.add(row.hash);
-  }
-  const untranslated = rows.filter((row) => !(`${row.hash}#${row.occurrence}` in curated.lines) && !(row.hash in curated.lines));
+export function checkTimeline(lyrics: TimedLyrics, timeline: TranslationTimeline): TimelineCheck {
+  const rows = lineRows(lyrics, lyrics.timing?.durationMs);
+  const starts = rows.map((row) => row.startMs);
+  const aligned = alignSegments(lyrics.lines, timeline.segments, lyrics.timing?.durationMs ?? timeline.timing.durationMs);
+  const uncovered = new Set(aligned.uncovered);
+  const offGrid = timeline.segments.flatMap((segment, index) => {
+    const nearest = starts.reduce<number | null>(
+      (best, start) => (best === null || Math.abs(start - segment.startMs) < Math.abs(best - segment.startMs) ? start : best),
+      null,
+    );
+    return nearest !== null && Math.abs(nearest - segment.startMs) <= SNAP_MS ? [] : [{ segment: index, startMs: segment.startMs, nearestLineMs: nearest }];
+  });
+  const duration = lyrics.timing?.durationMs;
   return {
-    total: applied.total,
-    matched: applied.matched,
-    untranslated,
-    unusedKeys: Object.keys(curated.lines).filter((key) => !used.has(key)),
+    total: rows.length,
+    covered: rows.length - uncovered.size,
+    lrclibIdMatches: lyrics.timing?.lrclibId === timeline.timing.lrclibId,
+    durationMatches: typeof duration === 'number' && Math.abs(duration - timeline.timing.durationMs) <= DURATION_TOLERANCE_MS,
+    offGrid,
+    uncovered: rows.filter((row) => uncovered.has(row.index)),
   };
 }

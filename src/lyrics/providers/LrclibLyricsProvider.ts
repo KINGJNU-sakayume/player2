@@ -37,11 +37,15 @@ export function cleanTrackTitle(title: string): string {
 }
 
 export function recordToTimedLyrics(record: LrclibRecord, source = 'LRCLIB'): TimedLyrics | null {
-  if (record.instrumental) return { lines: [], instrumental: true, source };
+  const timing = {
+    lrclibId: Number.isInteger(record.id) ? record.id : null,
+    durationMs: typeof record.duration === 'number' && record.duration > 0 ? Math.round(record.duration * 1000) : null,
+  };
+  if (record.instrumental) return { lines: [], instrumental: true, source, timing };
   if (!record.syncedLyrics) return null;
   const lines = parseLrc(record.syncedLyrics);
   if (lines.length === 0) return null;
-  return { lines, language: detectLyricsLanguage(lines.map((line) => line.text)), source };
+  return { lines, language: detectLyricsLanguage(lines.map((line) => line.text)), source, timing };
 }
 
 export class LrclibLyricsProvider implements LyricsProvider {

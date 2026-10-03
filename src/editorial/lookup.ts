@@ -41,6 +41,11 @@ function hasContent<T extends EditorialBody>(entry: T | undefined): T | null {
   return entry && entry.short.trim() ? entry : null;
 }
 
+/** A song note counts when it has a listening cue, a listening body or a curated translation. */
+function songHasContent(entry: SongNote | undefined): SongNote | null {
+  return entry && (entry.short?.trim() || entry.full?.trim() || entry.translation) ? entry : null;
+}
+
 function yearOf(date: string | null | undefined): number | undefined {
   const match = date ? /^(\d{4})/.exec(date) : null;
   return match ? Number(match[1]) : undefined;
@@ -103,14 +108,28 @@ export interface SongQuery {
   artistNames?: readonly string[];
 }
 
-export function getSongNote(query: SongQuery, sources: NoteSources = DEFAULT_SOURCES): SongNote | null {
+export interface SongMatch {
+  note: SongNote;
+  /** 'id': a listed Spotify track ID; 'name': title + artist name fallback (a curated translation then also checks the duration). */
+  matchedBy: 'id' | 'name';
+}
+
+export function findSongNote(query: SongQuery, sources: NoteSources = DEFAULT_SOURCES): SongMatch | null {
   const byId = query.id ? sources.songs.find((entry) => entry.trackIds.includes(query.id!)) : undefined;
-  if (byId) return hasContent(byId);
+  if (byId) {
+    const note = songHasContent(byId);
+    return note ? { note, matchedBy: 'id' } : null;
+  }
   const title = normaliseTitle(query.title);
   if (!title || !query.artistNames?.length) return null;
-  return hasContent(
+  const note = songHasContent(
     sources.songs.find(
       (entry) => entry.titles.some((t) => normaliseTitle(t) === title) && artistMatches(entry.artist, query.artistNames!, sources),
     ),
   );
+  return note ? { note, matchedBy: 'name' } : null;
+}
+
+export function getSongNote(query: SongQuery, sources: NoteSources = DEFAULT_SOURCES): SongNote | null {
+  return findSongNote(query, sources)?.note ?? null;
 }

@@ -27,7 +27,7 @@ function NoteFoot({ note }: { note: NotePayload | null }) {
   );
 }
 
-/** The single, app-level note drawer shared by Artist, Album and Song notes and lyric translation notes. */
+/** The single, app-level note drawer shared by Artist, Album and Song notes (a song's translation note is part of its note). */
 export function NoteDrawer() {
   const { note, closeNote } = useNote();
   // Keep the last note while the drawer slides out.
@@ -35,6 +35,11 @@ export function NoteDrawer() {
   useEffect(() => {
     if (note) setShown(note);
   }, [note]);
+  // Open at the requested section ("Translation note →" lands on 번역에 대하여).
+  useEffect(() => {
+    if (!note?.focus || shown !== note) return;
+    document.getElementById(note.focus)?.scrollIntoView?.({ block: 'start' });
+  }, [note, shown]);
 
   return (
     <SideDrawer open={Boolean(note)} onClose={closeNote} label="Archive note" labelledBy="note-drawer-title" closeLabel="Close note">

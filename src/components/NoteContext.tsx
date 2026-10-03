@@ -7,8 +7,10 @@ export interface NotePayload {
   subtitle?: string;
   /** Long-form note text (the Markdown subset NoteBody renders). */
   copy: string;
-  /** Rendered after the copy, for notes that carry more than text (e.g. a translation's line table). */
+  /** Rendered after the copy, for notes that carry more than text (a song's "번역에 대하여" section). */
   extra?: ReactNode;
+  /** Id of an element in the note to scroll to on open (e.g. the translation section). */
+  focus?: string;
   /** BCP 47 language of the title, for CJK glyph selection. */
   titleLang?: string;
   /** Quiet foot: when the note was written / revised and what it relies on. */
