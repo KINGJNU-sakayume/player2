@@ -29,7 +29,12 @@ function titleLanguage(title: string): string | undefined {
  * title, artist · album, track / release / duration / language — and the
  * listening column on the right — lyrics, Listening Note and the transport.
  * The full Listening note opens in the page as a column on the right; the
- * cover and lyrics move left to make room instead of being covered.
+ * lyrics then take the whole width left of it and the album drops to the
+ * bottom-left corner.
+ *
+ * Both sides share one grid's rows (base.css, `.player-shell`), so their lines
+ * meet: the cover starts on the Lyrics rule, the Now playing block is as tall as
+ * the Listening note, and the Track / Release rule continues the transport's.
  */
 export function NowPlayingPage() {
   const snapshot = usePlayerSnapshot();
@@ -96,25 +101,25 @@ export function NowPlayingPage() {
                     </>
                   )}
                 </div>
-                <div className="player-meta">
-                  <div>
-                    <b>Track</b>
-                    <span>
-                      {albumTrack ? `${formatTrackNumber(albumTrack.trackNumber)} / ${trackCount ? formatTrackNumber(trackCount) : '—'}` : '—'}
-                    </span>
-                  </div>
-                  <div>
-                    <b>Release</b>
-                    <span>{year ?? '—'}</span>
-                  </div>
-                  <div>
-                    <b>Duration</b>
-                    <span>{formatDuration(durationMs)}</span>
-                  </div>
-                  <div>
-                    <b>Language</b>
-                    <span>{language ?? '—'}</span>
-                  </div>
+              </div>
+              <div className="player-meta">
+                <div>
+                  <b>Track</b>
+                  <span>
+                    {albumTrack ? `${formatTrackNumber(albumTrack.trackNumber)} / ${trackCount ? formatTrackNumber(trackCount) : '—'}` : '—'}
+                  </span>
+                </div>
+                <div>
+                  <b>Release</b>
+                  <span>{year ?? '—'}</span>
+                </div>
+                <div>
+                  <b>Duration</b>
+                  <span>{formatDuration(durationMs)}</span>
+                </div>
+                <div>
+                  <b>Language</b>
+                  <span>{language ?? '—'}</span>
                 </div>
               </div>
             </section>
@@ -129,9 +134,11 @@ export function NowPlayingPage() {
 
               <SongNotePreview note={songNote} {...noteContext} className="player-note" onOpen={() => setNoteOpen(true)} expanded={showNote} />
 
-              <Transport />
-              <TransportExtras />
-              <PlaybackNotice />
+              <div className="player-controls">
+                <Transport />
+                <TransportExtras />
+                <PlaybackNotice />
+              </div>
             </section>
           </div>
           {showNote && <NoteColumn note={songNotePayload(songNote, noteContext)} onClose={() => setNoteOpen(false)} />}

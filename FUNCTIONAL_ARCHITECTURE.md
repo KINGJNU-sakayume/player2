@@ -183,7 +183,10 @@ Only one note drawer is mounted globally in the app shell. A song has one note, 
 (`src/components/SongNote.tsx`): the listening body, then *번역에 대하여* (speaker → addressee, relationship and speech
 level; pronoun and term tables; the reasoning), then sources and dates. There is no separate translation note, mark or
 link anywhere else. On Now Playing the Listening note opens in the page, not in the drawer: a column on the right of the
-same layer (`.player-stage` grid, `NoteColumn`), the cover and lyrics moving left; no backdrop or focus trap, Escape and
+same layer (`.player-stage` grid, `NoteColumn`); the lyrics then take the whole width left of it and the album object
+drops to the bottom-left corner. The album and lyrics pieces are items of one grid with shared rows (`.player-shell`:
+head / cover·lyrics / copy·note / meta·controls), so the cover starts on the Lyrics rule, the Now playing block and
+the Listening note preview share a height, and the meta rule continues the transport rule. No backdrop or focus trap, Escape and
 the close button close it and return focus, a new track closes it, and at single-column widths it stacks below. Both
 render `NoteContent`. The translated lines are never repeated in the note.
 

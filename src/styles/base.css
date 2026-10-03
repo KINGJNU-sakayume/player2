@@ -19,6 +19,8 @@
   /* Now Playing: how wide a lyric line may run, and the in-page Listening note column. */
   --lyric-width: 1100px;
   --note-width: 530px;
+  /* With the note open, the album object drops to the bottom-left corner at this size. */
+  --corner-cover: 200px;
   --ease: cubic-bezier(.2, .82, .2, 1);
 }
 
@@ -96,18 +98,35 @@ kbd { padding: 0 4px; border: 1px solid var(--line); font-size: .9em; }
 .player-note-panel-head button { width: 36px; height: 36px; border: 0; background: transparent; font-size: 18px; color: var(--muted); }
 .player-note-panel-body { overflow: auto; padding: 30px 34px 44px; }
 @keyframes note-panel-in { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
-.player-shell { width: 100%; max-width: 1760px; margin: 0 auto; display: grid; grid-template-columns: minmax(350px,42%) minmax(0,58%); gap: 64px; padding: 12px 0 30px; align-items: start; }
-.player-object { min-width: 0; position: sticky; top: 0; }
-.player-cover { width: min(48vh,32vw,520px,100%); aspect-ratio: 1; }
-/* With the note open the album object gives up width first, so the lyrics keep a readable measure. */
-.note-open .player-shell { grid-template-columns: minmax(240px,34%) minmax(0,1fr); gap: 48px; }
-.player-copy { margin-top: 22px; }
+/*
+ * One grid with shared rows, so the album side and the lyrics side meet on the same lines:
+ *   ".     head"        the cover starts on the Lyrics rule
+ *   "cover lyrics"      (this row takes the spare height)
+ *   "copy  note"        Now playing block and Listening note: one row, one height
+ *   "meta  controls"    the Track / Release rule continues the transport rule
+ * The album object and the listening column are `display: contents`; their pieces are the grid items.
+ */
+.player-shell { width: 100%; max-width: 1760px; margin: 0 auto; display: grid; grid-template-columns: minmax(350px,42%) minmax(0,58%); grid-template-rows: auto 1fr auto auto; grid-template-areas: ". head" "cover lyrics" "copy note" "meta controls"; column-gap: 64px; row-gap: 0; padding: 12px 0 30px; min-height: calc(100dvh - 150px); }
+.player-object, .player-listening { display: contents; }
+.player-shell .listening-head { grid-area: head; min-width: 0; }
+.player-shell .lyrics-panel { grid-area: lyrics; min-width: 0; }
+.player-cover { grid-area: cover; align-self: start; width: min(48vh,32vw,520px,100%); aspect-ratio: 1; }
+/* Same padding as the Listening note preview: the two share a row and its height. */
+.player-copy { grid-area: copy; min-width: 0; padding: 14px 0 22px; }
+.player-shell .player-note { grid-area: note; min-width: 0; margin-top: 0; padding: 14px 0 22px; }
+.player-shell .player-meta { grid-area: meta; align-self: start; min-width: 0; margin-top: 0; }
+.player-controls { grid-area: controls; align-self: start; min-width: 0; border-top: 1px solid var(--line); padding-top: 18px; }
+.player-controls .player-transport { margin-top: 0; border-top: 0; padding-top: 0; }
+/* Note open: the lyrics take the whole width left of the note; the album drops to the bottom-left corner. */
+.note-open .player-shell { grid-template-columns: var(--corner-cover) auto minmax(0,1fr); grid-template-areas: "head head head" "lyrics lyrics lyrics" "cover copy note" "cover meta controls"; column-gap: 32px; }
+.note-open .player-cover { width: var(--corner-cover); }
+.note-open .player-copy h1 { font-size: clamp(30px,2.6vw,44px); }
+.note-open .player-shell .player-meta { gap: 18px; }
 .player-copy h1 { margin: 8px 0 0; font-size: clamp(42px,5.2vw,78px); line-height: .93; letter-spacing: -.055em; font-weight: 500; overflow-wrap: anywhere; }
 .artist-line { margin-top: 11px; font-size: 15px; }
 .player-meta, .album-hero-meta { display: flex; gap: 26px; flex-wrap: wrap; margin-top: 23px; padding-top: 13px; border-top: 1px solid var(--line); }
 .player-meta div b, .album-hero-meta div b { display: block; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); }
 .player-meta div span, .album-hero-meta div span { display: block; margin-top: 5px; font-size: 12.5px; }
-.player-listening { min-width: 0; padding-top: 1px; display: flex; flex-direction: column; min-height: calc(100dvh - 150px); }
 .listening-head, .sequence-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--ink); }
 .listening-head h2, .sequence-head h2 { margin: 0; font-size: clamp(28px,2.8vw,42px); line-height: 1; letter-spacing: -.04em; font-weight: 500; }
 .listening-head span, .sequence-head span { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); text-align: right; }
@@ -185,8 +204,6 @@ kbd { padding: 0 4px; border: 1px solid var(--line); font-size: .9em; }
 .note-preview p { margin: 10px 0 0; font-size: 14px; line-height: 1.72; color: var(--muted); max-width: 54ch; }
 .note-more { margin-top: 10px; border: 0; background: transparent; padding: 0; font-size: 11px; letter-spacing: .09em; color: var(--ink); text-transform: uppercase; }
 .note-more:hover { text-decoration: underline; text-underline-offset: 4px; }
-.player-note { margin-top: auto; padding-bottom: 22px; }
-.player-note + .player-transport { margin-top: 0; }
 
 /* The shared right drawer: notes and the queue */
 .side-drawer-backdrop { position: fixed; inset: 0; background: rgba(17,19,21,.16); opacity: 0; pointer-events: none; transition: opacity .28s ease; z-index: 80; }
