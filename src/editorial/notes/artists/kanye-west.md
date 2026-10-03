@@ -3,18 +3,15 @@ artistIds: [5K4W6rqBFWDnAN6FQUkS6x]
 names: [Kanye West, Ye, 카녜이 웨스트, 예]
 origin: Chicago, USA · rapper / producer
 written: 2026-10-03
+updated: 2026-10-03
 sources:
-  - https://simple.wikipedia.org/wiki/Kanye_West_albums_discography
-  - https://en.wikipedia.org/wiki/The_Life_of_Pablo
-  - https://en.wikipedia.org/wiki/Donda
-  - https://en.wikipedia.org/wiki/Ye_(album)
-  - https://en.wikipedia.org/wiki/Jesus_Is_King
+  - https://en.wikipedia.org/wiki/Kanye_West
 eras:
   - 2001–2003 · 로커펠라의 프로듀서
   - 2004–2007 · 소울 샘플에서 스타디움으로
   - 2008–2013 · 『808s』에서 『Yeezus』까지
   - 2016–2019 · 『Pablo』 이후의 속도
-  - 2021– · 『Donda』와 『Vultures』
+  - 2021– · 『Donda』 이후
 short: >
   프로듀서의 귀로 만든 앨범을 래퍼의 고백으로 밀어붙이는 음악가. 한 장 한 장이 앞의 장르를 부정하며 나아가기 때문에, 곡보다 앨범과 앨범 사이의 낙차를 따라 듣는 편이 이 사람을 이해하기 쉽다.
 ---
@@ -33,9 +30,9 @@ short: >
 
 『The Life of Pablo』(2016)는 완성된 작품보다 진행 중인 작업물에 가까웠다. 공개 뒤에도 트랙과 믹스를 계속 고쳤고, 가스펠과 트랩, 짧은 스케치가 한 장에 섞였다. 2018년의 『Ye』는 일곱 곡으로 줄었고, 2019년의 『Jesus Is King』은 가스펠로 방향을 틀었다. 앨범의 길이와 완결성에 대한 기준이 이 시기에 가장 크게 흔들린다.
 
-## 『Donda』와 『Vultures』 (2021–)
+## 『Donda』 이후 (2021–)
 
-2021년 『Donda』는 어머니의 이름을 단 대형 프로젝트로, 청음회와 수정 발매를 거쳐 나왔다. 2024년에는 타이 달라 사인과 함께 『Vultures 1』(2월)과 『Vultures 2』(8월)를 냈다. 2022년 이후 반유대주의 발언으로 아디다스 등과의 관계가 끊겼고, 작품과 작가를 어떻게 함께 다룰지가 이 시기 청취의 부담이 되었다.
+2021년 『Donda』는 어머니의 이름을 단 대형 프로젝트로, 청음회와 수정 발매를 거쳐 나왔다. 2024년에는 타이 달라 사인과 함께 『Vultures 1』(2월)과 『Vultures 2』(8월)를 냈다. 2025년 4월에는 오랫동안 스트리밍에 없던 『Donda 2』가 올라왔고, 2026년 3월 28일에는 오래 예고된 『Bully』가 디지털로 발매되었다. 2022년 반유대주의 발언으로 아디다스가 협력을 끝낸 뒤에도 비슷한 발언과 논란이 2025년까지 이어졌고, 작품과 작가를 어떻게 함께 다룰지가 이 시기 청취의 부담이 되었다.
 
 ## 처음 듣는다면
 

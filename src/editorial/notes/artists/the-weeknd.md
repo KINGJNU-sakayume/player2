@@ -3,10 +3,9 @@ artistIds: [1Xyo4u8uXC1ZmMpatF05PJ]
 names: [The Weeknd, Weeknd, 더 위켄드, 위켄드]
 origin: Toronto, Canada · singer / songwriter / producer
 written: 2026-10-03
+updated: 2026-10-03
 sources:
-  - https://simple.wikipedia.org/wiki/The_Weeknd_discography
-  - https://dayandevent.com/the-weeknd-albums-in-order/
-  - https://www.iheart.com/content/2025-01-30-the-weeknd-completes-his-trilogy-with-new-album-hurry-up-tomorrow/
+  - https://en.wikipedia.org/wiki/The_Weeknd
 eras:
   - 2011–2013 · 믹스테이프와 『Trilogy』
   - 2015–2018 · 팝 스타의 얼굴
@@ -27,7 +26,7 @@ short: >
 
 ## 3부작 (2020–2025)
 
-2020년 『After Hours』, 2022년 『Dawn FM』, 2025년 『Hurry Up Tomorrow』는 위켄드 본인이 하나의 3부작으로 설명한 작품들이다. 『After Hours』는 추락하는 화자와 80년대 신스 팝을, 『Dawn FM』은 라디오 방송이라는 틀 안에서 연옥 같은 새벽의 풍경을 그렸다. 『Hurry Up Tomorrow』는 이 3부작의 마지막 장으로 발표되었다. 『After Hours』의 「Blinding Lights」와 2021년 슈퍼볼 하프타임 쇼를 지나며 위켄드는 가장 큰 규모의 무대에서 같은 이야기를 반복하게 되었다.
+2020년 『After Hours』, 2022년 『Dawn FM』, 2025년 『Hurry Up Tomorrow』는 위켄드 본인이 하나의 3부작으로 설명한 작품들이다. 『After Hours』는 추락하는 화자와 80년대 신스 팝을, 『Dawn FM』은 라디오 방송이라는 틀 안에서 연옥 같은 새벽의 풍경을 그렸다. 『Hurry Up Tomorrow』는 이 3부작의 마지막 장으로 발표되었다. 「Blinding Lights」는 빌보드 핫 100 역사에서 가장 좋은 성적을 낸 곡으로 꼽히고, 2021년에는 슈퍼볼 LV 하프타임 쇼에 올랐다. 위켄드는 가장 큰 규모의 무대에서 같은 이야기를 반복하게 되었다.
 
 ## 처음 듣는다면
 
