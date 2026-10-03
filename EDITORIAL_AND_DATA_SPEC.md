@@ -30,8 +30,13 @@ Never inject long editorial prose into Spotify transport models.
 - One song, one note. A song note (`notes/songs/<key>.md`) is the Listening Note and, when the song has one, its
   curated lyric translation: a `translation:` block in the frontmatter (the brief), a reserved `## 번역에 대하여`
   section at the end of the body (the reasoning) and `notes/songs/<key>.translation.json` (timed segments). The
-  translation inherits the note's matching fields; `short` is optional on a note that has a translation. See "Lyrics
-  copyright/data rule" below.
+  translation inherits the note's matching fields. See "Lyrics copyright/data rule" below.
+- Completeness: an album note lists its standard tracklist as song note keys (`tracks:`), and every track has a song
+  note with a listening note; a song in another language than Korean also has its translation (a song that needs
+  none says `lyricsLanguage: ko | instrumental`). The loader accepts incomplete notes so the app never breaks; the
+  quality floor in `src/editorial/quality.ts` (lengths, paragraphs, sources, tracklist, translation, banned phrases)
+  fails `npm run check` for any note not listed in its `PENDING_REVIEW` set. `npm run notes:audit` prints the same
+  audit while writing.
 
 The type sketches below are the original v7 plan; the current types are in `src/editorial/types.ts` and
 `src/translation/curated/types.ts`.

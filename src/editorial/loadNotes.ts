@@ -1,7 +1,7 @@
 import { parseTranslationBrief, parseTranslationTimeline } from '../translation/curated/parse';
 import type { SongTranslation } from '../translation/curated/types';
 import { FieldReader, fileKey, FrontmatterError, parseFrontmatter } from './frontmatter';
-import type { AlbumNote, ArtistEra, ArtistNote, EditorialBody, SongNote } from './types';
+import { SONG_LYRICS_LANGUAGES, type AlbumNote, type ArtistEra, type ArtistNote, type EditorialBody, type SongLyricsLanguage, type SongNote } from './types';
 
 /**
  * Turns the Markdown note files into typed notes. The file name is the key
@@ -73,6 +73,7 @@ export function loadAlbumNotes(files: NoteFiles): AlbumNote[] {
     albumIds: fields.optionalList('albumIds') ?? [],
     titles: fields.list('titles'),
     releaseYear: fields.optionalNumber('releaseYear'),
+    tracks: fields.optionalList('tracks'),
     ...body(fields, full, file),
   })).sort((a, b) => a.artist.localeCompare(b.artist) || (a.releaseYear ?? 0) - (b.releaseYear ?? 0) || a.key.localeCompare(b.key));
 }
@@ -139,12 +140,18 @@ export function loadSongNotes(files: NoteFiles, translationFiles: TranslationFil
 
     // A note with a translation block may skip the listening cue; any other song note needs one.
     const short = block ? fields.optionalString('short') : fields.string('short');
+    const lyricsLanguage = fields.optionalString('lyricsLanguage');
+    if (lyricsLanguage !== undefined && !SONG_LYRICS_LANGUAGES.includes(lyricsLanguage as SongLyricsLanguage)) {
+      fields.fail(`"lyricsLanguage" must be one of ${SONG_LYRICS_LANGUAGES.join(', ')}, got "${lyricsLanguage}".`);
+    }
+    if (lyricsLanguage !== undefined && block) fields.fail('"lyricsLanguage" is for songs without a translation; this one has a "translation" block.');
     return {
       key,
       artist: fields.string('artist'),
       trackIds: fields.optionalList('trackIds') ?? [],
       titles: fields.list('titles'),
       ...(short ? { short } : {}),
+      ...(lyricsLanguage ? { lyricsLanguage: lyricsLanguage as SongLyricsLanguage } : {}),
       full: listening || undefined,
       ...dates(fields, file),
       sources: fields.optionalList('sources'),

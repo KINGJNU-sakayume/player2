@@ -3,13 +3,35 @@ artist: the-weeknd
 albumIds: [2ODvWsOgouMbaA5xf0RkJe]
 titles: [Starboy]
 releaseYear: 2016
+tracks:
+  - starboy
+  - party-monster
+  - false-alarm
+  - reminder
+  - rockin
+  - secrets
+  - true-colors
+  - stargirl-interlude
+  - sidewalks
+  - six-feet-under
+  - love-to-lay
+  - a-lonely-night
+  - attention
+  - ordinary-life
+  - nothing-without-you
+  - all-i-know
+  - die-for-you
+  - i-feel-it-coming
 written: 2026-10-03
+updated: 2026-10-03
 sources:
   - https://open.spotify.com/album/2ODvWsOgouMbaA5xf0RkJe
   - https://en.wikipedia.org/wiki/Starboy_(album)
   - https://www.albumoftheyear.org/album/62264-the-weeknd-starboy.php
   - https://www.rollingstone.com/music/music-album-reviews/review-the-weeknds-starboy-treads-murky-water-in-innovative-rb-era-113836/
   - https://www.billboard.com/music/music-news/cashmere-cat-produced-four-songs-the-weeknd-starboy-album-7581602/
+  - https://www.thefader.com/2016/11/25/the-weeknd-starboy-details
+  - https://www.theringer.com/2016/11/28/music/the-weeknd-starboy-album-review-bf5ba461f33c
 short: >
   스타가 된 뒤의 위켄드가 '스타'라는 자리를 연기하고 의심하는 앨범. 열여덟 곡 안에서 과시와 편집증이 번갈아 나오고, 다프트 펑크가 연 문을 다프트 펑크가 닫으면서 가장 솔직한 순간은 맨 끝에 놓인다.
 ---
@@ -24,7 +46,7 @@ short: >
 
 도입과 마무리를 같은 팀이 맡았다는 점이 이 앨범의 구조를 정한다. 1번 'Starboy'는 다프트 펑크의 건조하고 기계적인 비트 위에서 위켄드가 가장 차갑게 자신을 선언하는 곡이고, 18번 'I Feel It Coming'은 같은 다프트 펑크가 만든 부드러운 디스코 풍 곡이다. 앞의 곡이 페르소나를 세우는 쪽이라면 뒤의 곡은 그 가면 아래의 목소리가 새어 나오는 쪽이다. 한 장이 차가운 선언에서 시작해 따뜻한 고백으로 끝나는 호를 그린다.
 
-그 사이에는 여러 프로듀서의 작업이 섞여 있다. 닥 맥키니(Doc McKinney)가 위켄드와 함께 총괄 프로듀서를 맡았고, 메트로 부민(Metro Boomin), 맥스 마틴(Max Martin), 사이러크(Cirkut), 캐시미어 캣(Cashmere Cat) 등이 곡마다 다른 질감을 보탰다. 'Die for You'는 맥키니, 사이러크, 캐시미어 캣, 프린스 85(Prince 85)가 함께 만든 곡이다. 이 폭 넓은 참여진 덕에 앨범은 트랩 비트, 신스팝, 느린 R&B 사이를 쉽게 오가지만, 그만큼 한 장의 목소리가 흐려지는 구간도 생긴다.
+그 사이에는 여러 프로듀서의 작업이 섞여 있다. 닥 맥키니(Doc McKinney)가 위켄드와 함께 총괄 프로듀서를 맡았고, 메트로 부민(Metro Boomin), 맥스 마틴(Max Martin), 사이러크(Cirkut), 캐시미어 캣(Cashmere Cat) 등이 곡마다 다른 질감을 보탰다. 'Die for You'는 맥키니, 사이러크, 캐시미어 캣, 프린스 85(Prince 85)가 함께 만든 곡이다. 이 폭 넓은 참여진 덕에 앨범은 트랩 비트, 신스팝, 느린 R&B 사이를 쉽게 오가지만, 그만큼 한 장의 목소리가 흐려지는 구간도 생긴다. 그 사이를 묶는 또 하나의 축은 80년대 팝이다. 'False Alarm'은 뉴 웨이브와 포스트 펑크의 기계적인 박자를 빌리고, 'Secrets'는 더 로맨틱스(The Romantics)의 'Talking in Your Sleep' 후렴과 티어스 포 피어스(Tears for Fears)의 'Pale Shelter'를 끌어오며, 맥스 마틴과 알리 파야미의 'A Lonely Night'는 마이클 잭슨의 디스코 펑크를 의식한다.
 
 ## 트랙 읽기
 
