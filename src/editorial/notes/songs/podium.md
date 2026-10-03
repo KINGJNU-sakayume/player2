@@ -22,7 +22,7 @@ translation:
     - source: podium
       target: 시상대
       note: 제목과 후렴의 핵심어. 순위권에 서는 자리라는 뜻으로 옮겼다.
-    - source: me tiene' pensando / te llevo rato analizando / desde lejos ya tu mirada me está quemando
+    - source: me tiene' pensando 외 스페인어 후렴
       target: 날 자꾸 생각에 잠기게 해 / 한참 동안 너를 지켜보고 있었어 / 멀리서부터 벌써 네 시선이 날 태우고 있어
       note: 후렴 뒤에 붙는 스페인어 대목을 한국어로 풀었다.
   written: 2026-10-03

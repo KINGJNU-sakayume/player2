@@ -13,7 +13,7 @@ translation:
   relationship: 같은 목표를 향해 하나가 되는 사이
   situation: 넘어져도 일어나서 끝까지 가겠다는 합창
   glossary:
-    - source: Smaerd ruof ytnewt, eno sa etinu we
+    - source: Smaerd ruof ytnewt
       target: 우리는 하나로 뭉쳐, 스물네 개의 꿈
       note: 영어 문장을 글자 순서대로 거꾸로 적은 말이라 뜻을 풀어 옮겼다. tripleS의 24명을 가리키는 것으로 읽힌다.
     - source: never die

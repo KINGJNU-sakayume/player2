@@ -16,7 +16,7 @@ translation:
   relationship: 서로에게 좋지 않다고 스스로 정리하려는 연인 사이
   situation: 외로운 밤에 사랑했다는 걸 인정하면서도 떨어져 있는 편이 낫다고 선을 긋는 장면
   glossary:
-    - source: "Better when we're both apart"
+    - source: "better when apart"
       target: 우린 떨어져 있을 때 더 나아
       note: 후렴의 핵심 문장. 헤어지자는 선언이라 평서문으로 통일했다.
     - source: A lonely night

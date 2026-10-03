@@ -19,10 +19,10 @@ translation:
       target: 너
       note: "'네가 떠난 뒤로는' 한 곳에만 나온다. 독백 안에서 잠시 떠올리는 상대라 평어로 옮겼다."
   glossary:
-    - source: pillars of salt and pillars of sand
+    - source: pillars of salt
       target: 소금 기둥과 모래 기둥
       note: 롯의 아내가 소금 기둥이 된 성경 일화와 무너지는 모래성의 이미지를 함께 가진 표현.
-    - source: Saint Peter won't call my name
+    - source: Saint Peter
       target: 성 베드로가 내 이름을 부르지 않으리란
       note: 천국 문지기 성 베드로가 이름을 부르지 않는다는 뜻으로 천국에 들지 못한다는 의미.
   written: 2026-10-03

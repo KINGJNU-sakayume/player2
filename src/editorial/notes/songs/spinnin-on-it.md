@@ -22,7 +22,7 @@ translation:
     - source: spinnin' on it
       target: 맴돌고 있어
       note: 제목이자 후렴의 핵심어. 같은 자리를 도는 관계의 쳇바퀴를 '맴돈다'로 통일했다.
-    - source: so done with love / so done with hurt
+    - source: so done with
       target: 사랑은 이제 지긋지긋해 / 상처도 이제 지긋지긋해
       note: 질린다는 말과 "그래도 넌 내게 전부"라는 반전이 한 쌍이라 두 줄의 어조를 맞췄다.
   written: 2026-10-03
