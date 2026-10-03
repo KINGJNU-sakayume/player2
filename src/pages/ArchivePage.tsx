@@ -8,7 +8,6 @@ import { songNotes } from '../editorial/songs';
 import type { AlbumNote, ArtistNote, EditorialBody, SongNote } from '../editorial/types';
 import { pluralise } from '../lib/format';
 import { usePlay } from '../playback/hooks';
-import { SPEECH_LEVEL_LABEL } from '../translation/curated/types';
 import { detectLineLanguage } from '../translation/languageDetect';
 
 interface ArtistEntry {
@@ -32,8 +31,6 @@ export function buildArchiveIndex(
     }));
   return { entries };
 }
-
-const hasListening = (song: SongNote) => Boolean(song.short?.trim() || song.full?.trim());
 
 function ReadMore({ kind, note, title, subtitle }: { kind: 'ARTIST' | 'ALBUM'; note: EditorialBody; title: string; subtitle?: string }) {
   const { openNote } = useNote();
@@ -91,33 +88,18 @@ function ReadSong({ song, title, subtitle }: { song: SongNote; title: string; su
   );
 }
 
-/** One row per song note, marked for what it holds: a listening note, a curated translation, or both. */
+/** One row per song: its Listening note (which carries the song's translation note, if any). */
 function SongRow({ song, artistName }: { song: SongNote; artistName: string }) {
   const title = song.titles[0]!;
-  const brief = song.translation?.brief;
   return (
     <li className="archive-row">
       <span className="archive-kind">Song</span>
       <span className="archive-text">
         <b lang={detectLineLanguage(title)}>{title}</b>
-        <span className="archive-marks">
-          {hasListening(song) && <span className="archive-mark">Listening note</span>}
-          {brief && (
-            <span className="archive-mark">
-              Translation · <span lang="ko">{SPEECH_LEVEL_LABEL[brief.register]}</span>
-            </span>
-          )}
-        </span>
-        {song.short ? (
+        {song.short && (
           <span className="archive-preview" lang="ko">
             {song.short}
           </span>
-        ) : (
-          brief && (
-            <span className="archive-meta" lang="ko">
-              {brief.speaker} → {brief.addressee}
-            </span>
-          )
         )}
       </span>
       <span className="archive-actions">
@@ -134,7 +116,7 @@ function ArtistSection({ entry }: { entry: ArtistEntry }) {
   const artistId = artist.artistIds[0];
   const count = [
     albums.length ? pluralise(albums.length, 'album note') : null,
-    songs.length ? pluralise(songs.length, 'song note') : null,
+    songs.length ? pluralise(songs.length, 'listening note') : null,
   ].filter(Boolean);
   return (
     <section className="archive-artist" aria-labelledby={`archive-${artist.key}`}>
@@ -199,9 +181,8 @@ function ArtistSection({ entry }: { entry: ArtistEntry }) {
 
 /**
  * The archive's own index, like the back of a book: every artist with a note,
- * their reviewed albums in release order, and one entry per song note, marked
- * for its listening note and its curated translation. Built from the local
- * notes only.
+ * their reviewed albums in release order, and one Listening note per song.
+ * Built from the local notes only.
  */
 export function ArchivePage() {
   usePageTitle('Archive');
@@ -209,8 +190,7 @@ export function ArchivePage() {
   const totals = [
     pluralise(entries.length, 'artist'),
     pluralise(albumNotes.length, 'album note'),
-    pluralise(songNotes.filter(hasListening).length, 'listening note'),
-    pluralise(songNotes.filter((song) => song.translation).length, 'translation'),
+    pluralise(songNotes.length, 'listening note'),
   ];
 
   return (

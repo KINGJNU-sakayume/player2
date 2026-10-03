@@ -81,31 +81,46 @@ describe('curated lyric translation on Now Playing', () => {
     fixture.notes.splice(0, fixture.notes.length);
   });
 
-  it('shows the segment under its line, the speech level, and one song note with 번역에 대하여', async () => {
+  it('shows the segment under its line with no translation chrome, and opens one Listening note beside the lyrics', async () => {
     await setFixtureNote({ listening: true });
     const user = userEvent.setup();
     renderNowPlaying();
 
     expect(await screen.findByText('큐레이션 번역 문장')).toBeInTheDocument();
-    expect(screen.getByText(/Curated ·/)).toHaveTextContent('Curated · 반말 · 해체');
-    // The listening cue stays on the page.
+    // Everything about the translation lives in the Listening note: no separate mark or link in the lyrics.
+    expect(screen.queryByText(/Curated/)).not.toBeInTheDocument();
+    expect(screen.queryByText('반말 · 해체')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Translation note/ })).not.toBeInTheDocument();
+    expect(screen.getByText('Listening note')).toBeInTheDocument();
     expect(screen.getByText('감상 큐 문장.')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Translation note →' }));
-    const dialog = screen.getByRole('dialog', { name: 'Lemon' });
-    expect(within(dialog).getByText('Listening note / Song')).toBeInTheDocument();
+    const more = screen.getByRole('button', { name: 'Read full note →' });
+    await user.click(more);
+    // In the page, not over it: no dialog, the lyrics stay readable.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    const note = screen.getByRole('complementary', { name: 'Lemon' });
+    expect(screen.getByText('큐레이션 번역 문장')).toBeInTheDocument();
+    expect(within(note).getByText('Listening note / Song')).toBeInTheDocument();
+    expect(within(note).getByRole('button', { name: 'Close note' })).toHaveFocus();
     // Listening body first, then the translation section.
-    const body = within(dialog).getByText('감상 본문 문단.');
-    const section = within(dialog).getByRole('heading', { name: '번역에 대하여' });
+    const body = within(note).getByText('감상 본문 문단.');
+    const section = within(note).getByRole('heading', { name: '번역에 대하여' });
     expect(body.compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(within(dialog).getByText('떠난 사람을 떠올리는 화자 → 떠난 사람')).toBeInTheDocument();
-    expect(within(dialog).getByText('반말 · 해체')).toBeInTheDocument();
-    expect(within(dialog).getByRole('table', { name: '호칭' })).toHaveTextContent('you너');
-    expect(within(dialog).getByText('해체').tagName).toBe('STRONG');
-    expect(within(dialog).getByRole('link', { name: 'example.com/interview' })).toHaveAttribute('href', 'https://example.com/interview');
+    expect(within(note).getByText('떠난 사람을 떠올리는 화자 → 떠난 사람')).toBeInTheDocument();
+    expect(within(note).getByText('반말 · 해체')).toBeInTheDocument();
+    expect(within(note).getByRole('table', { name: '호칭' })).toHaveTextContent('you너');
+    expect(within(note).getByText('해체').tagName).toBe('STRONG');
+    expect(within(note).getByRole('link', { name: 'example.com/interview' })).toHaveAttribute('href', 'https://example.com/interview');
     // No line-by-line pairs: the lyrics never appear in the note.
-    expect(dialog).not.toHaveTextContent(current.text);
-    expect(dialog).not.toHaveTextContent('큐레이션 번역 문장');
+    expect(note).not.toHaveTextContent(current.text);
+    expect(note).not.toHaveTextContent('큐레이션 번역 문장');
+
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('complementary', { name: 'Lemon' })).not.toBeInTheDocument();
+    expect(more).toHaveFocus();
+    await user.click(more);
+    await user.click(screen.getByRole('button', { name: 'Close note' }));
+    expect(screen.queryByRole('complementary', { name: 'Lemon' })).not.toBeInTheDocument();
   });
 
   it('applies the Translation On / Off toggle to the curated translation too', async () => {
@@ -116,27 +131,22 @@ describe('curated lyric translation on Now Playing', () => {
     expect(await screen.findByText('큐레이션 번역 문장')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /Translation (On|Off)/ }));
     await waitFor(() => expect(screen.queryByText('큐레이션 번역 문장')).not.toBeInTheDocument());
-    expect(screen.queryByText(/Curated ·/)).not.toBeInTheDocument();
     // Preferences live for the session: switch it back on for the other tests.
     await user.click(screen.getByRole('button', { name: /Translation (On|Off)/ }));
     expect(await screen.findByText('큐레이션 번역 문장')).toBeInTheDocument();
   });
 
-  it('shows only a link to the translation note for a song with no listening note', async () => {
+  it('shows a song with only a translation note as a Listening note without a cue', async () => {
     await setFixtureNote({ listening: false });
     const user = userEvent.setup();
     renderNowPlaying();
 
     expect(await screen.findByText('큐레이션 번역 문장')).toBeInTheDocument();
-    const notes = screen.getAllByRole('button', { name: 'Translation note →' });
-    // One in the lyrics header, one where the listening cue would be.
-    expect(notes).toHaveLength(2);
-    expect(screen.queryByText('Listening note')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Read full note →' })).not.toBeInTheDocument();
-
-    await user.click(notes[1]!);
-    const dialog = screen.getByRole('dialog', { name: 'Lemon' });
-    expect(within(dialog).getByText('Translation note / Song')).toBeInTheDocument();
-    expect(within(dialog).getByRole('heading', { name: '번역에 대하여' })).toBeInTheDocument();
+    expect(screen.getByText('Listening note')).toBeInTheDocument();
+    expect(screen.queryByText(/Translation note/)).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Read full note →' }));
+    const note = screen.getByRole('complementary', { name: 'Lemon' });
+    expect(within(note).getByText('Listening note / Song')).toBeInTheDocument();
+    expect(within(note).getByRole('heading', { name: '번역에 대하여' })).toBeInTheDocument();
   });
 });

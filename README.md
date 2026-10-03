@@ -16,10 +16,10 @@ or Specimen mode, and transport controls appear only on Now Playing.
 
 | Surface | What it does |
 | --- | --- |
-| **Now Playing** | v7 42 / 58 spread. Cover, title, artist · album and Track / Release / Duration / Language on the left; on the right the synced current lyric with its translation and the next two lines, the Listening Note, and the transport — previous / play-pause / next and seek — with shuffle, like, queue, device and volume on one quiet line beneath it. The accent colour follows the album cover. |
+| **Now Playing** | v7 42 / 58 spread. Cover, title, artist · album and Track / Release / Duration / Language on the left; on the right the synced current lyric with its translation and the next two lines, the Listening Note — *Read full note* opens it as a column on the right, in the page, with the cover and lyrics moving left instead of being covered — and the transport — previous / play-pause / next and seek — with shuffle, like, queue, device and volume on one quiet line beneath it. The accent colour follows the album cover. |
 | **Artist** | Compact dossier: portrait, name, origin line and Editorial Note. Below it, the **Discography** as a chronology. Albums, Singles & EPs, Compilations and Appears on each load in full, oldest first (or newest first). Releases are grouped by year, with deluxe / remaster / regional editions folded under the original (*+2 editions*), the note's career eras marked in the timeline, and noted releases marked. *Play artist*, *Open in Spotify*. |
 | **Album** | Cover, title, artist, release / format / tracks / duration and Editorial Note left; the complete Track Sequence right, with the playing track, guests, explicit marks, discs and a *Note* mark on songs with a song note. *Play album*, *Save album*. Under the sequence, the release's place in the discography (`03 / 12 · Albums`) with the previous and next release — `[` / `]` step through. |
-| **Archive** | The index of the archive's own writing: every artist with a note, their reviewed albums in release order, and one entry per song note — marked *Listening note* and / or *Translation · 반말 · 해체* — each opening its note or playing the track. No Spotify request. |
+| **Archive** | The index of the archive's own writing: every artist with a note, their reviewed albums in release order, and one Listening note per song (with the song's translation note inside it), each opening its note or playing the track. No Spotify request. |
 | **Library** | Liked songs (*Shuffle* draws from the whole library, *Play all*), followed artists, liked albums, then playlists and recently played. |
 | **Search** | The v7 overlay (`/`): tracks, artists, albums and playlists, type filters with paging, `↓` / `↑` through results. |
 | **Queue** | The real Spotify queue in the same right-hand drawer as the notes. |
@@ -185,9 +185,10 @@ loads its lyrics straight from that record (`/api/get/<lrclibId>`) instead of se
 translation share one timing; when the playing track is another edit (length off by more than 3 s) it searches as
 usual. The translation applies only when the loaded lyrics are that record or one of the same length (±3 s); a note
 matched by name rather than track ID also needs Spotify's length within 3 s. Otherwise, and for lines no segment covers, the machine provider translates (a curated
-translation also works with `VITE_TRANSLATION_PROVIDER=none`). The lyrics header shows `Curated · 반말 · 해체`;
-**Translation note →** opens the song's note at *번역에 대하여* (who speaks to whom, the speech level, pronoun and term
-tables, the reasoning). **Translation On / Off** covers curated translations too. A broken translation file is skipped
+translation also works with `VITE_TRANSLATION_PROVIDER=none`). The lyrics show a curated translation like any other,
+with no separate mark or link: everything about it is in the song's **Listening note**, whose *번역에 대하여* section
+(who speaks to whom, the speech level, pronoun and term tables, the reasoning) follows the listening text.
+**Translation On / Off** covers curated translations too. A broken translation file is skipped
 for that song with a development console warning; `npm run test:run` fails on it. The tool talks to lrclib.net; when
 that host is unreachable, `--file` reads a local LRC file kept outside the repository.
 
