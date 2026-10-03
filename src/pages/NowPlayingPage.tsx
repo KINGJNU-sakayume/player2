@@ -4,11 +4,11 @@ import { useSession } from '../app/sessionContext';
 import { useAlbum } from '../catalogue/queries';
 import { ArtistLinks } from '../components/ArtistLinks';
 import { CoverImage } from '../components/CoverImage';
-import { NotePreview } from '../components/NotePreview';
 import { LyricsBlock, languageName } from '../components/player/LyricsBlock';
 import { PlaybackNotice } from '../components/player/PlaybackNotice';
 import { Transport } from '../components/player/Transport';
 import { TransportExtras } from '../components/player/TransportExtras';
+import { SongNotePreview } from '../components/SongNote';
 import { StateView } from '../components/StateView';
 import { getSongNote } from '../editorial/lookup';
 import { formatDuration, formatTrackNumber, joinArtistNames, releaseYear } from '../lib/format';
@@ -112,8 +112,7 @@ export function NowPlayingPage() {
               context={`${albumName} / ${trackCount ?? '—'} tracks`}
             />
 
-            <NotePreview
-              kind="SONG"
+            <SongNotePreview
               note={songNote}
               title={track.title}
               titleLang={titleLang}

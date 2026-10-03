@@ -73,7 +73,11 @@ describe('discography digging (preview archive)', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Archive' })).toBeInTheDocument();
     // Counts and order follow the note files, so adding a note never breaks this test.
-    expect(screen.getByText(`${artistNotes.length} artists · ${albumNotes.length} album notes · ${songNotes.length} listening notes`, { exact: false })).toBeInTheDocument();
+    const listening = songNotes.filter((song) => song.short).length;
+    const translations = songNotes.filter((song) => song.translation).length;
+    expect(
+      screen.getByText(`${artistNotes.length} artists · ${albumNotes.length} album notes · ${listening} listening notes · ${translations} translations`),
+    ).toBeInTheDocument();
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
     const names = artistNotes.map((artist) => artist.names[0]!).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
     expect(headings.slice(0, names.length)).toEqual(names);
@@ -83,5 +87,17 @@ describe('discography digging (preview archive)', () => {
     expect(within(kenshi).getByRole('link', { name: 'STRAY SHEEP' })).toHaveAttribute('href', `#/album/${STRAY_SHEEP}`);
     await user.click(within(kenshi).getByRole('button', { name: 'Read the note on STRAY SHEEP' }));
     expect(screen.getByRole('dialog', { name: 'STRAY SHEEP' })).toHaveTextContent('Editorial note / Album');
+
+    // One row per song, marked for its listening note and its curated translation.
+    const row = (title: string) => within(kenshi).getByText(title, { selector: 'b' }).closest('li')!;
+    expect(within(row('Lemon')).getByText('Listening note')).toBeInTheDocument();
+    expect(row('Lemon')).toHaveTextContent('Translation · 존댓말 · 해요체');
+    expect(within(row('Flamingo')).queryByText('Listening note')).not.toBeInTheDocument();
+    expect(row('Flamingo')).toHaveTextContent(/Translation · /);
+    expect(within(kenshi).getAllByText('Lemon', { selector: 'b' })).toHaveLength(1);
+    await user.click(within(row('Lemon')).getByRole('button', { name: 'Read the note on Lemon' }));
+    const lemon = screen.getByRole('dialog', { name: 'Lemon' });
+    expect(lemon).toHaveTextContent('Listening note / Song');
+    expect(within(lemon).getByRole('heading', { name: '번역에 대하여' })).toBeInTheDocument();
   });
 });

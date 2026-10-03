@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { albumNotes } from './albums';
 import { artistNotes } from './artists';
-import { getAlbumNote, getArtistNote, getSongNote, normaliseTitle } from './lookup';
+import { findSongNote, getAlbumNote, getArtistNote, getSongNote, normaliseTitle } from './lookup';
 import { songNotes } from './songs';
 
 describe('seeded notes', () => {
@@ -22,10 +22,18 @@ describe('seeded notes', () => {
     for (const list of [artistNotes, albumNotes, songNotes]) {
       expect(new Set(list.map((entry) => entry.key)).size).toBe(list.length);
     }
-    const all = [...artistNotes, ...albumNotes, ...songNotes];
-    for (const entry of all) {
+    for (const entry of [...artistNotes, ...albumNotes]) {
       expect(entry.short.trim()).not.toBe('');
       expect(entry.full?.trim()).toBeTruthy();
+    }
+    // A song note is a listening note (cue + body), a curated translation, or both.
+    for (const entry of songNotes) {
+      if (entry.short || entry.full) {
+        expect(entry.short?.trim(), entry.key).toBeTruthy();
+        expect(entry.full?.trim(), entry.key).toBeTruthy();
+      } else {
+        expect(entry.translation, entry.key).toBeDefined();
+      }
     }
     const artistKeys = new Set(artistNotes.map((artist) => artist.key));
     for (const entry of [...albumNotes, ...songNotes]) expect(artistKeys.has(entry.artist)).toBe(true);
@@ -36,7 +44,14 @@ describe('seeded notes', () => {
     const albumKeysOf = (artist: string) => albumNotes.filter((a) => a.artist === artist).map((a) => a.key).sort();
     const songKeysOf = (artist: string) => songNotes.filter((s) => s.artist === artist).map((s) => s.key).sort();
     expect(albumKeysOf('kenshi-yonezu')).toEqual(['lost-corner', 'stray-sheep']);
-    expect(songKeysOf('kenshi-yonezu')).toEqual(['kanden', 'kick-back', 'lemon']);
+    const listeningKeysOf = (artist: string) => songNotes.filter((s) => s.artist === artist && s.short).map((s) => s.key).sort();
+    expect(listeningKeysOf('kenshi-yonezu')).toEqual(['kanden', 'kick-back', 'lemon']);
+    // Songs with only a curated translation have a translation-only note.
+    expect(songKeysOf('kenshi-yonezu')).toEqual(expect.arrayContaining(['flamingo', 'kanden', 'lemon', 'umi-no-yuurei']));
+    const flamingo = songNotes.find((s) => s.key === 'flamingo');
+    expect(flamingo?.short).toBeUndefined();
+    expect(flamingo?.full).toBeUndefined();
+    expect(flamingo?.translation).toBeDefined();
     expect(albumKeysOf('triples')).toEqual(['assemble', 'assemble24']);
     expect(songKeysOf('triples')).toEqual(['girls-never-die', 'rising']);
     expect(albumKeysOf('coldplay')).toEqual(['a-rush-of-blood', 'parachutes', 'viva-la-vida']);
@@ -63,6 +78,11 @@ describe('note lookup', () => {
     expect(getSongNote({ title: 'Yellow', artistNames: ['Someone Else'] })).toBeNull();
     expect(getAlbumNote({ name: 'Parachutes', artistNames: ['Coldplay'], releaseDate: '2021' })).toBeNull();
     expect(getAlbumNote({ name: 'Parachutes', artistNames: ['Coldplay'], releaseDate: null })?.key).toBe('parachutes');
+  });
+
+  it('finds a translation-only note, and says how it matched', () => {
+    expect(findSongNote({ title: 'Flamingo', artistNames: ['米津玄師'] })).toMatchObject({ matchedBy: 'name', note: { key: 'flamingo' } });
+    expect(findSongNote({ id: '04TshWXkhV1qkqHzf31Hn6' })).toMatchObject({ matchedBy: 'id', note: { key: 'lemon' } });
   });
 
   it('omits filler for entities without a note', () => {

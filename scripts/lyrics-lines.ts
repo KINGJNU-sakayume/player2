@@ -3,27 +3,30 @@
  *
  *   npm run lyrics:lines -- --title "Lemon" --artist "Kenshi Yonezu" [--album "Lemon"] [--duration 4:15]
  *   npm run lyrics:lines -- --id 123456
- *       Prints the LRCLIB record and one row per lyric line: number, line hash, original text.
- *       The hashes are the keys of the translation file's "lines" object.
+ *       Prints the LRCLIB record, the "timing" object for <song-key>.translation.json, and one row per lyric
+ *       line: number, startMs, endMs (the next line's start), original text. Segments are written in these times.
  *
- *   npm run lyrics:lines -- --file /path/outside/the/repo/lemon.lrc
- *       The same table from a local LRC or plain-text file (one lyric line per line), for when
- *       lrclib.net is unreachable. Keep that file outside the repository (e.g. a scratch directory).
+ *   npm run lyrics:lines -- --file /path/outside/the/repo/lemon.lrc [--duration 4:15]
+ *       The same table from a local LRC file, for when lrclib.net is unreachable. Keep that file outside the
+ *       repository (e.g. a scratch directory); it must be LRCLIB's lyrics for the times to match in the app.
  *
- *   npm run lyrics:lines -- --check src/translations/kenshi-yonezu/lemon.json
- *       Re-fetches the lyrics the file was written against (lyricsSource.id) and reports
- *       untranslated lines and keys that match nothing.
+ *   npm run lyrics:lines -- --check lemon [--file …]
+ *       Loads src/editorial/notes/songs/lemon.md + lemon.translation.json, fetches the LRCLIB record in
+ *       "timing", and reports segment starts more than 400 ms from any line start, lines no segment covers,
+ *       and an LRCLIB ID or length that does not match "timing". Exits 1 on any problem.
  *
  * The original lyrics are only printed to the terminal — never write them to a file in this repository.
  */
-import { readFileSync } from 'node:fs';
-import { basename } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { basename, join } from 'node:path';
+import { loadSongNotes } from '../src/editorial/loadNotes';
 import { parseLrc } from '../src/lyrics/lrc';
+import { normaliseLines } from '../src/lyrics/lyricSync';
 import { LRCLIB_BASE_URL, recordToTimedLyrics, type LrclibRecord } from '../src/lyrics/providers/LrclibLyricsProvider';
 import type { TimedLyrics } from '../src/lyrics/types';
-import { checkTranslation, formatLineTable } from '../src/translation/curated/authoring';
-import { parseCuratedTranslation } from '../src/translation/curated/parse';
+import { checkTimeline, formatLineTable } from '../src/translation/curated/authoring';
 
+const NOTES_DIR = 'src/editorial/notes/songs';
 const CLIENT = 'ARC Music translation tool (https://github.com/KINGJNU-sakayume/player2)';
 
 function args(): Map<string, string> {
@@ -89,53 +92,71 @@ async function findRecord(options: Map<string, string>): Promise<LrclibRecord> {
   return best ?? synced[0]!;
 }
 
-function readLocalLyrics(path: string): TimedLyrics {
-  const text = readFileSync(path, 'utf8');
-  const timed = parseLrc(text);
-  if (timed.length > 0) return { lines: timed };
-  return { lines: text.split(/\r?\n/).map((line, i) => ({ startMs: i, text: line })) };
+function readLocalLyrics(path: string, durationMs: number | null): TimedLyrics {
+  const lines = normaliseLines(parseLrc(readFileSync(path, 'utf8')));
+  if (lines.length === 0) throw new Error(`${path} has no timed LRC lines (segments need times).`);
+  return { lines, timing: { lrclibId: null, durationMs } };
+}
+
+function recordLyrics(record: LrclibRecord): TimedLyrics {
+  const lyrics = recordToTimedLyrics(record);
+  if (!lyrics || lyrics.lines.length === 0) throw new Error(`LRCLIB record ${record.id} has no synced lyrics.`);
+  return { ...lyrics, lines: normaliseLines(lyrics.lines) };
+}
+
+async function check(key: string, options: Map<string, string>): Promise<void> {
+  const notePath = join(NOTES_DIR, `${key}.md`);
+  const timelinePath = join(NOTES_DIR, `${key}.translation.json`);
+  if (!existsSync(notePath)) throw new Error(`No song note ${notePath}.`);
+  if (!existsSync(timelinePath)) throw new Error(`No ${timelinePath} next to the note.`);
+  const [note] = loadSongNotes({ [notePath]: readFileSync(notePath, 'utf8') }, { [timelinePath]: JSON.parse(readFileSync(timelinePath, 'utf8')) });
+  const timeline = note!.translation!.timeline;
+  const localPath = options.get('file');
+  const lyrics = localPath
+    ? readLocalLyrics(localPath, timeline.timing.durationMs)
+    : recordLyrics((await lrclib<LrclibRecord>(`/get/${timeline.timing.lrclibId}`)) ?? missing(timeline.timing.lrclibId));
+  const report = checkTimeline(lyrics, timeline);
+  const problems: string[] = [];
+  if (!localPath && !report.lrclibIdMatches) problems.push(`LRCLIB returned record ${lyrics.timing?.lrclibId}, not ${timeline.timing.lrclibId}.`);
+  if (!localPath && !report.durationMatches) {
+    problems.push(`LRCLIB record length ${lyrics.timing?.durationMs ?? '?'} ms differs from timing.durationMs ${timeline.timing.durationMs} ms by more than 3 s.`);
+  }
+  for (const item of report.offGrid) {
+    problems.push(`segment ${item.segment} starts at ${item.startMs} ms, ${item.nearestLineMs === null ? 'with no line' : `${Math.abs(item.startMs - item.nearestLineMs)} ms from the nearest line start (${item.nearestLineMs})`}.`);
+  }
+  for (const row of report.uncovered) problems.push(`line ${row.number} (${row.startMs}–${row.endMs ?? '?'} ms) has no segment: ${row.text}`);
+
+  console.log(`${key}: ${timeline.segments.length} segments cover ${report.covered} / ${report.total} lines${localPath ? ` (local file ${basename(localPath)}: ID and length not checked)` : ''}`);
+  for (const problem of problems) console.log(`  ${problem}`);
+  if (problems.length) process.exitCode = 1;
+}
+
+function missing(id: number): never {
+  throw new Error(`No LRCLIB record ${id}.`);
 }
 
 async function main(): Promise<void> {
   const options = args();
+  const checkKey = options.get('check');
+  if (checkKey) return check(basename(checkKey).replace(/\.(md|translation\.json)$/, ''), options);
+
   const localPath = options.get('file');
   if (localPath) {
-    if (!options.get('check')) {
-      console.log(`Local file ${basename(localPath)} (no lyricsSource: add one only if these are LRCLIB's lines)`);
-      console.log('');
-      console.log(formatLineTable(readLocalLyrics(localPath)));
-      return;
-    }
-  }
-  const checkPath = options.get('check');
-  if (checkPath) {
-    const curated = parseCuratedTranslation(basename(checkPath, '.json'), checkPath, JSON.parse(readFileSync(checkPath, 'utf8')));
-    const lrclibId = curated.lyricsSource?.provider === 'lrclib' ? curated.lyricsSource.id : undefined;
-    let lyrics: TimedLyrics | null;
-    if (localPath) {
-      lyrics = readLocalLyrics(localPath);
-    } else if (lrclibId !== undefined) {
-      options.set('id', String(lrclibId));
-      lyrics = recordToTimedLyrics(await findRecord(options));
-    } else {
-      throw new Error('The file has no lyricsSource { "provider": "lrclib", "id": … } to check against; pass --file as well.');
-    }
-    if (!lyrics || lyrics.lines.length === 0) throw new Error('No synced lyrics to check against.');
-    const report = checkTranslation(lyrics, curated);
-    console.log(`${checkPath}: ${report.matched} / ${report.total} lines translated`);
-    for (const row of report.untranslated) console.log(`  untranslated ${String(row.number).padStart(3)}  ${row.hash}${row.occurrence > 1 ? `#${row.occurrence}` : ''}  ${row.text}`);
-    for (const key of report.unusedKeys) console.log(`  unused key   ${key}`);
-    if (report.untranslated.length || report.unusedKeys.length) process.exitCode = 1;
+    const durationS = seconds(options.get('duration'));
+    const lyrics = readLocalLyrics(localPath, durationS ? durationS * 1000 : null);
+    console.log(`Local file ${basename(localPath)} — use LRCLIB's own record for "timing" (the app matches segments against it).`);
+    console.log('');
+    console.log(formatLineTable(lyrics, lyrics.timing?.durationMs));
     return;
   }
 
   const record = await findRecord(options);
-  const lyrics = recordToTimedLyrics(record);
-  if (!lyrics || lyrics.lines.length === 0) throw new Error(`LRCLIB record ${record.id} has no synced lyrics.`);
+  const lyrics = recordLyrics(record);
   console.log(`LRCLIB ${record.id}: ${record.trackName} — ${record.artistName} / ${record.albumName ?? '?'} (${record.duration ?? '?'} s, ${lyrics.language ?? '?'})`);
-  console.log(`lyricsSource: { "provider": "lrclib", "id": ${record.id}, "durationMs": ${Math.round((record.duration ?? 0) * 1000)} }`);
+  console.log(`"timing": ${JSON.stringify(lyrics.timing && { lrclibId: lyrics.timing.lrclibId, durationMs: lyrics.timing.durationMs })}`);
   console.log('');
-  console.log(formatLineTable(lyrics));
+  console.log('  #  startMs    endMs  original (terminal only — never copy into the repository)');
+  console.log(formatLineTable(lyrics, lyrics.timing?.durationMs));
 }
 
 main().catch((error: unknown) => {

@@ -83,18 +83,24 @@ WebSearch / WebFetch로 확인한 사실만 쓴다. 조사할 것:
     - 2018– · 'Lemon' 이후
   ```
 
-### 곡 — Listening Note
+### 곡 — Listening Note (곡 하나에 노트 하나)
 
 - `short`: 1–2줄, 약 60–100자. 리뷰가 아니라 **무엇을 들어보라는 신호**("…를 따라 들어보면 좋다").
-- 본문: 2–4문단. 들을 포인트(구조, 편곡, 목소리), 곡의 배경, 가사 해석. 큐레이션 번역
-  (`src/translations/`)이 있으면 화자·청자 해석이 번역 브리프와 어긋나지 않게 한다.
+- 본문: 2–4문단. 들을 포인트(구조, 편곡, 목소리), 곡의 배경, 가사 해석.
+- 곡 노트는 큐레이션 번역도 담는다(`translate-lyrics` 스킬). 노트에 다음이 있으면 **그대로 보존한다**:
+  - frontmatter의 `translation:` 블록 (들여쓴 하위 필드 전부)
+  - 본문 끝의 `## 번역에 대하여` 섹션 (예약된 제목이다. 감상 본문에 같은 제목을 쓰지 않는다)
+  - 같은 이름의 `<key>.translation.json` 파일
+  감상 본문은 `## 번역에 대하여` **위에** 쓴다. 화자·청자 해석이 번역 브리프와 어긋나지 않게 한다.
+- 번역만 있는 곡 노트(`short`와 감상 본문이 없음)에 감상 노트를 더할 때는 `short`와 본문을 추가하고,
+  번역 블록과 섹션은 건드리지 않는다. 곡 하나에 노트 파일을 둘 만들지 않는다.
 
 ## 4. 파일 형식
 
 파일 이름이 키다: `src/editorial/notes/albums/stray-sheep.md` → `stray-sheep`(소문자, 하이픈).
 frontmatter는 `src/editorial/frontmatter.ts`가 읽는 작은 YAML 부분집합이다: `키: 값`, `[a, b]` 목록,
-`- 항목` 블록 목록, `키: >` 다음 들여쓴 줄(한 줄로 합쳐짐). 쉼표가 든 목록 항목은 `"Tyler, The Creator"`처럼
-따옴표로 감싼다.
+`- 항목` 블록 목록, `키: >` 다음 들여쓴 줄(한 줄로 합쳐짐), 그리고 곡 노트의 `translation:` 같은 들여쓴 하위 블록.
+쉼표가 든 목록 항목은 `"Tyler, The Creator"`처럼 따옴표로 감싼다.
 
 ```markdown
 ---
@@ -121,14 +127,15 @@ short: >
 | --- | --- | --- |
 | artists | `artistIds`, `names`, `short` | `origin`, `eras`, `written`, `updated`, `sources` |
 | albums | `artist`, `titles`, `short` | `albumIds`, `releaseYear`, `written`, `updated`, `sources` |
-| songs | `artist`, `titles`, `short` | `trackIds`, `written`, `updated`, `sources` |
+| songs | `artist`, `titles`, `short`(번역 블록이 있으면 선택) | `trackIds`, `written`, `updated`, `sources`, `translation` |
 
 본문은 문단(빈 줄로 구분), `##`/`###` 소제목, `- ` 목록, `> ` 인용, `**굵게**`, `*기울임*`,
 `[텍스트](https://…)`만 렌더된다(`src/components/NoteBody.tsx`). 날짜는 `YYYY-MM-DD`.
 
 ## 5. 확인하고 커밋
 
-1. `npm run check`: frontmatter 오류, 없는 아티스트 키, 중복 키를 잡는다.
+1. `npm run check`: frontmatter 오류, 없는 아티스트 키, 중복 키, 그리고 곡 노트의 `translation:` 블록 ↔
+   `.translation.json` ↔ `## 번역에 대하여` 짝이 맞지 않는 경우를 잡는다.
 2. 미리보기 카탈로그(`/?preview`)에 있는 아티스트면 `npm run dev`로 페이지와 드로어를 확인한다.
 3. 커밋 메시지 예: `notes: add STRAY SHEEP review`. 사용자에게 무엇을 근거로 썼는지(주요 출처)와
    확인하지 못해 뺀 내용을 짧게 알린다.

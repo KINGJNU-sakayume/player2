@@ -207,18 +207,25 @@ kbd { padding: 0 4px; border: 1px solid var(--line); font-size: .9em; }
 .note-body a:hover, .note-sources a:hover { text-decoration-color: currentColor; }
 .note-drawer-foot { margin-top: 34px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); }
 .note-sources { margin: 12px 0 0; padding-left: 0; display: grid; gap: 5px; font-size: 12.5px; line-height: 1.5; letter-spacing: .01em; text-transform: none; overflow-wrap: anywhere; }
-/* Curated lyric translation: header mark and the drawer's line-by-line pairs */
+/* Curated lyric translation: header mark, a segment carried over its continuing lines, and the song note's 번역에 대하여 */
 .curated-mark { font-size: 12px; letter-spacing: .06em; color: var(--main-text); }
 .translation-tools .note-more { margin-top: 0; }
-.translation-pairs { margin-top: 34px; }
-.translation-pairs h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.translation-coverage { font-weight: 400; letter-spacing: .08em; color: var(--dim); }
-.note-body .lyric-pairs { list-style: none; margin: 0; padding: 0; }
-.note-body .lyric-pairs li { display: grid; gap: 2px; margin: 0; padding: 9px 0; border-bottom: 1px solid var(--line-soft); }
-.lyric-pairs li:last-child { border-bottom: 0; }
-.lyric-original { font-size: 14px; line-height: 1.6; color: var(--ink); }
-.lyric-translation { font-size: 14px; line-height: 1.6; color: var(--muted); }
-.lyric-machine { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); }
+.current-trans.is-continued { color: var(--dim); }
+.song-translation { margin-top: 34px; }
+.note-drawer-copy > .song-translation:first-child { margin-top: 0; }
+.note-drawer-copy > .song-translation:first-child > h3 { margin-top: 0; padding-top: 0; border-top: 0; }
+.translation-brief { display: grid; gap: 6px; margin: 0 0 1.15em; font-size: 14px; line-height: 1.6; }
+.translation-brief > div { display: grid; grid-template-columns: 82px minmax(0,1fr); gap: 12px; }
+.translation-brief dt { font-size: 11px; letter-spacing: .09em; color: var(--dim); padding-top: 3px; }
+.translation-brief dd { margin: 0; color: var(--ink); }
+.term-table { width: 100%; margin: 0 0 1.15em; border-collapse: collapse; font-size: 13.5px; line-height: 1.55; }
+.term-table caption { text-align: left; padding-bottom: 6px; font-size: 11px; letter-spacing: .09em; color: var(--dim); }
+.term-table th { text-align: left; font-weight: 400; font-size: 11px; letter-spacing: .09em; color: var(--dim); padding: 0 10px 6px 0; border-bottom: 1px solid var(--line); }
+.term-table td { vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line-soft); }
+.term-table td:first-child, .term-table td:nth-child(2) { color: var(--ink); word-break: keep-all; }
+.term-table td:nth-child(3) { color: var(--muted); }
+.translation-reasoning { margin-top: 4px; }
+.translation-dates { margin: 1.15em 0 0; font-size: 11px; letter-spacing: .09em; color: var(--dim); }
 .queue-label { margin: 22px 0 6px; }
 .queue-note { margin: 10px 0; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
 .queue-list .index-row { grid-template-columns: 30px 40px minmax(0,1fr) auto; }

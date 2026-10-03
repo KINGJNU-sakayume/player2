@@ -27,8 +27,11 @@ Never inject long editorial prose into Spotify transport models.
   `written` / `updated` / `sources`; the body is the long-form note. Loaded by `src/editorial/loadNotes.ts`.
 - Album notes are critic-style reviews without scores. The writing rules are in
   `.claude/skills/write-note/SKILL.md`.
-- Curated lyric translations are JSON files: `src/translations/<artist>/<song>.json`, holding a translation brief and
-  translated lines keyed by original-line hash (see "Lyrics copyright/data rule" below).
+- One song, one note. A song note (`notes/songs/<key>.md`) is the Listening Note and, when the song has one, its
+  curated lyric translation: a `translation:` block in the frontmatter (the brief), a reserved `## 번역에 대하여`
+  section at the end of the body (the reasoning) and `notes/songs/<key>.translation.json` (timed segments). The
+  translation inherits the note's matching fields; `short` is optional on a note that has a translation. See "Lyrics
+  copyright/data rule" below.
 
 The type sketches below are the original v7 plan; the current types are in `src/editorial/types.ts` and
 `src/translation/curated/types.ts`.
@@ -164,14 +167,33 @@ Do not replace this by hard-coding copyrighted song lyrics into the repository.
 
 Production lyrics must come through an appropriately licensed/authorized provider or another user-approved source. Until then, keep the mock provider explicitly synthetic.
 
-### Curated translations (v7.2)
+### Curated translations (v7.5: time segments in the song note)
 
-The repository owner decided to keep hand-made Korean translations of lyrics in this public repository
-(`src/translations/`), accepting that a translation is a derivative of the original lyrics. To limit what is stored:
+The repository owner decided to keep hand-made Korean translations of lyrics in this public repository (inside the song
+notes, `src/editorial/notes/songs/`), accepting that a translation is a derivative of the original lyrics. To limit what
+is stored:
 
-- the original lyrics are **never** stored — not in translation files, notes, tests, fixtures or commit messages;
-- each translated line is keyed by a hash of the original line and matched at runtime against lyrics loaded from
-  LRCLIB, so the files are unreadable as lyrics without that source;
-- a brief may quote at most a few words of the original as evidence.
+- the original lyrics are **never** stored — not in translation files, notes, tests, fixtures, comments, docs or commit
+  messages. Original text and line timing come from LRCLIB at runtime only;
+- `<key>.translation.json` holds only `schemaVersion: 2`, `timing: { lrclibId, durationMs }` (the LRCLIB record the
+  times were taken from) and `segments: [{ startMs, endMs, translation }]`. The parser rejects unknown keys and, in
+  particular, `text` / `original` / `source` / `lyrics`; segments must be sorted, non-overlapping, non-empty and end
+  by `durationMs + 3 s`;
+- the brief and the `## 번역에 대하여` section may quote at most a few words of the original as evidence.
 
-Tests use the synthetic preview test lines as fixtures, never real lyrics.
+Matching and placement at runtime:
+
+- the note is found as any song note (track ID, then title + artist name). A name match brings the translation only when
+  Spotify's track length is within 3 s of `timing.durationMs`;
+- for a song whose note matches (same rule), the app loads lyrics directly from the `timing.lrclibId` record, provided
+  its length is within 3 s of the playing track; otherwise it searches LRCLIB as usual;
+- the loaded LRCLIB lyrics must be the `timing.lrclibId` record, or another record within 3 s of its length; otherwise
+  the translation is not applied (machine translation, development warning);
+- line i's window is [start_i, start_{i+1}) (the last runs to the end of the track). A segment shows under the line
+  whose window holds its `startMs` (snapped to the next line when that starts within 400 ms), stays — marked as a
+  continuation — while later lines inside the segment play, and is joined with other segments that start in the same
+  line. Only lines no segment covers go to the machine provider;
+- a malformed file skips that song's translation with a development warning; the tests load every file strictly and fail.
+
+Tests use dummy lines ("line one") and the synthetic preview test lines as fixtures, never real lyrics. The earlier
+hash-keyed files (`src/translations/`, v7.2) were converted with `npm run notes:migrate` and removed.

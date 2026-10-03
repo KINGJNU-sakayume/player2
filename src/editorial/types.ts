@@ -1,3 +1,5 @@
+import type { SongTranslation } from '../translation/curated/types';
+
 /**
  * ARC's hand-written notes. They are local, source-controlled data and stay
  * separate from Spotify models: pages look a note up and render it only when
@@ -6,7 +8,7 @@
  *
  * - Artist → Editorial Note
  * - Album  → Editorial Note
- * - Song   → Listening Note
+ * - Song   → Listening Note (+ curated translation, one note per song)
  */
 
 export interface EditorialBody {
@@ -59,12 +61,20 @@ export interface AlbumNote extends EditorialBody {
   releaseYear?: number;
 }
 
-export interface SongNote extends EditorialBody {
+/**
+ * The one note per song: the listening note (`short` cue and body) and, when
+ * the song has one, its curated translation (brief, `## 번역에 대하여`, and the
+ * paired `<key>.translation.json`). Either part may be absent, not both.
+ */
+export interface SongNote extends Omit<EditorialBody, 'short'> {
   key: string;
   artist: string;
   /** Spotify track IDs: the album cut, the single, and other editions. */
   trackIds: string[];
   titles: string[];
+  /** The listening cue on Now Playing; a translation-only note has none. */
+  short?: string;
+  translation?: SongTranslation;
 }
 
 export type NoteKind = 'ARTIST' | 'ALBUM' | 'SONG';

@@ -1,3 +1,5 @@
+import { parseTranslationBrief, parseTranslationTimeline } from '../translation/curated/parse';
+import type { SongTranslation } from '../translation/curated/types';
 import { FieldReader, fileKey, FrontmatterError, parseFrontmatter } from './frontmatter';
 import type { AlbumNote, ArtistEra, ArtistNote, EditorialBody, SongNote } from './types';
 
@@ -14,17 +16,20 @@ export type NoteFiles = Record<string, string>;
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-function body(fields: FieldReader, full: string, file: string): EditorialBody {
+function dates(fields: FieldReader, file: string): Pick<EditorialBody, 'written' | 'updated'> {
   const written = fields.optionalString('written');
   const updated = fields.optionalString('updated');
   for (const date of [written, updated]) {
     if (date !== undefined && !ISO_DATE.test(date)) throw new FrontmatterError(`${file}: dates must be YYYY-MM-DD, got "${date}".`);
   }
+  return { written, updated };
+}
+
+function body(fields: FieldReader, full: string, file: string): EditorialBody {
   return {
     short: fields.string('short'),
     full: full || undefined,
-    written,
-    updated,
+    ...dates(fields, file),
     sources: fields.optionalList('sources'),
   };
 }
@@ -72,12 +77,80 @@ export function loadAlbumNotes(files: NoteFiles): AlbumNote[] {
   })).sort((a, b) => a.artist.localeCompare(b.artist) || (a.releaseYear ?? 0) - (b.releaseYear ?? 0) || a.key.localeCompare(b.key));
 }
 
-export function loadSongNotes(files: NoteFiles): SongNote[] {
-  return load(files, (key, fields, full, file) => ({
-    key,
-    artist: fields.string('artist'),
-    trackIds: fields.optionalList('trackIds') ?? [],
-    titles: fields.list('titles'),
-    ...body(fields, full, file),
-  }));
+/** `{ path: parsed JSON }` for `notes/songs/*.translation.json`, as `import.meta.glob(…, { import: 'default', eager: true })` returns. */
+export type TranslationFiles = Record<string, unknown>;
+
+/** The reserved heading that starts a song note's translation section. */
+export const TRANSLATION_HEADING = '## 번역에 대하여';
+const TRANSLATION_SECTION = /^##[ \t]+번역에 대하여[ \t]*$/m;
+
+/** Splits a song note's body into the listening note and the `## 번역에 대하여` section (without its heading). */
+export function splitSongBody(full: string): { listening: string; about: string | null } {
+  const match = TRANSLATION_SECTION.exec(full);
+  if (!match) return { listening: full.trim(), about: null };
+  return { listening: full.slice(0, match.index).trim(), about: full.slice(match.index + match[0].length).trim() };
+}
+
+export interface SongNoteOptions {
+  /**
+   * true (tests, tools): any problem throws. false (the app): a broken
+   * translation is dropped from its note with a warning, so one bad file never
+   * takes the other songs (or the note itself) down.
+   */
+  strict?: boolean;
+  warn?: (message: string) => void;
+}
+
+/** `notes/songs/lemon.translation.json` → `lemon`. */
+export function translationFileKey(path: string): string {
+  return path.replace(/^.*\//, '').replace(/\.translation\.json$/, '');
+}
+
+export function loadSongNotes(files: NoteFiles, translationFiles: TranslationFiles = {}, options: SongNoteOptions = {}): SongNote[] {
+  const strict = options.strict ?? true;
+  const report = (error: unknown) => {
+    if (strict) throw error;
+    options.warn?.(`Curated translation skipped: ${error instanceof Error ? error.message : String(error)}`);
+  };
+  const timelines = new Map(Object.keys(translationFiles).map((path) => [translationFileKey(path), path]));
+  const notes = load(files, (key, fields, full, file): SongNote => {
+    const block = fields.optionalMap('translation');
+    const { listening, about } = splitSongBody(full);
+    const timelinePath = timelines.get(key);
+    timelines.delete(key);
+
+    let translation: SongTranslation | undefined;
+    try {
+      if (block && !timelinePath) throw new FrontmatterError(`${file}: has a "translation" block but no ${key}.translation.json next to it.`);
+      if (!block && timelinePath) throw new FrontmatterError(`${timelinePath}: has no "translation" block in ${file}.`);
+      if (block && about === null) throw new FrontmatterError(`${file}: has a "translation" block but no "${TRANSLATION_HEADING}" section.`);
+      if (!block && about !== null) throw new FrontmatterError(`${file}: has a "${TRANSLATION_HEADING}" section but no "translation" block.`);
+      if (block && !about) throw new FrontmatterError(`${file}: the "${TRANSLATION_HEADING}" section is empty.`);
+      if (block && timelinePath) {
+        translation = {
+          brief: parseTranslationBrief(block),
+          about: about!,
+          timeline: parseTranslationTimeline(timelinePath, translationFiles[timelinePath]),
+        };
+      }
+    } catch (error) {
+      report(error);
+    }
+
+    // A note with a translation block may skip the listening cue; any other song note needs one.
+    const short = block ? fields.optionalString('short') : fields.string('short');
+    return {
+      key,
+      artist: fields.string('artist'),
+      trackIds: fields.optionalList('trackIds') ?? [],
+      titles: fields.list('titles'),
+      ...(short ? { short } : {}),
+      full: listening || undefined,
+      ...dates(fields, file),
+      sources: fields.optionalList('sources'),
+      ...(translation ? { translation } : {}),
+    };
+  });
+  for (const path of timelines.values()) report(new FrontmatterError(`${path}: no song note with the same name.`));
+  return notes;
 }

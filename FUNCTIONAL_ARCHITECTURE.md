@@ -155,6 +155,16 @@ Translation is secondary to original lyrics.
 - provider is replaceable
 - cache by track + lyric version + language pair when practical
 - failure hides translation cleanly
+- lyrics for a song with a curated translation are pinned to the LRCLIB record the translation was timed on
+  (`pinnedLrclibId` → `LyricsRequestOptions.lrclibId` → `/api/get/<id>`, used when its length is within 3 s of the
+  track; cached under its own key); other tracks and other edits search LRCLIB as before
+- a curated translation (in the song note) comes first: `getCuratedTranslation` finds the note (track ID, or name +
+  Spotify length within 3 s), `lyricsMatchTiming` checks the loaded lyrics' `timing` (LRCLIB record ID and duration,
+  carried by the provider and the lyrics cache) against the translation's `timing`, and `alignSegments` places the
+  time segments on the loaded lines (`src/translation/curated/`). Only uncovered lines reach the machine provider
+- a segment over several lines is shown under its first line and kept while the others play; the Now Playing
+  current-line translation keeps one element per segment, so it does not re-appear on each line
+- Translation On / Off applies to curated and machine translation alike
 
 ## Editorial drawer state
 
@@ -169,7 +179,10 @@ type NoteContext =
   | { kind: 'song'; trackId: string };
 ```
 
-Only one note drawer is mounted globally in the app shell.
+Only one note drawer is mounted globally in the app shell. A song has one note and one drawer layout
+(`src/components/SongNote.tsx`): the listening body, then *번역에 대하여* (speaker → addressee, relationship and speech
+level; pronoun and term tables; the reasoning), then sources and dates. The lyrics header's **Translation note →** opens
+the same drawer scrolled to that section (`NotePayload.focus`). The translated lines are never repeated in the drawer.
 
 Opening/closing it must not affect playback.
 
@@ -224,6 +237,7 @@ Every async surface needs deliberate states.
 
 ### Notes
 - no local editorial override → omit preview/drawer action
+- song note with a translation but no listening cue → Now Playing shows only the link to the translation note
 
 ## GitHub Pages / static hosting
 

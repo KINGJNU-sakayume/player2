@@ -14,10 +14,30 @@ export interface TimedLyrics {
   source?: string;
   /** The provider reports the track as instrumental (no lines expected). */
   instrumental?: boolean;
+  /**
+   * Which recording's timing these lines follow: the LRCLIB record ID and its
+   * duration. A curated translation's segments are times in one LRCLIB record,
+   * so they are applied only when this matches (see translation/curated).
+   */
+  timing?: LyricsTiming;
+}
+
+export interface LyricsTiming {
+  /** LRCLIB record ID; null for providers without one. */
+  lrclibId: number | null;
+  /** Length of the recording the timestamps belong to. */
+  durationMs: number | null;
 }
 
 export interface LyricsRequestOptions {
   signal?: AbortSignal;
+  /**
+   * The LRCLIB record a song note's curated translation was timed on. The
+   * LRCLIB provider loads exactly that record (when its length matches the
+   * track) instead of searching, so lyrics and translation share one timing.
+   * Other providers ignore it.
+   */
+  lrclibId?: number;
 }
 
 /**

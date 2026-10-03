@@ -9,7 +9,7 @@ import { SPEECH_LEVEL_LABEL } from '../../translation/curated/types';
 import { detectLineLanguage, detectLineLanguages } from '../../translation/languageDetect';
 import { useLyricTranslation, type TranslationState } from '../../translation/useLyricTranslation';
 import { useNote } from '../NoteContext';
-import { translationNotePayload } from './TranslationNote';
+import { songNotePayload } from '../SongNote';
 
 /** v7 shows the current line, its translation and the next two lines. */
 const UPCOMING_LINES = 2;
@@ -37,14 +37,14 @@ function TranslationStatus({
       return <span>Translating…</span>;
     case 'ready':
       if (state.curated) {
-        const { total, matched, machine } = state.curated;
+        const { total, covered, machine } = state.curated;
         return (
           <>
             <span
               className="curated-mark"
-              title={`${matched} of ${total} lines from the curated translation${machine.length ? `, ${machine.length} machine-translated` : ''}`}
+              title={`${covered} of ${total} lines from the curated translation${machine.length ? `, ${machine.length} machine-translated` : ''}`}
             >
-              Curated · <span lang="ko">{SPEECH_LEVEL_LABEL[state.curated.translation.brief.register]}</span>
+              Curated · <span lang="ko">{SPEECH_LEVEL_LABEL[state.curated.match.translation.brief.register]}</span>
             </span>
             {openNote && (
               <button type="button" className="note-more" aria-haspopup="dialog" onClick={openNote}>
@@ -94,20 +94,22 @@ export function LyricsBlock({ track, lyricsState, context }: { track: TrackIdent
   const current = lines && activeIndex >= 0 ? lines[activeIndex]! : null;
   const upcoming = lines ? lines.slice(nextIndex, nextIndex + UPCOMING_LINES) : [];
   const translated = translation.status === 'ready' && activeIndex >= 0 ? (translation.lines[activeIndex] ?? '').trim() : '';
-  const openTranslationNote =
-    translation.status === 'ready' && translation.curated && lines
-      ? () =>
-          openNote(
-            translationNotePayload({
-              track,
-              lines,
-              translations: translation.lines,
-              lineLanguages,
-              coverage: translation.curated!,
-              titleLang: detectLineLanguage(track.title),
-            }),
-          )
-      : null;
+  // A curated segment spanning several lines keeps one element (same key), dimmed while it continues.
+  const curatedLine = translation.status === 'ready' && translation.curated && activeIndex >= 0 ? translation.curated : null;
+  const segment = curatedLine?.segmentOf[activeIndex] ?? null;
+  const continued = Boolean(curatedLine?.continued[activeIndex]);
+  const curatedNote = translation.status === 'ready' ? translation.curated?.match.note : undefined;
+  const openTranslationNote = curatedNote
+    ? () =>
+        openNote(
+          songNotePayload(curatedNote, {
+            title: track.title,
+            titleLang: detectLineLanguage(track.title),
+            subtitle: [track.artists.map((artist) => artist.name).join(', '), track.album.name].filter(Boolean).join(' · '),
+            focusTranslation: true,
+          }),
+        )
+    : null;
 
   return (
     <>
@@ -178,7 +180,11 @@ export function LyricsBlock({ track, lyricsState, context }: { track: TrackIdent
               </p>
             )}
             {translated && (
-              <p key={`tr-${activeIndex}`} className="current-trans" lang={translationTarget}>
+              <p
+                key={segment !== null ? `seg-${segment}` : `tr-${activeIndex}`}
+                className={continued ? 'current-trans is-continued' : 'current-trans'}
+                lang={translationTarget}
+              >
                 {translated}
               </p>
             )}

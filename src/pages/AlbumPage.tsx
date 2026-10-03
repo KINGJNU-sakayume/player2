@@ -82,7 +82,7 @@ function TrackSequence({ album }: { album: AlbumDetail }) {
           </span>
           <span className="track-aside">
             {noted && (
-              <span className="track-note" title="Listening note">
+              <span className="track-note" title="Song note">
                 Note
               </span>
             )}

@@ -1,17 +1,23 @@
 import { BoundedCache } from '../lib/boundedCache';
+import { devWarn } from '../lib/devWarn';
 import { hashString } from '../lib/hash';
 import type { TimedLyrics } from '../lyrics/types';
-import { applyCuratedTranslation, type CuratedTranslation } from './curated';
+import { lyricsMatchTiming, type CuratedMatch } from './curated';
+import { alignSegments } from './curated/align';
 import { detectLineLanguages, sameLanguage } from './languageDetect';
 import { TranslationUnavailableError, type TranslationProvider } from './TranslationProvider';
 
-/** How much of the lyrics a curated translation covered. */
+/** How a curated translation sat on the loaded lyrics. */
 export interface CuratedCoverage {
-  translation: CuratedTranslation;
-  /** Lines with text, and how many of them the curated file covered. */
+  match: CuratedMatch;
+  /** Lines with text, and how many of them a segment covered. */
   total: number;
-  matched: number;
-  /** Line indices the curated file did not cover that the machine provider filled in. */
+  covered: number;
+  /** Per lyric line: the first segment shown with it (stable across continued lines), or null. */
+  segmentOf: (number | null)[];
+  /** Per lyric line: true when it continues the previous line's segment. */
+  continued: boolean[];
+  /** Line indices no segment covered that the machine provider filled in. */
   machine: number[];
 }
 
@@ -88,32 +94,42 @@ export async function translateLyrics(
 }
 
 /**
- * A curated translation first; lines it does not cover (a different lyrics
- * version, an added ad-lib) go to the machine provider when there is one.
- * When no line matches at all, the curated file is for another version of the
- * lyrics and plain machine translation is used instead.
+ * A curated translation first: its time segments are placed on the loaded
+ * lines (see curated/align.ts) and only the lines no segment covers go to the
+ * machine provider, when there is one. When the lyrics follow another timing
+ * (a different LRCLIB record of another length) or no segment finds a line,
+ * the curated translation is not used and plain machine translation runs.
  */
 export async function translateWithCurated(
   provider: TranslationProvider | null,
   trackId: string,
   lyrics: TimedLyrics,
-  curated: CuratedTranslation,
+  match: CuratedMatch,
   targetLanguage: string,
+  trackDurationMs?: number | null,
   cache: BoundedCache<string[]> = defaultCache,
 ): Promise<LyricTranslationResult> {
-  const applied = applyCuratedTranslation(lyrics, curated);
-  if (applied.matched === 0) {
-    return provider
-      ? translateLyrics(provider, trackId, lyrics, targetLanguage, cache)
-      : { status: 'unavailable', message: 'The curated translation is for a different version of these lyrics.' };
+  const { timeline } = match.translation;
+  const fallback = (message: string): Promise<LyricTranslationResult> | LyricTranslationResult => {
+    devWarn(`"${match.note.key}": ${message} Using machine translation.`);
+    return provider ? translateLyrics(provider, trackId, lyrics, targetLanguage, cache) : { status: 'unavailable', message };
+  };
+  if (!lyricsMatchTiming(lyrics.timing, timeline.timing)) {
+    return fallback(
+      `the lyrics (LRCLIB ${lyrics.timing?.lrclibId ?? '?'}, ${lyrics.timing?.durationMs ?? '?'} ms) are not the version the curated ` +
+        `translation was timed on (LRCLIB ${timeline.timing.lrclibId}, ${timeline.timing.durationMs} ms).`,
+    );
   }
-  const lines = [...applied.lines];
+  const aligned = alignSegments(lyrics.lines, timeline.segments, lyrics.timing?.durationMs ?? trackDurationMs);
+  if (aligned.anchored === 0) return fallback('no curated segment falls on these lyrics.');
+
+  const lines = [...aligned.lines];
   const machine: number[] = [];
-  if (provider && applied.missing.length > 0) {
-    const rest: TimedLyrics = { ...lyrics, lines: applied.missing.map((index) => lyrics.lines[index]!) };
+  if (provider && aligned.uncovered.length > 0) {
+    const rest: TimedLyrics = { ...lyrics, lines: aligned.uncovered.map((index) => lyrics.lines[index]!) };
     const result = await translateLyrics(provider, trackId, rest, targetLanguage, cache);
     if (result.status === 'ready') {
-      applied.missing.forEach((lineIndex, i) => {
+      aligned.uncovered.forEach((lineIndex, i) => {
         const text = result.lines[i]?.trim();
         if (!text) return;
         lines[lineIndex] = text;
@@ -121,5 +137,10 @@ export async function translateWithCurated(
       });
     }
   }
-  return { status: 'ready', lines, curated: { translation: curated, total: applied.total, matched: applied.matched, machine } };
+  const total = lyrics.lines.filter((line) => line.text.trim()).length;
+  return {
+    status: 'ready',
+    lines,
+    curated: { match, total, covered: total - aligned.uncovered.length, segmentOf: aligned.segmentOf, continued: aligned.continued, machine },
+  };
 }

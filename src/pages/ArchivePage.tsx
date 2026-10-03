@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom';
 import { usePageTitle } from '../app/pageTitle';
 import { useNote } from '../components/NoteContext';
+import { songNotePayload } from '../components/SongNote';
 import { albumNotes } from '../editorial/albums';
 import { artistNotes } from '../editorial/artists';
-import { namesMatch } from '../editorial/lookup';
 import { songNotes } from '../editorial/songs';
-import type { AlbumNote, ArtistNote, EditorialBody, NoteKind, SongNote } from '../editorial/types';
+import type { AlbumNote, ArtistNote, EditorialBody, SongNote } from '../editorial/types';
 import { pluralise } from '../lib/format';
 import { usePlay } from '../playback/hooks';
-import { curatedTranslations, type CuratedTranslation } from '../translation/curated';
 import { SPEECH_LEVEL_LABEL } from '../translation/curated/types';
 import { detectLineLanguage } from '../translation/languageDetect';
 
@@ -16,37 +15,31 @@ interface ArtistEntry {
   artist: ArtistNote;
   albums: AlbumNote[];
   songs: SongNote[];
-  translations: CuratedTranslation[];
 }
 
-/** Every note and translation in the archive, grouped under its artist. Pure data: no Spotify request. */
+/** Every note in the archive, grouped under its artist. Pure data: no Spotify request. */
 export function buildArchiveIndex(
   artists: readonly ArtistNote[] = artistNotes,
   albums: readonly AlbumNote[] = albumNotes,
   songs: readonly SongNote[] = songNotes,
-  translations: readonly CuratedTranslation[] = curatedTranslations,
-): { entries: ArtistEntry[]; unattached: CuratedTranslation[] } {
-  const attached = new Set<CuratedTranslation>();
+): { entries: ArtistEntry[] } {
   const entries = [...artists]
     .sort((a, b) => a.names[0]!.localeCompare(b.names[0]!, 'en', { sensitivity: 'base' }))
-    .map((artist) => {
-      const own = translations.filter((t) => namesMatch(artist.names, t.artistNames));
-      own.forEach((t) => attached.add(t));
-      return {
-        artist,
-        albums: albums.filter((a) => a.artist === artist.key).sort((a, b) => (a.releaseYear ?? 0) - (b.releaseYear ?? 0)),
-        songs: songs.filter((s) => s.artist === artist.key).sort((a, b) => a.titles[0]!.localeCompare(b.titles[0]!)),
-        translations: own.sort((a, b) => a.titles[0]!.localeCompare(b.titles[0]!)),
-      };
-    });
-  return { entries, unattached: translations.filter((t) => !attached.has(t)) };
+    .map((artist) => ({
+      artist,
+      albums: albums.filter((a) => a.artist === artist.key).sort((a, b) => (a.releaseYear ?? 0) - (b.releaseYear ?? 0)),
+      songs: songs.filter((s) => s.artist === artist.key).sort((a, b) => a.titles[0]!.localeCompare(b.titles[0]!)),
+    }));
+  return { entries };
 }
 
-function ReadMore({ kind, note, title, subtitle }: { kind: NoteKind; note: EditorialBody; title: string; subtitle?: string }) {
+const hasListening = (song: SongNote) => Boolean(song.short?.trim() || song.full?.trim());
+
+function ReadMore({ kind, note, title, subtitle }: { kind: 'ARTIST' | 'ALBUM'; note: EditorialBody; title: string; subtitle?: string }) {
   const { openNote } = useNote();
   if (!note.full?.trim()) return null;
-  const heading = kind === 'SONG' ? 'Listening note' : 'Editorial note';
-  const label = kind === 'SONG' ? 'Song' : kind === 'ALBUM' ? 'Album' : 'Artist';
+  const heading = 'Editorial note';
+  const label = kind === 'ALBUM' ? 'Album' : 'Artist';
   return (
     <button
       type="button"
@@ -82,32 +75,66 @@ function PlayTrack({ trackIds, title }: { trackIds: readonly string[]; title: st
   );
 }
 
-function TranslationRow({ translation }: { translation: CuratedTranslation }) {
-  const title = translation.titles[0]!;
+function ReadSong({ song, title, subtitle }: { song: SongNote; title: string; subtitle?: string }) {
+  const { openNote } = useNote();
+  if (!song.full?.trim() && !song.translation) return null;
+  return (
+    <button
+      type="button"
+      className="row-play"
+      aria-haspopup="dialog"
+      aria-label={`Read the note on ${title}`}
+      onClick={() => openNote(songNotePayload(song, { title, subtitle, titleLang: detectLineLanguage(title) }))}
+    >
+      Read
+    </button>
+  );
+}
+
+/** One row per song note, marked for what it holds: a listening note, a curated translation, or both. */
+function SongRow({ song, artistName }: { song: SongNote; artistName: string }) {
+  const title = song.titles[0]!;
+  const brief = song.translation?.brief;
   return (
     <li className="archive-row">
-      <span className="archive-kind">Translation</span>
+      <span className="archive-kind">Song</span>
       <span className="archive-text">
         <b lang={detectLineLanguage(title)}>{title}</b>
-        <span className="archive-meta" lang="ko">
-          {SPEECH_LEVEL_LABEL[translation.brief.register]} · {translation.brief.speaker} → {translation.brief.addressee}
+        <span className="archive-marks">
+          {hasListening(song) && <span className="archive-mark">Listening note</span>}
+          {brief && (
+            <span className="archive-mark">
+              Translation · <span lang="ko">{SPEECH_LEVEL_LABEL[brief.register]}</span>
+            </span>
+          )}
         </span>
+        {song.short ? (
+          <span className="archive-preview" lang="ko">
+            {song.short}
+          </span>
+        ) : (
+          brief && (
+            <span className="archive-meta" lang="ko">
+              {brief.speaker} → {brief.addressee}
+            </span>
+          )
+        )}
       </span>
       <span className="archive-actions">
-        <PlayTrack trackIds={translation.trackIds} title={title} />
+        <ReadSong song={song} title={title} subtitle={artistName} />
+        <PlayTrack trackIds={song.trackIds} title={title} />
       </span>
     </li>
   );
 }
 
 function ArtistSection({ entry }: { entry: ArtistEntry }) {
-  const { artist, albums, songs, translations } = entry;
+  const { artist, albums, songs } = entry;
   const name = artist.names[0]!;
   const artistId = artist.artistIds[0];
   const count = [
     albums.length ? pluralise(albums.length, 'album note') : null,
-    songs.length ? pluralise(songs.length, 'listening note') : null,
-    translations.length ? pluralise(translations.length, 'translation') : null,
+    songs.length ? pluralise(songs.length, 'song note') : null,
   ].filter(Boolean);
   return (
     <section className="archive-artist" aria-labelledby={`archive-${artist.key}`}>
@@ -162,26 +189,8 @@ function ArtistSection({ entry }: { entry: ArtistEntry }) {
             </li>
           );
         })}
-        {songs.map((song) => {
-          const title = song.titles[0]!;
-          return (
-            <li key={song.key} className="archive-row">
-              <span className="archive-kind">Song</span>
-              <span className="archive-text">
-                <b lang={detectLineLanguage(title)}>{title}</b>
-                <span className="archive-preview" lang="ko">
-                  {song.short}
-                </span>
-              </span>
-              <span className="archive-actions">
-                <ReadMore kind="SONG" note={song} title={title} subtitle={name} />
-                <PlayTrack trackIds={song.trackIds} title={title} />
-              </span>
-            </li>
-          );
-        })}
-        {translations.map((translation) => (
-          <TranslationRow key={translation.key} translation={translation} />
+        {songs.map((song) => (
+          <SongRow key={song.key} song={song} artistName={name} />
         ))}
       </ul>
     </section>
@@ -190,17 +199,18 @@ function ArtistSection({ entry }: { entry: ArtistEntry }) {
 
 /**
  * The archive's own index, like the back of a book: every artist with a note,
- * their reviewed albums in release order, listening notes and curated
- * translations. Built from the local notes only.
+ * their reviewed albums in release order, and one entry per song note, marked
+ * for its listening note and its curated translation. Built from the local
+ * notes only.
  */
 export function ArchivePage() {
   usePageTitle('Archive');
-  const { entries, unattached } = buildArchiveIndex();
+  const { entries } = buildArchiveIndex();
   const totals = [
     pluralise(entries.length, 'artist'),
     pluralise(albumNotes.length, 'album note'),
-    pluralise(songNotes.length, 'listening note'),
-    pluralise(curatedTranslations.length, 'translation'),
+    pluralise(songNotes.filter(hasListening).length, 'listening note'),
+    pluralise(songNotes.filter((song) => song.translation).length, 'translation'),
   ];
 
   return (
@@ -215,18 +225,6 @@ export function ArchivePage() {
           {entries.map((entry) => (
             <ArtistSection key={entry.artist.key} entry={entry} />
           ))}
-          {unattached.length > 0 && (
-            <section className="archive-artist" aria-labelledby="archive-other">
-              <div className="archive-artist-head">
-                <h2 id="archive-other">Other translations</h2>
-              </div>
-              <ul className="archive-rows">
-                {unattached.map((translation) => (
-                  <TranslationRow key={translation.key} translation={translation} />
-                ))}
-              </ul>
-            </section>
-          )}
         </div>
       </div>
     </div>
