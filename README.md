@@ -106,7 +106,11 @@ The file name is the key. The frontmatter holds the match fields and a `short` p
 shorter). The body is the long-form note for the drawer. It can use paragraphs, `##` sections, lists, quotes, emphasis
 and links. Optional `written` / `updated` dates and `sources` appear at the foot of the drawer. To have Claude
 write one, ask for it (*"STRAY SHEEP 리뷰 써줘"*); the procedure and style rules are in
-[`.claude/skills/write-note/SKILL.md`](.claude/skills/write-note/SKILL.md). Matching, in
+[`.claude/skills/write-note/SKILL.md`](.claude/skills/write-note/SKILL.md). An album request covers the artist note,
+the review, a listening note for every track (`tracks:` in the album note) and translations of the songs not in
+Korean. [`src/editorial/quality.ts`](src/editorial/quality.ts) holds the quality floor that `npm run check` enforces
+(notes written before it are listed in `PENDING_REVIEW` until rewritten); `npm run notes:audit -- <artist-key>`
+prints it per note. Matching, in
 [`src/editorial/lookup.ts`](src/editorial/lookup.ts):
 
 1. **Spotify IDs first** — `artistIds`, `albumIds`, `trackIds` (the 22-character part of an `open.spotify.com` link).
@@ -222,6 +226,7 @@ npm run test:run
 npm run build
 npm run check      # all of the above — run before pushing
 npm run lyrics:lines -- …   # curated-translation tool (see Curated translations)
+npm run notes:audit -- …    # notes against the quality floor (all, an artist key, or songs/<key>)
 npm run notes:migrate -- --dry-run   # one-time: hash-keyed translations → song notes (already run)
 npm run preview    # serve dist/ on http://127.0.0.1:4173/
 ```

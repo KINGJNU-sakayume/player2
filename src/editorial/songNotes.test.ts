@@ -58,6 +58,14 @@ describe('song note ↔ curated translation', () => {
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('segments'));
   });
 
+  it('reads lyricsLanguage on a song without a translation, and rejects it elsewhere', () => {
+    const korean = note({ block: false, section: false }).replace('titles: [Test Song]', 'titles: [Test Song]\nlyricsLanguage: ko');
+    expect(loadSongNotes(md(korean))[0]?.lyricsLanguage).toBe('ko');
+    expect(() => loadSongNotes(md(korean.replace('lyricsLanguage: ko', 'lyricsLanguage: ja')))).toThrow(/must be one of/);
+    const translated = note().replace('titles: [Test Song]', 'titles: [Test Song]\nlyricsLanguage: ko');
+    expect(() => loadSongNotes(md(translated), json())).toThrow(/has a "translation" block/);
+  });
+
   it('still requires a listening cue on a note without a translation', () => {
     expect(() => loadSongNotes(md(note({ block: false, section: false, short: false })))).toThrow(/short/);
   });

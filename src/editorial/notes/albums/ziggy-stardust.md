@@ -3,6 +3,18 @@ artist: david-bowie
 albumIds: [48D1hRORqJq52qsnUYZX56, 0745mDdMqet9J5nO5x7IQS, 0pQwegEZU73KdwGzJdulze]
 titles: [The Rise and Fall of Ziggy Stardust and the Spiders from Mars, The Rise and Fall of Ziggy Stardust and the Spiders from Mars (2012 Remaster), The Rise and Fall of Ziggy Stardust and the Spiders from Mars (Remastered Version)]
 releaseYear: 1972
+tracks:
+  - five-years
+  - soul-love
+  - moonage-daydream
+  - starman
+  - it-aint-easy
+  - lady-stardust
+  - star
+  - hang-on-to-yourself
+  - ziggy-stardust
+  - suffragette-city
+  - rock-n-roll-suicide
 written: 2026-10-03
 sources:
   - https://www.davidbowie.com/the-rise-and-fall-of-ziggy-stardust-and-the-spiders-from-mars

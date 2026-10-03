@@ -59,12 +59,19 @@ export interface AlbumNote extends EditorialBody {
   /** Titles as Spotify may show them, including localised or romanised forms. */
   titles: string[];
   releaseYear?: number;
+  /**
+   * Song note keys of the standard edition's tracklist, in order. An album
+   * note is complete only when every track has its own song note (quality.ts).
+   */
+  tracks?: string[];
 }
 
 /**
  * The one note per song: the listening note (`short` cue and body) and, when
  * the song has one, its curated translation (brief, `## 번역에 대하여`, and the
- * paired `<key>.translation.json`). Either part may be absent, not both.
+ * paired `<key>.translation.json`). The loader accepts a note with either part
+ * missing so the app never breaks; the quality floor (quality.ts) requires the
+ * listening note, and a translation unless `lyricsLanguage` says none is needed.
  */
 export interface SongNote extends Omit<EditorialBody, 'short'> {
   key: string;
@@ -74,7 +81,14 @@ export interface SongNote extends Omit<EditorialBody, 'short'> {
   titles: string[];
   /** The listening cue on Now Playing; a translation-only note has none. */
   short?: string;
+  /** Set on a song with no translation: its lyrics are Korean, or it has none. */
+  lyricsLanguage?: SongLyricsLanguage;
   translation?: SongTranslation;
 }
+
+/** Why a song note has no curated translation: Korean lyrics, or an instrumental. */
+export type SongLyricsLanguage = 'ko' | 'instrumental';
+
+export const SONG_LYRICS_LANGUAGES: readonly SongLyricsLanguage[] = ['ko', 'instrumental'];
 
 export type NoteKind = 'ARTIST' | 'ALBUM' | 'SONG';
