@@ -40,11 +40,14 @@ description: ARC Music에 곡의 큐레이션 가사 번역을 만들 때 사용
 ## 1. 줄 표 확인
 
 ```bash
-npm run lyrics:lines -- --title "Lemon" --artist "Kenshi Yonezu" --album "Lemon" --duration 4:15
-npm run lyrics:lines -- --id 123456          # 후보 중 특정 버전
+npm run lyrics:lines -- --title "Lemon" --artist "Kenshi Yonezu" --album "Lemon" --duration 4:15 --lang ja
+npm run lyrics:lines -- --id 123456 --lang ja   # 후보 중 특정 버전
 npm run lyrics:lines -- --file /scratch/lemon.lrc --duration 4:15   # LRCLIB에 접근할 수 없을 때
 ```
 
+- **곡의 가사 언어를 사용자에게 받아 `--lang ja|ko|zh|en`으로 항상 준다.** 지시에 언어가 없으면 먼저 묻는다. LRCLIB에는 J-pop·K-pop의
+  로마자 음차본이나 영어 번역본이 올라와 있어 길이만 맞는다고 고르면 틀린 가사를 쓰게 된다. `--lang`이 있으면 다른 언어로 판별된
+  후보는 제외되고, `--id`로 고른 레코드가 다른 언어면 오류로 멈춘다. 원어 후보가 없으면 `--file`로 처리한다.
 - 출력: LRCLIB 레코드, `.translation.json`에 넣을 `"timing"` 한 줄, 그리고 `번호  startMs  endMs  원문` 표(터미널 전용).
   `endMs`는 다음 줄의 시작이고, 마지막 줄은 곡 끝까지다.
 - Spotify 재생 시간과 길이가 맞는 버전(±3초)을 고른다. 앱도 같은 방식으로 LRCLIB 가사를 고른다.
