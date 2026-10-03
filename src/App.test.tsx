@@ -81,7 +81,7 @@ describe('ARC Music (preview archive)', () => {
   });
 
   it.each([
-    ['tripleS', '5Z71xE9prhpHrqL5thVMyK', /조합과 재구성을 전제로/],
+    ['tripleS', '5Z71xE9prhpHrqL5thVMyK', /조합을 전제로 움직이는 스물네 명/],
     ['Coldplay', '4gzpq5DPGxSnKTe4SA8HAU', /크게 따라 부를 수 있는 후렴/],
   ])('shows the %s Editorial Note on the Artist page', async (name, id, text) => {
     renderApp('?preview', `#/artist/${id}`);
