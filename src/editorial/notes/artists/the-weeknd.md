@@ -1,0 +1,34 @@
+---
+artistIds: [1Xyo4u8uXC1ZmMpatF05PJ]
+names: [The Weeknd, Weeknd, 더 위켄드, 위켄드]
+origin: Toronto, Canada · singer / songwriter / producer
+written: 2026-10-03
+sources:
+  - https://simple.wikipedia.org/wiki/The_Weeknd_discography
+  - https://dayandevent.com/the-weeknd-albums-in-order/
+  - https://www.iheart.com/content/2025-01-30-the-weeknd-completes-his-trilogy-with-new-album-hurry-up-tomorrow/
+eras:
+  - 2011–2013 · 믹스테이프와 『Trilogy』
+  - 2015–2018 · 팝 스타의 얼굴
+  - 2020–2025 · 3부작
+short: >
+  어두운 R&B로 출발해 80년대 신스 팝의 한가운데에 선 음악가. 목소리는 늘 같은 자리에서 흔들리고, 바뀌는 것은 그 목소리를 둘러싼 장치다. 그 장치가 바뀔 때마다 같은 이야기가 다르게 들린다.
+---
+
+더 위켄드는 토론토 출신의 아벨 테스파이(Abel Tesfaye)가 쓰는 이름이다. 2009년부터 정체를 밝히지 않고 곡을 올리다가, 2011년에 믹스테이프 세 장을 연달아 내며 알려졌다. 이 이력이 음악에도 남아 있다. 약과 파티, 허무가 뒤엉킨 밤의 이야기를 하나의 화자가 반복해서 들려주고, 앨범마다 그 화자가 서 있는 무대와 조명이 달라진다.
+
+## 믹스테이프와 『Trilogy』 (2011–2013)
+
+2011년 『House of Balloons』, 『Thursday』, 『Echoes of Silence』가 차례로 공개되었고, 이 세 장은 2012년 11월 『Trilogy』로 다시 묶여 정식 발매되었다. 느리고 어두운 R&B에 몽롱한 신스와 높게 갈라지는 팔세토가 올라앉은 이 시기의 소리는 이후 작품이 계속 되돌아보는 기준점이 된다. 2013년의 첫 정규작 『Kiss Land』는 같은 감각을 더 차갑고 큰 규모로 옮긴 앨범이다.
+
+## 팝 스타의 얼굴 (2015–2018)
+
+2015년 『Beauty Behind the Madness』에서 위켄드는 처음으로 팝 차트의 한가운데를 노리는 곡을 쓴다. 2016년의 『Starboy』는 그 방향을 확정한 앨범으로, 다프트 펑크와의 작업으로 시작해 이전의 어둠을 스타의 자의식으로 바꿔 입었다. 이어 2018년에는 EP 『My Dear Melancholy,』로 잠시 초기의 침잠한 소리로 돌아왔다.
+
+## 3부작 (2020–2025)
+
+2020년 『After Hours』, 2022년 『Dawn FM』, 2025년 『Hurry Up Tomorrow』는 위켄드 본인이 하나의 3부작으로 설명한 작품들이다. 『After Hours』는 추락하는 화자와 80년대 신스 팝을, 『Dawn FM』은 라디오 방송이라는 틀 안에서 연옥 같은 새벽의 풍경을 그렸다. 『Hurry Up Tomorrow』는 이 3부작의 마지막 장으로 발표되었다. 『After Hours』의 「Blinding Lights」와 2021년 슈퍼볼 하프타임 쇼를 지나며 위켄드는 가장 큰 규모의 무대에서 같은 이야기를 반복하게 되었다.
+
+## 처음 듣는다면
+
+『After Hours』가 가장 빠른 입구다. 이 앨범의 화자가 어떤 사람인지 알고 나면 『Starboy』의 과시가 왜 공허하게 들리는지, 『Dawn FM』이 왜 같은 밤의 다음 장면처럼 들리는지가 이어진다. 초기 『House of Balloons』는 그 뒤에 들으면 모든 장치가 걷힌 원본처럼 들린다.
