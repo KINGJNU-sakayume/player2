@@ -10,7 +10,8 @@ The playback, library, search, lyrics and translation features of the ARC Catalo
 is built for digging through discographies. Album notes can be long critic-style reviews. Lyrics can carry a curated
 translation whose Korean speech level (존댓말 / 반말) is fixed from the song's context before any line is translated.
 v7.3 ([`DESIGN_REVISION_V7_3.md`](DESIGN_REVISION_V7_3.md)) adds the discography timeline, previous / next release
-navigation and the Archive index. There is still no global playback footer, no Catalogue
+navigation and the Archive index. v7.4 ([`DESIGN_REVISION_V7_4.md`](DESIGN_REVISION_V7_4.md)) raises the small type and
+the lyric translation line for a 24" desktop monitor. There is still no global playback footer, no Catalogue
 or Specimen mode, and transport controls appear only on Now Playing.
 
 | Surface | What it does |
