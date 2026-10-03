@@ -1,0 +1,87 @@
+{
+  "trackIds": [
+    "2ZWKuGuQ087pzwK4vO4E31",
+    "1aPTYPSR08JgTIf4W58bES"
+  ],
+  "titles": [
+    "Lady Stardust"
+  ],
+  "artistNames": [
+    "David Bowie",
+    "데이비드 보위"
+  ],
+  "sourceLanguage": "en",
+  "targetLanguage": "ko",
+  "lyricsSource": {
+    "provider": "lrclib",
+    "id": 358759,
+    "durationMs": 201000
+  },
+  "brief": {
+    "speaker": "객석에서 Lady Stardust의 공연을 바라보다 자신의 감정을 잠깐 드러내는 관찰자",
+    "addressee": "직접 말을 거는 대상은 거의 없고, 기억 속 공연과 Lady Stardust를 향한 독백",
+    "relationship": "공개적으로 드러내기 어려운 애정과 동경을 품은 관객 혹은 가까운 지인",
+    "situation": "화장과 긴 머리 때문에 조롱받던 남성 스타가 무대에 오르자 객석 전체가 매혹되고, 화자는 자신이 따를 수 없는 사랑을 슬프게 인정한다.",
+    "register": "haerache",
+    "pronouns": [
+      {
+        "source": "he / his",
+        "target": "그 / 그의",
+        "note": "Lady Stardust라는 이름과 별개로 원문이 일관되게 남성 대명사를 쓰는 점을 유지했다."
+      },
+      {
+        "source": "I",
+        "target": "나"
+      }
+    ],
+    "glossary": [
+      {
+        "source": "Lady Stardust",
+        "target": "레이디 스타더스트",
+        "note": "무대 위 인물의 이름이므로 음역했다."
+      },
+      {
+        "source": "femme fatales",
+        "target": "팜 파탈들",
+        "note": "글램의 성적·연극적 분위기를 살리기 위해 익숙한 외래어로 옮겼다."
+      },
+      {
+        "source": "a love I could not obey",
+        "target": "따를 수 없는 사랑",
+        "note": "사회적 규범과 개인적 욕망 사이의 긴장을 단정하지 않고 남겨 두었다."
+      }
+    ],
+    "reasoning": "대부분이 공연을 회상하는 관찰자의 서술이고, 직접 고백하는 한 줄도 회고 속에 삽입된다. 그래서 친밀한 대화체보다 **해라체**가 맞다. Marc Bolan을 염두에 둔 초기 제목과 성별 경계를 흔드는 무대 이미지 때문에, 'love'를 특정 성적 정체성 하나로 단정하지 않았다.",
+    "sources": [
+      "https://www.davidbowie.com/1999/1999/12/31/the-rise-and-fall-of-ziggy-stardust-and-the-spiders-from-mars",
+      "https://www.davidbowie.com/blog/2022/6/15/starman-top-of-the-pops-version-2022-mix-streaming-single",
+      "https://www.allmusic.com/song/lady-stardust-mt0044072050"
+    ]
+  },
+  "lines": {
+    "15348215": "정말 천국 같았다, 그는 밤새도록 노래했다",
+    "88df8fd0": "사람들은 그의 얼굴 화장을 빤히 쳐다봤다",
+    "cf48f4cb": "그의 긴 검은 머리와 짐승 같은 우아함을 비웃었다",
+    "6de7c04d": "새파란 청바지를 입은 그 소년은",
+    "13c4d5e7": "무대 위로 뛰어올랐고",
+    "1b136c17": "레이디 스타더스트는 자신의 노래를 불렀다",
+    "5152d226": "어둠과 치욕에 관한",
+    "b29201b9": "그는 괜찮았다, 밴드는 모두 한데 모여 있었다",
+    "6a12971f": "그래, 그는 괜찮았다, 노래는 영원히 이어졌다",
+    "53329c69": "그는 정말 너무 멋졌다",
+    "ac97b7db": "정말 현실감 없을 만큼 멋졌고, 밤새도록 노래했다",
+    "125f4f70": "팜 파탈들이 그림자 속에서 모습을 드러냈다",
+    "9bbbb4ec": "이 아름다운 존재를 보려고",
+    "37d88ec3": "소년들은 의자 위에 올라섰다",
+    "95845b0a": "더 잘 보려고",
+    "81d222f9": "나는 따를 수 없는 사랑 때문에 슬프게 웃었다",
+    "f0e8b5dc": "레이디 스타더스트는 자신의 노래를 불렀다",
+    "a78f4193": "어둠과 불안에 관한",
+    "b1b0acc0": "그리고 그는 정말 너무 멋졌다",
+    "233fc50f": "정말 현실감 없을 만큼 멋졌고, 밤새도록 노래했다",
+    "033eced0": "사람들이 그의 이름을 아느냐고 물었을 때 나는 얼마나 한숨지었던가",
+    "8ee53451": "그래도 그는 괜찮았고, 노래는 영원히 이어졌다",
+    "0ef178d4": "그래, 그는 괜찮았고 노래는 함께 이어졌다"
+  },
+  "written": "2026-10-03"
+}
