@@ -102,7 +102,8 @@ export function songNotePayload(note: SongNote, { title, subtitle, titleLang, fo
     titleLang,
     copy: note.full ?? '',
     extra: note.translation ? <TranslationAbout translation={note.translation} /> : undefined,
-    focus: focusTranslation && note.translation ? TRANSLATION_SECTION_ID : undefined,
+    // Scroll only past a listening note; a translation-only note already opens on the section.
+    focus: focusTranslation && note.translation && !translationOnly ? TRANSLATION_SECTION_ID : undefined,
     written: note.written,
     updated: note.updated,
     sources: note.sources,

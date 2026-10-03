@@ -18,8 +18,8 @@ or Specimen mode, and transport controls appear only on Now Playing.
 | --- | --- |
 | **Now Playing** | v7 42 / 58 spread. Cover, title, artist · album and Track / Release / Duration / Language on the left; on the right the synced current lyric with its translation and the next two lines, the Listening Note, and the transport — previous / play-pause / next and seek — with shuffle, like, queue, device and volume on one quiet line beneath it. The accent colour follows the album cover. |
 | **Artist** | Compact dossier: portrait, name, origin line and Editorial Note. Below it, the **Discography** as a chronology. Albums, Singles & EPs, Compilations and Appears on each load in full, oldest first (or newest first). Releases are grouped by year, with deluxe / remaster / regional editions folded under the original (*+2 editions*), the note's career eras marked in the timeline, and noted releases marked. *Play artist*, *Open in Spotify*. |
-| **Album** | Cover, title, artist, release / format / tracks / duration and Editorial Note left; the complete Track Sequence right, with the playing track, guests, explicit marks, discs and a *Note* mark on songs with a Listening Note. *Play album*, *Save album*. Under the sequence, the release's place in the discography (`03 / 12 · Albums`) with the previous and next release — `[` / `]` step through. |
-| **Archive** | The index of the archive's own writing: every artist with a note, their reviewed albums in release order, listening notes and curated translations, each opening its note or playing the track. No Spotify request. |
+| **Album** | Cover, title, artist, release / format / tracks / duration and Editorial Note left; the complete Track Sequence right, with the playing track, guests, explicit marks, discs and a *Note* mark on songs with a song note. *Play album*, *Save album*. Under the sequence, the release's place in the discography (`03 / 12 · Albums`) with the previous and next release — `[` / `]` step through. |
+| **Archive** | The index of the archive's own writing: every artist with a note, their reviewed albums in release order, and one entry per song note — marked *Listening note* and / or *Translation · 반말 · 해체* — each opening its note or playing the track. No Spotify request. |
 | **Library** | Liked songs (*Shuffle* draws from the whole library, *Play all*), followed artists, liked albums, then playlists and recently played. |
 | **Search** | The v7 overlay (`/`): tracks, artists, albums and playlists, type filters with paging, `↓` / `↑` through results. |
 | **Queue** | The real Spotify queue in the same right-hand drawer as the notes. |
@@ -92,7 +92,7 @@ Notes are ARC's own writing, one Markdown file per note, kept apart from Spotify
 | --- | --- | --- |
 | [`src/editorial/notes/artists/`](src/editorial/notes/artists/) | Artist **Editorial Note** (+ origin line) | Artist |
 | [`src/editorial/notes/albums/`](src/editorial/notes/albums/) | Album **Editorial Note**, written as a critic-style review | Album |
-| [`src/editorial/notes/songs/`](src/editorial/notes/songs/) | Song **Listening Note** | Now Playing |
+| [`src/editorial/notes/songs/`](src/editorial/notes/songs/) | Song **Listening Note**, plus the song's [curated translation](#curated-translations) — one note per song | Now Playing, lyrics header |
 
 Seeded notes: the v7 reference subjects — Vaundy / `strobo` / 怪獣の花唄, Tyler, The Creator / `IGOR` / EARFQUAKE,
 tripleS / `<ASSEMBLE24>` / Girls Never Die — and three example artists with representative releases:
@@ -133,8 +133,11 @@ short: >
 ```
 
 `artist` is the file name of the artist's note. Anything without a file gets no note — never generated filler.
-`npm run test:run` checks that every file parses, every entry is complete and every album / song points at an
-existing artist.
+A song note may also carry the song's curated translation: a `translation:` block in the frontmatter, a reserved
+`## 번역에 대하여` section at the end of the body and a `<key>.translation.json` next to it
+([Curated translations](#curated-translations)). A song with only a translation has a translation-only note (no
+`short`, no listening body). `npm run test:run` checks that every file parses, every entry is complete, every album /
+song points at an existing artist, and the three parts of each translation come together.
 
 ## Lyrics and translation
 
@@ -159,22 +162,34 @@ Spotify's Web API has no lyrics, so both come from replaceable providers and nei
 
 Machine translation works line by line, so it cannot know who is speaking to whom, and the Korean speech level drifts
 from line to line. A **curated translation** decides that first. Its *brief* names the speaker, the addressee, their
-relationship, and the speech level kept throughout (하십시오체 / 해요체 / 해체 / 해라체), with the reasoning and
-sources. The whole song is then translated against the brief. Files live in
-[`src/translations/`](src/translations/) and are written in a Claude session
-([`.claude/skills/translate-lyrics/SKILL.md`](.claude/skills/translate-lyrics/SKILL.md)):
+relationship, and the speech level kept throughout (하십시오체 / 해요체 / 해체 / 해라체). The whole song is then
+translated against the brief, a sentence at a time. It lives with the song's note — one song, one note — and is written
+in a Claude session ([`.claude/skills/translate-lyrics/SKILL.md`](.claude/skills/translate-lyrics/SKILL.md)):
+
+| Where | What |
+| --- | --- |
+| `notes/songs/<key>.md` frontmatter, `translation:` | languages, `register`, speaker → addressee, relationship, situation, pronouns, glossary, dates |
+| `notes/songs/<key>.md` body, `## 번역에 대하여` | why this voice, in prose (after the listening note); sources go in the note's `sources` |
+| `notes/songs/<key>.translation.json` | `{ "schemaVersion": 2, "timing": { "lrclibId", "durationMs" }, "segments": [{ "startMs", "endMs", "translation" }] }` |
 
 ```bash
-npm run lyrics:lines -- --title "Lemon" --artist "Kenshi Yonezu" --duration 4:15   # line table with hashes
-npm run lyrics:lines -- --check src/translations/kenshi-yonezu/lemon.json         # coverage against LRCLIB
+npm run lyrics:lines -- --title "Lemon" --artist "Kenshi Yonezu" --duration 4:15   # timing + "# startMs endMs text" (terminal only)
+npm run lyrics:lines -- --check lemon                                              # segments against the LRCLIB record
 ```
 
-The files never contain the original lyrics: each translated line is keyed by a hash of the original line and
-matched against the lyrics loaded from LRCLIB at runtime. A curated translation wins over the machine provider (and
-works with `VITE_TRANSLATION_PROVIDER=none`). Lines it does not cover still go to the machine provider. The lyrics
-header shows `Curated · 반말 · 해체`, and **Translation note →** opens the brief and a line-by-line 대역 in the note
-drawer. The tool talks to lrclib.net. When that host is unreachable, `--file` reads a local LRC or text file kept
-outside the repository.
+The repository holds times and translations, never the original lyrics. Segments are time ranges in one LRCLIB record;
+at runtime the original lines come from LRCLIB and each segment is placed by time: under the line whose window holds
+its start (snapped to the next line within 400 ms), kept — dimmed, not repeated — while later lines of the same
+sentence play, and joined with the next segment when LRCLIB puts two sentences on one line. It applies only when the
+loaded lyrics are that record or one of the same length (±3 s); a note matched by name rather than track ID also needs
+Spotify's length within 3 s. Otherwise, and for lines no segment covers, the machine provider translates (a curated
+translation also works with `VITE_TRANSLATION_PROVIDER=none`). The lyrics header shows `Curated · 반말 · 해체`;
+**Translation note →** opens the song's note at *번역에 대하여* (who speaks to whom, the speech level, pronoun and term
+tables, the reasoning). **Translation On / Off** covers curated translations too. A broken translation file is skipped
+for that song with a development console warning; `npm run test:run` fails on it. The tool talks to lrclib.net; when
+that host is unreachable, `--file` reads a local LRC file kept outside the repository.
+
+The earlier hash-keyed files (`src/translations/`) were converted by `npm run notes:migrate` and removed.
 
 To add a provider, implement `LyricsProvider` ([`src/lyrics/types.ts`](src/lyrics/types.ts)) or
 `TranslationProvider` ([`src/translation/TranslationProvider.ts`](src/translation/TranslationProvider.ts)) and
@@ -203,7 +218,8 @@ npm run lint
 npm run test:run
 npm run build
 npm run check      # all of the above — run before pushing
-npm run lyrics:lines -- …   # curated-translation tool (see Lyrics and translation)
+npm run lyrics:lines -- …   # curated-translation tool (see Curated translations)
+npm run notes:migrate -- --dry-run   # one-time: hash-keyed translations → song notes (already run)
 npm run preview    # serve dist/ on http://127.0.0.1:4173/
 ```
 
@@ -229,10 +245,10 @@ src/
   spotify/      typed Web API client (401 refresh, 429 backoff), endpoints, mappers, error taxonomy, scopes
   playback/     the single PlayerStore, Web Playback SDK adapter, Spotify engine, playback clock
   catalogue/    CatalogueSource (Spotify or preview) and query hooks
-  editorial/    Editorial and Listening Notes (Markdown files in notes/), frontmatter loader and lookup
+  editorial/    Editorial and song notes (Markdown in notes/, + songs/*.translation.json), frontmatter loader and lookup
   lyrics/       LyricsProvider, LRC parser, lyric sync, cache, LRCLIB and mock providers
   translation/  TranslationProvider, language detection, browser / http / mock providers, curated translations
-  translations/ curated lyric translations (JSON: brief + hashed lines, no original lyrics)
+                (brief + segment parsing, matching, time alignment)
   palette/      cover colour extraction and the contrast-safe accent
   preview/      sample archive, preview source and simulated engine
   components/   covers, notes + shared drawer, search, queue, settings, transport

@@ -84,7 +84,7 @@ function ReadSong({ song, title, subtitle }: { song: SongNote; title: string; su
       className="row-play"
       aria-haspopup="dialog"
       aria-label={`Read the note on ${title}`}
-      onClick={() => openNote(songNotePayload(song, { title, subtitle, titleLang: detectLineLanguage(title), focusTranslation: !hasListening(song) }))}
+      onClick={() => openNote(songNotePayload(song, { title, subtitle, titleLang: detectLineLanguage(title) }))}
     >
       Read
     </button>

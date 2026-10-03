@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NoteBody, isSafeUrl } from './NoteBody';
 import { useNote, type NotePayload } from './NoteContext';
 import { SideDrawer } from './SideDrawer';
@@ -35,15 +35,20 @@ export function NoteDrawer() {
   useEffect(() => {
     if (note) setShown(note);
   }, [note]);
-  // Open at the requested section ("Translation note →" lands on 번역에 대하여).
+  // Each note opens at its top, or at the requested section ("Translation note →" lands on 번역에 대하여).
+  const topRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!note?.focus || shown !== note) return;
-    document.getElementById(note.focus)?.scrollIntoView?.({ block: 'start' });
+    if (!note || shown !== note) return;
+    const target = note.focus ? document.getElementById(note.focus) : null;
+    if (target) target.scrollIntoView?.({ block: 'start' });
+    else topRef.current?.closest('.side-drawer-body')?.scrollTo?.({ top: 0 });
   }, [note, shown]);
 
   return (
     <SideDrawer open={Boolean(note)} onClose={closeNote} label="Archive note" labelledBy="note-drawer-title" closeLabel="Close note">
-      <div className="note-drawer-context">{shown?.context}</div>
+      <div ref={topRef} className="note-drawer-context">
+        {shown?.context}
+      </div>
       <h2 id="note-drawer-title" className="note-drawer-title" lang={shown?.titleLang}>
         {shown?.title}
       </h2>
