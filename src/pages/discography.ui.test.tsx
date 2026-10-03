@@ -4,6 +4,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { App } from '../App';
 import { readConfig } from '../app/config';
 import { createAppServices } from '../app/services';
+import { albumNotes } from '../editorial/albums';
+import { artistNotes } from '../editorial/artists';
+import { songNotes } from '../editorial/songs';
 
 const KENSHI = '1snhtMLeb2DYoMOcVbb8iB';
 const STRAY_SHEEP = '052EiTRYh35MuDVJN9Emdh';
@@ -69,9 +72,12 @@ describe('discography digging (preview archive)', () => {
     renderApp('#/archive');
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Archive' })).toBeInTheDocument();
-    expect(screen.getByText(/5 artists · 9 album notes · 10 listening notes/)).toBeInTheDocument();
+    // Counts and order follow the note files, so adding a note never breaks this test.
+    expect(screen.getByText(`${artistNotes.length} artists · ${albumNotes.length} album notes · ${songNotes.length} listening notes`, { exact: false })).toBeInTheDocument();
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
-    expect(headings).toEqual(['Coldplay', 'Kenshi Yonezu', 'tripleS', 'Tyler, The Creator', 'Vaundy']);
+    const names = artistNotes.map((artist) => artist.names[0]!).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+    expect(headings.slice(0, names.length)).toEqual(names);
+    expect(headings).toEqual(expect.arrayContaining(['Coldplay', 'Kenshi Yonezu', 'NMIXX']));
 
     const kenshi = screen.getByRole('region', { name: 'Kenshi Yonezu' });
     expect(within(kenshi).getByRole('link', { name: 'STRAY SHEEP' })).toHaveAttribute('href', `#/album/${STRAY_SHEEP}`);
