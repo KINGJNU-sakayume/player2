@@ -1,5 +1,5 @@
 import type { TrackIdentity } from '../../domain/types';
-import { detectLyricsLanguage } from '../../translation/languageDetect';
+import { detectLyricsLanguage, expectedLyricsLanguage, lyricsMatchLanguage } from '../../translation/languageDetect';
 import { parseLrc } from '../lrc';
 import { LyricsProviderError, type LyricsProvider, type LyricsRequestOptions, type TimedLyrics } from '../types';
 
@@ -49,6 +49,11 @@ export function recordToTimedLyrics(record: LrclibRecord, source = 'LRCLIB'): Ti
   return { lines, language: detectLyricsLanguage(lines.map((line) => line.text)), source, timing };
 }
 
+/** A record whose lyrics are not in the track's expected language (romanised / English-only upload) is not the song's lyrics. */
+function inExpectedLanguage(lyrics: TimedLyrics | null, expected: string | undefined): lyrics is TimedLyrics {
+  return lyrics !== null && (lyrics.instrumental === true || lyricsMatchLanguage(lyrics.lines.map((line) => line.text), expected));
+}
+
 export class LrclibLyricsProvider implements LyricsProvider {
   readonly id = 'lrclib';
   readonly label = 'LRCLIB';
@@ -66,17 +71,20 @@ export class LrclibLyricsProvider implements LyricsProvider {
     const artist = track.artists[0]?.name;
     if (!artist || !track.title) return null;
     const durationS = Math.round(track.durationMs / 1000);
+    const expected = expectedLyricsLanguage(track);
 
     const exact = await this.get({ track_name: track.title, artist_name: artist, album_name: track.album.name, durationS }, options);
-    if (exact) return exact;
+    if (inExpectedLanguage(exact, expected)) return exact;
 
     const cleaned = cleanTrackTitle(track.title);
     const candidates = await this.search({ track_name: cleaned, artist_name: artist }, options);
     const match = candidates
       .filter((record) => record.syncedLyrics || record.instrumental)
       .filter((record) => typeof record.duration !== 'number' || Math.abs(record.duration - durationS) <= DURATION_TOLERANCE_S)
-      .sort((a, b) => Number(Boolean(b.syncedLyrics)) - Number(Boolean(a.syncedLyrics)))[0];
-    return match ? recordToTimedLyrics(match, this.label) : null;
+      .sort((a, b) => Number(Boolean(b.syncedLyrics)) - Number(Boolean(a.syncedLyrics)))
+      .map((record) => recordToTimedLyrics(record, this.label))
+      .find((lyrics) => inExpectedLanguage(lyrics, expected));
+    return match ?? null;
   }
 
   /**
