@@ -155,6 +155,9 @@ Translation is secondary to original lyrics.
 - provider is replaceable
 - cache by track + lyric version + language pair when practical
 - failure hides translation cleanly
+- lyrics for a song with a curated translation are pinned to the LRCLIB record the translation was timed on
+  (`pinnedLrclibId` → `LyricsRequestOptions.lrclibId` → `/api/get/<id>`, used when its length is within 3 s of the
+  track; cached under its own key); other tracks and other edits search LRCLIB as before
 - a curated translation (in the song note) comes first: `getCuratedTranslation` finds the note (track ID, or name +
   Spotify length within 3 s), `lyricsMatchTiming` checks the loaded lyrics' `timing` (LRCLIB record ID and duration,
   carried by the provider and the lyrics cache) against the translation's `timing`, and `alignSegments` places the

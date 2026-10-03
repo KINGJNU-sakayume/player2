@@ -49,6 +49,22 @@ export function getCuratedTranslation(query: CuratedQuery, sources?: NoteSources
 }
 
 /**
+ * The LRCLIB record to load lyrics from for this track: the one its song
+ * note's curated translation was timed on. Same rule as the translation
+ * itself — a track-ID match, or a name match within 3 s of that record's
+ * length. Independent of the target language: it only decides which lyrics
+ * (and so which timing) the app shows. The provider still checks the record's
+ * length against the track and searches as usual when it does not fit.
+ */
+export function pinnedLrclibId(query: Omit<CuratedQuery, 'targetLanguage'>, sources?: NoteSources): number | null {
+  const match = findSongNote(query, sources);
+  const timing = match?.note.translation?.timeline.timing;
+  if (!match || !timing) return null;
+  if (match.matchedBy === 'name' && !withinTolerance(query.durationMs, timing.durationMs)) return null;
+  return timing.lrclibId;
+}
+
+/**
  * Whether the loaded lyrics follow the timing the segments were written on:
  * the same LRCLIB record, or another one of the same length (±3 s).
  */

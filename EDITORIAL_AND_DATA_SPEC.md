@@ -185,6 +185,8 @@ Matching and placement at runtime:
 
 - the note is found as any song note (track ID, then title + artist name). A name match brings the translation only when
   Spotify's track length is within 3 s of `timing.durationMs`;
+- for a song whose note matches (same rule), the app loads lyrics directly from the `timing.lrclibId` record, provided
+  its length is within 3 s of the playing track; otherwise it searches LRCLIB as usual;
 - the loaded LRCLIB lyrics must be the `timing.lrclibId` record, or another record within 3 s of its length; otherwise
   the translation is not applied (machine translation, development warning);
 - line i's window is [start_i, start_{i+1}) (the last runs to the end of the track). A segment shows under the line

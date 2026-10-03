@@ -7,6 +7,7 @@ import { LyricsProviderError, type LyricsProvider, type LyricsRequestOptions, ty
  * LRCLIB (https://lrclib.net) — a free, keyless, CORS-enabled synced lyrics
  * database. Contract taken from its open-source server:
  *   GET /api/get?track_name&artist_name&album_name&duration   → record | 404 TrackNotFound
+ *   GET /api/get/{id}                                          → record | 404
  *   GET /api/search?track_name&artist_name                     → record[]
  *   record: { id, trackName, artistName, albumName, duration (s), instrumental,
  *             plainLyrics, syncedLyrics (LRC) }
@@ -58,6 +59,10 @@ export class LrclibLyricsProvider implements LyricsProvider {
   ) {}
 
   async getTimedLyrics(track: TrackIdentity, options: LyricsRequestOptions = {}): Promise<TimedLyrics | null> {
+    if (options.lrclibId) {
+      const pinned = await this.byId(options.lrclibId, track, options);
+      if (pinned) return pinned;
+    }
     const artist = track.artists[0]?.name;
     if (!artist || !track.title) return null;
     const durationS = Math.round(track.durationMs / 1000);
@@ -72,6 +77,20 @@ export class LrclibLyricsProvider implements LyricsProvider {
       .filter((record) => typeof record.duration !== 'number' || Math.abs(record.duration - durationS) <= DURATION_TOLERANCE_S)
       .sort((a, b) => Number(Boolean(b.syncedLyrics)) - Number(Boolean(a.syncedLyrics)))[0];
     return match ? recordToTimedLyrics(match, this.label) : null;
+  }
+
+  /**
+   * The record a curated translation was timed on. Used only when it has synced
+   * lyrics and the playing track is the same length (±3 s): another edit of the
+   * song falls back to the usual search.
+   */
+  private async byId(id: number, track: TrackIdentity, options: LyricsRequestOptions): Promise<TimedLyrics | null> {
+    const response = await this.request(`/get/${id}`, options);
+    if (response.status === 404) return null;
+    const record = (await response.json()) as LrclibRecord;
+    const durationS = track.durationMs / 1000;
+    if (!record.syncedLyrics || typeof record.duration !== 'number' || Math.abs(record.duration - durationS) > DURATION_TOLERANCE_S) return null;
+    return recordToTimedLyrics(record, this.label);
   }
 
   private async get(

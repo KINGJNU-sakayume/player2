@@ -144,7 +144,7 @@ song points at an existing artist, and the three parts of each translation come 
 Spotify's Web API has no lyrics, so both come from replaceable providers and neither ever blocks playback.
 
 - **Lyrics** — [LRCLIB](https://lrclib.net) (`lrclib`): keyless and CORS-enabled; matches title, artist, album and
-  duration, falls back to a search, and caches results in `localStorage` (30 days; 3 days for "not found"). It sends
+  duration (or loads the record a song's curated translation was timed on), falls back to a search, and caches results in `localStorage` (30 days; 3 days for "not found"). It sends
   that track metadata to lrclib.net. `mock` gives original test lines; `none` turns lyrics off.
 - **Translation** — `browser` uses Chrome's on-device Translator API (no key; a missing model downloads after one
   click in the lyrics header). `http` posts to your own function, which keeps any DeepL / Papago / Google key
@@ -180,9 +180,11 @@ npm run lyrics:lines -- --check lemon                                           
 The repository holds times and translations, never the original lyrics. Segments are time ranges in one LRCLIB record;
 at runtime the original lines come from LRCLIB and each segment is placed by time: under the line whose window holds
 its start (snapped to the next line within 400 ms), kept — dimmed, not repeated — while later lines of the same
-sentence play, and joined with the next segment when LRCLIB puts two sentences on one line. It applies only when the
-loaded lyrics are that record or one of the same length (±3 s); a note matched by name rather than track ID also needs
-Spotify's length within 3 s. Otherwise, and for lines no segment covers, the machine provider translates (a curated
+sentence play, and joined with the next segment when LRCLIB puts two sentences on one line. For such a song the app
+loads its lyrics straight from that record (`/api/get/<lrclibId>`) instead of searching, so the lyrics and the
+translation share one timing; when the playing track is another edit (length off by more than 3 s) it searches as
+usual. The translation applies only when the loaded lyrics are that record or one of the same length (±3 s); a note
+matched by name rather than track ID also needs Spotify's length within 3 s. Otherwise, and for lines no segment covers, the machine provider translates (a curated
 translation also works with `VITE_TRANSLATION_PROVIDER=none`). The lyrics header shows `Curated · 반말 · 해체`;
 **Translation note →** opens the song's note at *번역에 대하여* (who speaks to whom, the speech level, pronoun and term
 tables, the reasoning). **Translation On / Off** covers curated translations too. A broken translation file is skipped

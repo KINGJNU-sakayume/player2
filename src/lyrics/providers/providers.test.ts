@@ -64,6 +64,28 @@ describe('LrclibLyricsProvider', () => {
     expect(lyrics?.timing).toEqual({ lrclibId: 4, durationMs: 186_000 });
   });
 
+  it('loads the pinned LRCLIB record directly when its length matches the track', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(json({ id: 77, duration: 186, syncedLyrics: '[00:01.00]line one' }));
+    const lyrics = await new LrclibLyricsProvider(fetchMock).getTimedLyrics(track, { lrclibId: 77 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(new URL(fetchMock.mock.calls[0]![0] as string).pathname).toBe('/api/get/77');
+    expect(lyrics).toMatchObject({ lines: [{ text: 'line one' }], timing: { lrclibId: 77, durationMs: 186_000 } });
+  });
+
+  it.each([
+    ['another length (a different edit)', json({ id: 77, duration: 200, syncedLyrics: '[00:01.00]line one' })],
+    ['no synced lyrics', json({ id: 77, duration: 187, plainLyrics: 'line one' })],
+    ['a missing record', json({ code: 404 }, 404)],
+  ])('falls back to the usual search when the pinned record has %s', async (_label, pinned) => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(pinned)
+      .mockResolvedValueOnce(json({ id: 1, duration: 187, syncedLyrics: '[00:01.00]line two' }));
+    const lyrics = await new LrclibLyricsProvider(fetchMock).getTimedLyrics(track, { lrclibId: 77 });
+    expect(new URL(fetchMock.mock.calls[1]![0] as string).pathname).toBe('/api/get');
+    expect(lyrics?.lines[0]?.text).toBe('line two');
+  });
+
   it('returns null when nothing is found and throws retryable errors for outages', async () => {
     const notFound = vi.fn(async () => json({ code: 404 }, 404));
     await expect(new LrclibLyricsProvider(notFound).getTimedLyrics(track)).resolves.toBeNull();
@@ -133,6 +155,17 @@ describe('withLyricsCache', () => {
     const reread = withLyricsCache(inner, new BoundedCache({ prefix: 'test.lyrics3:', maxEntries: 10 }));
     await expect(reread.getTimedLyrics(track)).resolves.toEqual(result);
     expect(inner.getTimedLyrics).toHaveBeenCalledTimes(1);
+  });
+
+  it('caches a lookup pinned to a record apart from the plain one', async () => {
+    const result: TimedLyrics = { lines: [{ startMs: 0, text: 'line one' }] };
+    const inner = { id: 'p', label: 'P', getTimedLyrics: vi.fn(async () => result) };
+    const cached = withLyricsCache(inner, new BoundedCache({ prefix: 'test.lyrics4:', maxEntries: 10 }));
+    await cached.getTimedLyrics(track);
+    await cached.getTimedLyrics(track, { lrclibId: 77 });
+    await cached.getTimedLyrics(track, { lrclibId: 77 });
+    expect(inner.getTimedLyrics).toHaveBeenCalledTimes(2);
+    expect(inner.getTimedLyrics.mock.calls[1]).toEqual([track, { lrclibId: 77 }]);
   });
 
   it('never caches transient failures', async () => {

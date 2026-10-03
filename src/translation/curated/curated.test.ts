@@ -6,7 +6,7 @@ import type { TimedLyrics } from '../../lyrics/types';
 import { translateWithCurated } from '../translateLyrics';
 import type { TranslationProvider } from '../TranslationProvider';
 import { checkTimeline, formatLineTable } from './authoring';
-import { getCuratedTranslation, lyricsMatchTiming } from './index';
+import { getCuratedTranslation, lyricsMatchTiming, pinnedLrclibId } from './index';
 import { CuratedTranslationError, parseTranslationTimeline } from './parse';
 
 // Dummy lines only — never real lyrics.
@@ -111,6 +111,16 @@ describe('getCuratedTranslation', () => {
 
   it('only returns translations into the requested language', () => {
     expect(getCuratedTranslation({ id: TRACK_ID, targetLanguage: 'en' }, sources())).toBeNull();
+  });
+});
+
+describe('pinnedLrclibId', () => {
+  it("names the record the song note's translation was timed on, under the same matching rule", () => {
+    expect(pinnedLrclibId({ id: TRACK_ID, durationMs: 1 }, sources())).toBe(101);
+    const byName = { id: 'other-edition', title: 'Test Song', artistNames: ['Test Artist'] };
+    expect(pinnedLrclibId({ ...byName, durationMs: 21_000 }, sources())).toBe(101);
+    expect(pinnedLrclibId({ ...byName, durationMs: 30_000 }, sources())).toBeNull();
+    expect(pinnedLrclibId({ id: 'unknown', title: 'Other Song', artistNames: ['Test Artist'] }, sources())).toBeNull();
   });
 });
 

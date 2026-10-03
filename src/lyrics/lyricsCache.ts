@@ -20,7 +20,8 @@ export function withLyricsCache(
     id: provider.id,
     label: provider.label,
     async getTimedLyrics(track: TrackIdentity, options?: LyricsRequestOptions) {
-      const key = `${provider.id}:${track.spotifyTrackId}`;
+      // A lookup pinned to a curated translation's LRCLIB record is cached apart from the plain search.
+      const key = `${provider.id}:${track.spotifyTrackId}${options?.lrclibId ? `@${options.lrclibId}` : ''}`;
       const cached = cache.get(key);
       if (cached !== undefined) return cached;
       const result = await provider.getTimedLyrics(track, options);

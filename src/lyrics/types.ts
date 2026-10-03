@@ -31,6 +31,13 @@ export interface LyricsTiming {
 
 export interface LyricsRequestOptions {
   signal?: AbortSignal;
+  /**
+   * The LRCLIB record a song note's curated translation was timed on. The
+   * LRCLIB provider loads exactly that record (when its length matches the
+   * track) instead of searching, so lyrics and translation share one timing.
+   * Other providers ignore it.
+   */
+  lrclibId?: number;
 }
 
 /**
