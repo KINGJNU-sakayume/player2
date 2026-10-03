@@ -179,10 +179,13 @@ type NoteContext =
   | { kind: 'song'; trackId: string };
 ```
 
-Only one note drawer is mounted globally in the app shell. A song has one note and one drawer layout
+Only one note drawer is mounted globally in the app shell. A song has one note, the Listening note
 (`src/components/SongNote.tsx`): the listening body, then *번역에 대하여* (speaker → addressee, relationship and speech
-level; pronoun and term tables; the reasoning), then sources and dates. The lyrics header's **Translation note →** opens
-the same drawer scrolled to that section (`NotePayload.focus`). The translated lines are never repeated in the drawer.
+level; pronoun and term tables; the reasoning), then sources and dates. There is no separate translation note, mark or
+link anywhere else. On Now Playing the Listening note opens in the page, not in the drawer: a column on the right of the
+same layer (`.player-stage` grid, `NoteColumn`), the cover and lyrics moving left; no backdrop or focus trap, Escape and
+the close button close it and return focus, a new track closes it, and at single-column widths it stacks below. Both
+render `NoteContent`. The translated lines are never repeated in the note.
 
 Opening/closing it must not affect playback.
 

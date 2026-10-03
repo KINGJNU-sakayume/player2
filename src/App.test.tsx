@@ -56,8 +56,10 @@ describe('ARC Music (preview archive)', () => {
     expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Next track' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'まちがいさがし' })).toBeInTheDocument();
-    // No local note for this track: the preview is omitted rather than filled.
-    expect(screen.queryByText('Listening note')).not.toBeInTheDocument();
+    // This track's note holds only its translation note: the Listening note shows no cue, just the link to the note.
+    expect(screen.queryByText(/애도를 다루는 곡이지만/)).not.toBeInTheDocument();
+    expect(screen.getByText('Listening note')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Read full note →' })).toBeInTheDocument();
     expect(screen.getByRole('slider', { name: 'Seek' })).toHaveAttribute('aria-valuemax', '302');
   });
 

@@ -1,6 +1,8 @@
 @media (max-width: 1180px) {
   .player-page, .artist-page, .album-page, .library-page { padding-left: 28px; padding-right: 28px; }
   .player-shell, .album-shell { gap: 42px; }
+  :root { --note-width: 400px; }
+  .note-open .player-stage { column-gap: 30px; }
   .artist-hero { grid-template-columns: 310px 1fr; gap: 38px; }
   .library-band { gap: 42px; }
   .object-rows { column-gap: 42px; }
@@ -20,6 +22,8 @@
   .player-page, .artist-page, .album-page, .library-page, .state-page { height: auto; overflow: visible; }
   .player-shell, .artist-hero, .album-shell, .library-band, .library-band.quiet { grid-template-columns: 1fr; }
   .player-object, .album-object { position: static; }
+  .player-stage, .note-open .player-stage { grid-template-columns: minmax(0,1fr); column-gap: 0; }
+  .player-note-panel { position: static; max-height: none; margin-top: 28px; border-left: 0; border-top: 1px solid var(--line); }
   .player-cover, .album-hero-cover { width: min(100%,430px); }
   .artist-portrait { max-width: 360px; }
   .release-card { grid-template-columns: 130px minmax(0,1fr); }

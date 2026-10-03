@@ -5,11 +5,8 @@ import type { TimedLyricLine } from '../../lyrics/types';
 import type { LyricsState } from '../../lyrics/useTimedLyrics';
 import { useLyricCursor } from '../../playback/hooks';
 import { usePreferences } from '../../preferences/preferences';
-import { SPEECH_LEVEL_LABEL } from '../../translation/curated/types';
-import { detectLineLanguage, detectLineLanguages } from '../../translation/languageDetect';
+import { detectLineLanguages } from '../../translation/languageDetect';
 import { useLyricTranslation, type TranslationState } from '../../translation/useLyricTranslation';
-import { useNote } from '../NoteContext';
-import { songNotePayload } from '../SongNote';
 
 /** v7 shows the current line, its translation and the next two lines. */
 const UPCOMING_LINES = 2;
@@ -21,39 +18,12 @@ export function languageName(tag: string | undefined): string | null {
   return LANGUAGE_NAMES[tag.split('-')[0]!.toLowerCase()] ?? tag;
 }
 
-function TranslationStatus({
-  state,
-  target,
-  prepare,
-  openNote,
-}: {
-  state: TranslationState;
-  target: string;
-  prepare: (() => Promise<void>) | null;
-  openNote: (() => void) | null;
-}) {
+/** A curated translation shows like any other: its brief and reasoning live in the song's Listening note. */
+function TranslationStatus({ state, target, prepare }: { state: TranslationState; target: string; prepare: (() => Promise<void>) | null }) {
   switch (state.status) {
     case 'loading':
       return <span>Translating…</span>;
     case 'ready':
-      if (state.curated) {
-        const { total, covered, machine } = state.curated;
-        return (
-          <>
-            <span
-              className="curated-mark"
-              title={`${covered} of ${total} lines from the curated translation${machine.length ? `, ${machine.length} machine-translated` : ''}`}
-            >
-              Curated · <span lang="ko">{SPEECH_LEVEL_LABEL[state.curated.match.translation.brief.register]}</span>
-            </span>
-            {openNote && (
-              <button type="button" className="note-more" aria-haspopup="dialog" onClick={openNote}>
-                Translation note →
-              </button>
-            )}
-          </>
-        );
-      }
       return <span>{languageName(target)}</span>;
     case 'not-needed':
       return <span>Already in {languageName(target)}</span>;
@@ -82,7 +52,6 @@ export function LyricsBlock({ track, lyricsState, context }: { track: TrackIdent
   const lyrics = lyricsState.status === 'ready' ? lyricsState.lyrics : null;
   const lines: TimedLyricLine[] | null = lyrics?.lines ?? null;
   const { state: translation, prepare, curated } = useLyricTranslation(track, lyrics, preferences.translationEnabled);
-  const { openNote } = useNote();
   const { activeIndex, nextIndex } = useLyricCursor(lines);
 
   const lineLanguages = useMemo(
@@ -98,18 +67,6 @@ export function LyricsBlock({ track, lyricsState, context }: { track: TrackIdent
   const curatedLine = translation.status === 'ready' && translation.curated && activeIndex >= 0 ? translation.curated : null;
   const segment = curatedLine?.segmentOf[activeIndex] ?? null;
   const continued = Boolean(curatedLine?.continued[activeIndex]);
-  const curatedNote = translation.status === 'ready' ? translation.curated?.match.note : undefined;
-  const openTranslationNote = curatedNote
-    ? () =>
-        openNote(
-          songNotePayload(curatedNote, {
-            title: track.title,
-            titleLang: detectLineLanguage(track.title),
-            subtitle: [track.artists.map((artist) => artist.name).join(', '), track.album.name].filter(Boolean).join(' · '),
-            focusTranslation: true,
-          }),
-        )
-    : null;
 
   return (
     <>
@@ -120,7 +77,7 @@ export function LyricsBlock({ track, lyricsState, context }: { track: TrackIdent
           {(provider || curated) && (
             <span className="translation-tools">
               {preferences.translationEnabled && lines && (
-                <TranslationStatus state={translation} target={translationTarget} prepare={prepare} openNote={openTranslationNote} />
+                <TranslationStatus state={translation} target={translationTarget} prepare={prepare} />
               )}
               <button
                 type="button"

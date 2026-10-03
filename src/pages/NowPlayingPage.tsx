@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { usePageTitle } from '../app/pageTitle';
 import { useSession } from '../app/sessionContext';
@@ -5,10 +6,11 @@ import { useAlbum } from '../catalogue/queries';
 import { ArtistLinks } from '../components/ArtistLinks';
 import { CoverImage } from '../components/CoverImage';
 import { LyricsBlock, languageName } from '../components/player/LyricsBlock';
+import { NoteColumn } from '../components/player/NoteColumn';
 import { PlaybackNotice } from '../components/player/PlaybackNotice';
 import { Transport } from '../components/player/Transport';
 import { TransportExtras } from '../components/player/TransportExtras';
-import { SongNotePreview } from '../components/SongNote';
+import { SongNotePreview, songNotePayload } from '../components/SongNote';
 import { StateView } from '../components/StateView';
 import { getSongNote } from '../editorial/lookup';
 import { formatDuration, formatTrackNumber, joinArtistNames, releaseYear } from '../lib/format';
@@ -26,6 +28,8 @@ function titleLanguage(title: string): string | undefined {
  * The one Now Playing design (v7): the album object on the left — cover,
  * title, artist · album, track / release / duration / language — and the
  * listening column on the right — lyrics, Listening Note and the transport.
+ * The full Listening note opens in the page as a column on the right; the
+ * cover and lyrics move left to make room instead of being covered.
  */
 export function NowPlayingPage() {
   const snapshot = usePlayerSnapshot();
@@ -34,6 +38,10 @@ export function NowPlayingPage() {
   const album = useAlbum(track?.album.id || undefined);
   const lyricsState = useTimedLyrics(track);
   usePageTitle('Now Playing', track?.title ?? null);
+  const [noteOpen, setNoteOpen] = useState(false);
+  // A new track closes the previous track's note.
+  const trackId = track?.spotifyTrackId;
+  useEffect(() => setNoteOpen(false), [trackId]);
 
   if (!hydrated) return <NowPlayingLoading />;
   if (!track) return <NothingPlaying />;
@@ -49,81 +57,84 @@ export function NowPlayingPage() {
   const songNote = getSongNote({ id: track.spotifyTrackId, title: track.title, artistNames: track.artists.map((a) => a.name) });
   const titleLang = lyricLanguage ?? detectLineLanguage(track.title);
   const artistNames = joinArtistNames(track.artists) || 'Unknown artist';
+  const noteContext = {
+    title: track.title,
+    titleLang,
+    subtitle: `${artistNames} · ${albumName}${albumTrack ? ` · Track ${formatTrackNumber(albumTrack.trackNumber)}` : ''}`,
+  };
+  const showNote = noteOpen && songNote !== null;
 
   return (
     <div className="view active">
-      <div className="player-page">
-        <div className="player-shell">
-          <section className="player-object" aria-label="Now playing">
-            <div className="player-cover">
-              <CoverImage
-                images={track.album.images}
-                size={520}
-                alt={`${albumName} album cover`}
-                title={albumName}
-                subtitle={artistNames}
-                paletteKey={track.album.id}
-                shadow
-                priority
+      <div className={showNote ? 'player-page note-open' : 'player-page'}>
+        <div className="player-stage">
+          <div className="player-shell">
+            <section className="player-object" aria-label="Now playing">
+              <div className="player-cover">
+                <CoverImage
+                  images={track.album.images}
+                  size={520}
+                  alt={`${albumName} album cover`}
+                  title={albumName}
+                  subtitle={artistNames}
+                  paletteKey={track.album.id}
+                  shadow
+                  priority
+                />
+              </div>
+              <div className="player-copy">
+                <div className="label">Now playing</div>
+                <h1 lang={titleLang}>{track.title}</h1>
+                <div className="artist-line">
+                  <ArtistLinks artists={track.artists} />
+                  {track.album.id && (
+                    <>
+                      <span aria-hidden="true"> · </span>
+                      <Link className="linkish" to={`/album/${track.album.id}`} lang={detectLineLanguage(albumName)}>
+                        {albumName}
+                      </Link>
+                    </>
+                  )}
+                </div>
+                <div className="player-meta">
+                  <div>
+                    <b>Track</b>
+                    <span>
+                      {albumTrack ? `${formatTrackNumber(albumTrack.trackNumber)} / ${trackCount ? formatTrackNumber(trackCount) : '—'}` : '—'}
+                    </span>
+                  </div>
+                  <div>
+                    <b>Release</b>
+                    <span>{year ?? '—'}</span>
+                  </div>
+                  <div>
+                    <b>Duration</b>
+                    <span>{formatDuration(durationMs)}</span>
+                  </div>
+                  <div>
+                    <b>Language</b>
+                    <span>{language ?? '—'}</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="player-listening" aria-label="Lyrics and playback controls">
+              <LyricsBlock
+                key={track.spotifyTrackId}
+                track={track}
+                lyricsState={lyricsState}
+                context={`${albumName} / ${trackCount ?? '—'} tracks`}
               />
-            </div>
-            <div className="player-copy">
-              <div className="label">Now playing</div>
-              <h1 lang={titleLang}>{track.title}</h1>
-              <div className="artist-line">
-                <ArtistLinks artists={track.artists} />
-                {track.album.id && (
-                  <>
-                    <span aria-hidden="true"> · </span>
-                    <Link className="linkish" to={`/album/${track.album.id}`} lang={detectLineLanguage(albumName)}>
-                      {albumName}
-                    </Link>
-                  </>
-                )}
-              </div>
-              <div className="player-meta">
-                <div>
-                  <b>Track</b>
-                  <span>
-                    {albumTrack ? `${formatTrackNumber(albumTrack.trackNumber)} / ${trackCount ? formatTrackNumber(trackCount) : '—'}` : '—'}
-                  </span>
-                </div>
-                <div>
-                  <b>Release</b>
-                  <span>{year ?? '—'}</span>
-                </div>
-                <div>
-                  <b>Duration</b>
-                  <span>{formatDuration(durationMs)}</span>
-                </div>
-                <div>
-                  <b>Language</b>
-                  <span>{language ?? '—'}</span>
-                </div>
-              </div>
-            </div>
-          </section>
 
-          <section className="player-listening" aria-label="Lyrics and playback controls">
-            <LyricsBlock
-              key={track.spotifyTrackId}
-              track={track}
-              lyricsState={lyricsState}
-              context={`${albumName} / ${trackCount ?? '—'} tracks`}
-            />
+              <SongNotePreview note={songNote} {...noteContext} className="player-note" onOpen={() => setNoteOpen(true)} expanded={showNote} />
 
-            <SongNotePreview
-              note={songNote}
-              title={track.title}
-              titleLang={titleLang}
-              subtitle={`${artistNames} · ${albumName}${albumTrack ? ` · Track ${formatTrackNumber(albumTrack.trackNumber)}` : ''}`}
-              className="player-note"
-            />
-
-            <Transport />
-            <TransportExtras />
-            <PlaybackNotice />
-          </section>
+              <Transport />
+              <TransportExtras />
+              <PlaybackNotice />
+            </section>
+          </div>
+          {showNote && <NoteColumn note={songNotePayload(songNote, noteContext)} onClose={() => setNoteOpen(false)} />}
         </div>
       </div>
     </div>

@@ -16,6 +16,9 @@
   --main: #b91f2e;
   --main-text: #b91f2e;
   --rail: 68px;
+  /* Now Playing: how wide a lyric line may run, and the in-page Listening note column. */
+  --lyric-width: 1100px;
+  --note-width: 530px;
   --ease: cubic-bezier(.2, .82, .2, 1);
 }
 
@@ -84,9 +87,20 @@ kbd { padding: 0 4px; border: 1px solid var(--line); font-size: .9em; }
 
 /* Now playing */
 .player-page { height: 100%; overflow: auto; padding: 32px 44px 50px; }
-.player-shell { max-width: 1450px; margin: 0 auto; display: grid; grid-template-columns: minmax(350px,42%) minmax(0,58%); gap: 64px; padding: 12px 0 30px; align-items: start; }
+/* The stage holds the album object + listening column, and the Listening note column when it is open (same layer, pushes left). */
+.player-stage { display: grid; grid-template-columns: minmax(0,1fr) 0; column-gap: 0; align-items: start; transition: grid-template-columns .34s var(--ease), column-gap .34s var(--ease); }
+.note-open .player-stage { grid-template-columns: minmax(0,1fr) var(--note-width); column-gap: 44px; }
+.player-note-panel { position: sticky; top: 0; max-height: calc(100dvh - 68px - 64px); display: flex; flex-direction: column; background: var(--paper); border-left: 1px solid var(--line); min-width: 0; animation: note-panel-in .34s var(--ease); }
+.player-note-panel-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 18px 26px 14px; border-bottom: 1px solid var(--line-soft); }
+.player-note-panel-head span { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); }
+.player-note-panel-head button { width: 36px; height: 36px; border: 0; background: transparent; font-size: 18px; color: var(--muted); }
+.player-note-panel-body { overflow: auto; padding: 30px 34px 44px; }
+@keyframes note-panel-in { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+.player-shell { width: 100%; max-width: 1760px; margin: 0 auto; display: grid; grid-template-columns: minmax(350px,42%) minmax(0,58%); gap: 64px; padding: 12px 0 30px; align-items: start; }
 .player-object { min-width: 0; position: sticky; top: 0; }
-.player-cover { width: min(48vh,32vw,520px); aspect-ratio: 1; }
+.player-cover { width: min(48vh,32vw,520px,100%); aspect-ratio: 1; }
+/* With the note open the album object gives up width first, so the lyrics keep a readable measure. */
+.note-open .player-shell { grid-template-columns: minmax(240px,34%) minmax(0,1fr); gap: 48px; }
 .player-copy { margin-top: 22px; }
 .player-copy h1 { margin: 8px 0 0; font-size: clamp(42px,5.2vw,78px); line-height: .93; letter-spacing: -.055em; font-weight: 500; overflow-wrap: anywhere; }
 .artist-line { margin-top: 11px; font-size: 15px; }
@@ -102,11 +116,11 @@ kbd { padding: 0 4px; border: 1px solid var(--line); font-size: .9em; }
 .translation-tools > * { white-space: nowrap; }
 .translation-tools .text-toggle b { font-weight: 500; color: var(--ink); }
 .lyrics-panel { padding: 42px 0 30px; min-height: 290px; }
-.current-lyric { margin: 0; font-size: clamp(36px,4vw,64px); line-height: 1.08; letter-spacing: -.045em; font-weight: 500; max-width: 850px; white-space: pre-line; overflow-wrap: anywhere; animation: lyric-in .36s var(--ease); }
+.current-lyric { margin: 0; font-size: clamp(36px,4vw,64px); line-height: 1.08; letter-spacing: -.045em; font-weight: 500; max-width: var(--lyric-width); white-space: pre-line; overflow-wrap: anywhere; animation: lyric-in .36s var(--ease); }
 .current-lyric.is-state { color: var(--muted); font-size: clamp(30px,3.2vw,48px); animation: none; }
 .current-lyric.is-gap { color: var(--dim); font-size: clamp(22px,2vw,30px); letter-spacing: .3em; line-height: 1.6; }
 @keyframes lyric-in { from { opacity: .35; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.current-trans { margin: 14px 0 0; font-size: clamp(17px,1.2vw,19px); line-height: 1.5; color: var(--muted); max-width: 70ch; }
+.current-trans { margin: 16px 0 0; font-size: clamp(22px,2.15vw,41px); line-height: 1.35; letter-spacing: -.01em; color: var(--muted); max-width: var(--lyric-width); }
 .next-lines { display: flex; flex-direction: column; gap: 13px; margin-top: 24px; }
 .next-line { font-size: clamp(18px,1.55vw,25px); line-height: 1.4; color: var(--muted); white-space: pre-line; }
 .next-line.second { color: var(--dim); }
@@ -207,20 +221,20 @@ kbd { padding: 0 4px; border: 1px solid var(--line); font-size: .9em; }
 .note-body a:hover, .note-sources a:hover { text-decoration-color: currentColor; }
 .note-drawer-foot { margin-top: 34px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); }
 .note-sources { margin: 12px 0 0; padding-left: 0; display: grid; gap: 5px; font-size: 12.5px; line-height: 1.5; letter-spacing: .01em; text-transform: none; overflow-wrap: anywhere; }
-/* Curated lyric translation: header mark, a segment carried over its continuing lines, and the song note's 번역에 대하여 */
-.curated-mark { font-size: 12px; letter-spacing: .06em; color: var(--main-text); }
+/* Curated lyric translation: a segment carried over its continuing lines, and the song note's 번역에 대하여 */
 .translation-tools .note-more { margin-top: 0; }
 .current-trans.is-continued { color: var(--dim); }
 .song-translation { margin-top: 34px; }
+.note-body.song-translation > h3 { font-size: 14px; }
 .note-drawer-copy > .song-translation:first-child { margin-top: 0; }
 .note-drawer-copy > .song-translation:first-child > h3 { margin-top: 0; padding-top: 0; border-top: 0; }
-.translation-brief { display: grid; gap: 6px; margin: 0 0 1.15em; font-size: 14px; line-height: 1.6; }
-.translation-brief > div { display: grid; grid-template-columns: 82px minmax(0,1fr); gap: 12px; }
-.translation-brief dt { font-size: 11px; letter-spacing: .09em; color: var(--dim); padding-top: 3px; }
+.translation-brief { display: grid; gap: 6px; margin: 0 0 1.15em; font-size: 14.5px; line-height: 1.6; }
+.translation-brief > div { display: grid; grid-template-columns: 98px minmax(0,1fr); gap: 12px; }
+.translation-brief dt { font-size: 13px; letter-spacing: .09em; color: var(--dim); padding-top: 3px; }
 .translation-brief dd { margin: 0; color: var(--ink); }
-.term-table { width: 100%; margin: 0 0 1.15em; border-collapse: collapse; font-size: 13.5px; line-height: 1.55; }
-.term-table caption { text-align: left; padding-bottom: 6px; font-size: 11px; letter-spacing: .09em; color: var(--dim); }
-.term-table th { text-align: left; font-weight: 400; font-size: 11px; letter-spacing: .09em; color: var(--dim); padding: 0 10px 6px 0; border-bottom: 1px solid var(--line); }
+.term-table { width: 100%; margin: 0 0 1.15em; border-collapse: collapse; font-size: 14.5px; line-height: 1.55; }
+.term-table caption { text-align: left; padding-bottom: 6px; font-size: 13px; letter-spacing: .09em; color: var(--dim); }
+.term-table th { text-align: left; font-weight: 400; font-size: 13px; letter-spacing: .09em; color: var(--dim); padding: 0 10px 6px 0; border-bottom: 1px solid var(--line); }
 .term-table td { vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line-soft); }
 .term-table td:first-child, .term-table td:nth-child(2) { color: var(--ink); word-break: keep-all; }
 .term-table td:nth-child(3) { color: var(--muted); }

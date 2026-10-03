@@ -1,17 +1,15 @@
+import { useId } from 'react';
 import type { SongNote } from '../editorial/types';
 import { SPEECH_LEVEL_LABEL, type SongTranslation, type TermMapping } from '../translation/curated/types';
 import { NoteBody } from './NoteBody';
 import { useNote, type NotePayload } from './NoteContext';
 
 /**
- * The one drawer for a song: the listening note first, then — when the song
+ * The one note for a song: the listening note first, then — when the song
  * has a curated translation — "번역에 대하여" (who speaks to whom, the speech
  * level, pronouns and terms, the reasoning), then sources and dates in the
  * shared foot. The translation itself is read in the lyrics, never here.
  */
-
-/** Element id of the translation section; "Translation note →" opens the drawer scrolled to it. */
-export const TRANSLATION_SECTION_ID = 'note-translation';
 
 const LANGUAGE_LABEL: Record<string, string> = { ja: '일본어', en: '영어', ko: '한국어', zh: '중국어' };
 
@@ -47,10 +45,11 @@ function TermTable({ caption, terms, sourceLang }: { caption: string; terms: Ter
 
 export function TranslationAbout({ translation }: { translation: SongTranslation }) {
   const { brief, about } = translation;
+  const titleId = useId();
   const dates = [`작성 ${brief.written}`, brief.updated && `수정 ${brief.updated}`].filter(Boolean).join(' · ');
   return (
-    <section id={TRANSLATION_SECTION_ID} className="note-body song-translation" aria-labelledby={`${TRANSLATION_SECTION_ID}-title`}>
-      <h3 id={`${TRANSLATION_SECTION_ID}-title`}>번역에 대하여</h3>
+    <section className="note-body song-translation" aria-labelledby={titleId}>
+      <h3 id={titleId}>번역에 대하여</h3>
       <dl className="translation-brief">
         <div>
           <dt>화자 → 청자</dt>
@@ -89,21 +88,17 @@ export interface SongNoteContext {
   title: string;
   subtitle?: string;
   titleLang?: string;
-  /** Open scrolled to the translation section. */
-  focusTranslation?: boolean;
 }
 
-export function songNotePayload(note: SongNote, { title, subtitle, titleLang, focusTranslation }: SongNoteContext): NotePayload {
-  const translationOnly = !note.full?.trim() && !note.short?.trim();
+/** A song's one note: the listening body, then 번역에 대하여 when the song has a curated translation. */
+export function songNotePayload(note: SongNote, { title, subtitle, titleLang }: SongNoteContext): NotePayload {
   return {
-    context: translationOnly ? 'Translation note / Song' : 'Listening note / Song',
+    context: 'Listening note / Song',
     title,
     subtitle,
     titleLang,
     copy: note.full ?? '',
     extra: note.translation ? <TranslationAbout translation={note.translation} /> : undefined,
-    // Scroll only past a listening note; a translation-only note already opens on the section.
-    focus: focusTranslation && note.translation && !translationOnly ? TRANSLATION_SECTION_ID : undefined,
     written: note.written,
     updated: note.updated,
     sources: note.sources,
@@ -111,38 +106,40 @@ export function songNotePayload(note: SongNote, { title, subtitle, titleLang, fo
 }
 
 /**
- * Now Playing's note area: the listening cue and "Read full note →"; for a
- * song with only a translation note, just the link to it. Nothing without a note.
+ * Now Playing's note area: "Listening note", the cue when there is one, and
+ * "Read full note →". `onOpen` shows the note in-page (Now Playing's note
+ * column); without it the app-level drawer opens. Nothing without a note.
  */
-export function SongNotePreview({ note, className, ...context }: { note: SongNote | null; className?: string } & Omit<SongNoteContext, 'focusTranslation'>) {
+export function SongNotePreview({
+  note,
+  className,
+  onOpen,
+  expanded,
+  ...context
+}: { note: SongNote | null; className?: string; onOpen?: () => void; expanded?: boolean } & SongNoteContext) {
   const { openNote } = useNote();
   if (!note) return null;
   const short = note.short?.trim();
   const hasBody = Boolean(note.full?.trim() || note.translation);
-  if (!short && !note.translation) return null;
+  if (!short && !hasBody) return null;
   return (
     <div className={className ? `note-preview ${className}` : 'note-preview'}>
       <div className="note-kicker">
-        <span>{short ? 'Listening note' : 'Translation note'}</span>
+        <span>Listening note</span>
         <span className="index">SONG</span>
       </div>
       {short && <p lang="ko">{short}</p>}
-      {short
-        ? hasBody && (
-            <button type="button" className="note-more" aria-haspopup="dialog" onClick={() => openNote(songNotePayload(note, context))}>
-              Read full note →
-            </button>
-          )
-        : (
-            <button
-              type="button"
-              className="note-more"
-              aria-haspopup="dialog"
-              onClick={() => openNote(songNotePayload(note, { ...context, focusTranslation: true }))}
-            >
-              Translation note →
-            </button>
-          )}
+      {hasBody && (
+        <button
+          type="button"
+          className="note-more"
+          aria-haspopup={onOpen ? undefined : 'dialog'}
+          aria-expanded={onOpen ? Boolean(expanded) : undefined}
+          onClick={() => (onOpen ? onOpen() : openNote(songNotePayload(note, context)))}
+        >
+          Read full note →
+        </button>
+      )}
     </div>
   );
 }
