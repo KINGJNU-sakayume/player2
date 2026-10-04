@@ -160,7 +160,7 @@ export function auditNotes(artists: readonly ArtistNote[], albums: readonly Albu
  * shrinks: rewrite a note, then remove its line here.
  */
 // Album prose and standard tracklists are complete; these six albums still lack song-note files.
-// Five song notes have listening prose but still lack curated translations or verified language metadata.
+// Four song notes have listening prose but still lack curated translations or verified language metadata.
 export const PENDING_REVIEW: ReadonlySet<string> = new Set([
   'albums/parachutes',
   'albums/a-rush-of-blood',
@@ -169,7 +169,6 @@ export const PENDING_REVIEW: ReadonlySet<string> = new Set([
   'albums/assemble24',
   'albums/strobo',
   'songs/adore-u',
-  'songs/before-the-rise',
   'songs/blue-valentine',
   'songs/chowall',
   'songs/crush-on-you',

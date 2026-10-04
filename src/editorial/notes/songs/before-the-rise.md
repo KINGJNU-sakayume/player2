@@ -1,6 +1,7 @@
 ---
 artist: triples
 titles: [Before the Rise]
+lyricsLanguage: instrumental
 written: 2026-10-03
 
 short: >
