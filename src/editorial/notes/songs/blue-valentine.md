@@ -11,6 +11,7 @@ sources:
   - https://en.wikipedia.org/wiki/Blue_Valentine_(Nmixx_song)
   - https://andasian.com/nmixxs-blue-valentine-album-is-almost-a-masterpiece/amp/
   - https://thehoneypop.com/2025/10/22/nmixxs-blue-valentine-album-proves-o-o-was-the-perfect-debut/
+  - https://lrclib.net/api/get/38111968
 ---
 
 앨범의 타이틀곡이다. 몽롱하고 쓸쓸한 신스와 감정적인 기타 리프가 곡을 끌고 가고, 그 아래에서 느리게 걷던 붐뱁 리듬이 중간에 빨라지며 BPM이 바뀐다. 엔믹스가 늘 해 오던 장르 전환이지만 여기서는 놀라게 하려는 장치가 아니라 곡의 서사 그 자체로 쓰인다. 후렴의 선율은 파란 분위기 위에서도 쉽게 따라 부를 수 있게 만들어져 있다.

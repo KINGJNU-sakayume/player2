@@ -7,6 +7,7 @@ short: >
 sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
+  - https://lrclib.net/api/get/11929497
 ---
 
 짧은 소리들이 박자 주변에서 움직이고 목소리도 매끈하게만 노래하지 않는다. 음절을 힘주어 꺾거나 말을 던지는 발성이 반주의 익살스러운 질감과 맞물린다. 후렴에는 쉽게 기억되는 선율이 있지만 그 앞뒤는 곧게 달리는 밴드 팝보다 더 구불구불하다. 제목의 간명함과 실제 소리의 과장 사이에 생기는 차이가 첫 청취부터 곡의 표정을 만든다.

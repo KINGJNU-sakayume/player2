@@ -7,6 +7,7 @@ short: >
 sources:
   - https://en.wikipedia.org/wiki/Assemble24
   - https://www.sputnikmusic.com/review/88548/tripleS-ASSEMBLE24/
+  - https://lrclib.net/api/get/38215774
 ---
 
 밝은 기타와 매끄럽게 움직이는 박자가 'Midnight Flower'의 바닥을 만든다. 목소리는 절의 가벼운 선에서 후렴의 함께 부를 수 있는 크기로 펴지고, 반주는 그 확장을 거친 충돌보다 밝은 층의 증가로 받친다. 1980년대 팝을 떠올리게 하는 표면이 있어도 곡은 과거의 장면에 머무르지 않고 계속 앞으로 움직인다. 후렴의 음량보다 각 목소리가 같은 선을 어떻게 나누는지 들으면 작은 고양이 집단의 크기를 얻는 과정이 보인다.

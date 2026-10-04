@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/parachutes/
   - https://pitchfork.com/reviews/albums/1539-parachutes/
   - https://en.wikipedia.org/wiki/Parachutes_(Coldplay_album)
+  - https://lrclib.net/api/get/15801
 ---
 
 전기 기타가 짧고 날카로운 동기를 반복하고 드럼이 그 사이를 단단하게 받친다. 낮은 목소리로 시작한 벌스는 문장마다 힘을 아끼다가 후렴에서 높은 음역으로 크게 뻗는다. 기타가 단순한 코드 배경에 머물지 않고 보컬 사이마다 다른 움직임을 보여 주는 점도 중요하다. 곡의 흔들림은 느슨한 연주보다 서로 팽팽하게 잡아당기는 파트의 관계에서 생긴다.

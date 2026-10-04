@@ -8,6 +8,7 @@ sources:
   - https://spincoaster.com/news/vaundy-release-1st-album-strobo
   - https://aramajapan.com/news/newrelease/vaundy-to-release-his-debut-album-strobo-pv-for-life-hack/105087/
   - https://en.wikipedia.org/wiki/Strobo
+  - https://lrclib.net/api/get/10223881
 ---
 
 리듬은 느긋하게 움직이고 기타의 짧은 음이 그 사이를 가볍게 짚는다. 베이스가 아래에서 곡의 몸을 만들며 목소리는 멀리 뻗기보다 바로 앞에 낮게 놓인다. 후렴에도 반주의 크기를 한꺼번에 늘리지 않아 같은 공간의 분위기가 유지된다. 작은 말과 음이 돌아올 때마다 곡은 새 장면을 보여 주기보다 지금의 밤에 조금 더 오래 머무는 듯 들린다.

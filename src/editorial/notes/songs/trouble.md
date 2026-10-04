@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/parachutes/
   - https://pitchfork.com/reviews/albums/1539-parachutes/
   - https://en.wikipedia.org/wiki/Parachutes_(Coldplay_album)
+  - https://lrclib.net/api/get/16114
 ---
 
 피아노가 짧은 동기를 반복하고 목소리는 그 사이에 조심스럽게 들어온다. 같은 음형이 돌아올 때마다 문장이 조금씩 길어져, 반주가 앞으로 나아가기보다 화자의 말을 기다리는 듯 들린다. 베이스와 드럼이 더해져도 피아노의 윤곽은 가려지지 않는다. 전기 기타는 선율을 크게 주장하기보다 뒤에서 길게 울리며 작은 고백에 거리감을 보탠다.

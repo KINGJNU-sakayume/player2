@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/viva-la-vida-or-death-and-all-his-friends/
   - https://en.wikipedia.org/wiki/Viva_la_Vida_or_Death_and_All_His_Friends
   - https://pitchfork.com/reviews/albums/11621-viva-la-vida-or-death-and-all-his-friends/
+  - https://lrclib.net/api/get/1049006
 ---
 
 앞부분은 타격이 선명한 피아노의 반복과 드럼이 밝은 속도를 만든다. 목소리는 그 흐름을 타고 긴 선율로 위를 향하고, 기타는 뒤에서 반짝이는 층을 더한다. 밴드의 밀도가 충분히 자란 뒤 음악은 멈춤을 거쳐 훨씬 조용한 피아노로 옮겨 간다. 'Reign of Love'에서는 같은 트랙 안의 공간이 작아져 낮은 문장과 잔향이 다시 들리기 시작한다.

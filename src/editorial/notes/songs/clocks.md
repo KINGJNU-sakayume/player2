@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/a-rush-of-blood-to-the-head/
   - https://pitchfork.com/reviews/albums/1538-a-rush-of-blood-to-the-head/
   - https://en.wikipedia.org/wiki/A_Rush_of_Blood_to_the_Head
+  - https://lrclib.net/api/get/13450
 ---
 
 피아노가 빠르게 순환하는 음형을 시작하고 베이스와 드럼이 그 아래에 곧은 박자를 놓는다. 피아노는 한 번 들려준 뒤 사라지는 도입이 아니라 곡의 대부분을 붙드는 중심이다. 목소리는 그 움직임 위에서 긴 음을 펴므로 짧게 도는 건반과 길게 뻗는 문장이 서로 다른 방향의 시간을 만든다. 소리는 밝게 열려 있어도 쉬지 않는 반복이 약한 압박을 준다.

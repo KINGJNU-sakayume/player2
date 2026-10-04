@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { albumNotes } from './albums';
 import { artistNotes } from './artists';
-import { auditAlbum, auditArtist, auditNotes, auditSong, countParagraphs, FLOOR, isTranslationPending, MISSING_TRANSLATION, PENDING_REVIEW, PENDING_TRANSLATION } from './quality';
+import { auditAlbum, auditArtist, auditNotes, auditSong, countParagraphs, FLOOR, PENDING_REVIEW } from './quality';
 import { songNotes } from './songs';
 import type { AlbumNote, ArtistNote, SongNote } from './types';
 
@@ -96,20 +96,12 @@ describe('the repository notes', () => {
   const audits = auditNotes(artistNotes, albumNotes, songNotes);
   const ids = new Set(audits.map((audit) => audit.id));
 
-  it.each(audits.filter((audit) => !PENDING_REVIEW.has(audit.id) && !isTranslationPending(audit)).map((audit) => [audit.id, audit] as const))(
+  it.each(audits.filter((audit) => !PENDING_REVIEW.has(audit.id)).map((audit) => [audit.id, audit] as const))(
     '%s meets the quality floor',
     (_id, audit) => {
       expect(audit.problems).toEqual([]);
     },
   );
-
-  it.each([...PENDING_TRANSLATION].map((id) => [id] as const))('%s only awaits a lyric translation', (id) => {
-    expect(ids.has(id), `${id} is not a note`).toBe(true);
-    expect(PENDING_REVIEW.has(id), `${id} should have only one pending status`).toBe(false);
-    const audit = audits.find((entry) => entry.id === id)!;
-    expect(audit.kind).toBe('song');
-    expect(audit.problems).toEqual([MISSING_TRANSLATION]);
-  });
 
   it.each([...PENDING_REVIEW].map((id) => [id] as const))('%s is still pending review (rewrite it, then remove it from PENDING_REVIEW)', (id) => {
     expect(ids.has(id), `${id} is not a note`).toBe(true);

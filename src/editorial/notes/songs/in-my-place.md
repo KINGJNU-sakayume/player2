@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/a-rush-of-blood-to-the-head/
   - https://pitchfork.com/reviews/albums/1538-a-rush-of-blood-to-the-head/
   - https://en.wikipedia.org/wiki/A_Rush_of_Blood_to_the_Head
+  - https://lrclib.net/api/get/13920
 ---
 
 드럼이 단단하게 박자를 시작하고 그 위로 전기 기타의 짧은 선율이 떠오른다. 기타는 보컬 뒤의 장식보다 곡을 알아보게 하는 중심 동기다. 목소리가 들어오면 반주의 골격은 크게 바뀌지 않지만 문장 끝의 긴 음이 그 일정한 박자와 다른 시간을 만든다. 후렴에서도 기타가 돌아오므로 기다리는 말과 계속 움직이는 밴드가 동시에 들린다.

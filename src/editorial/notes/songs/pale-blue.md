@@ -8,6 +8,7 @@ sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
   - https://en.wikipedia.org/wiki/Pale_Blue_(song)
+  - https://lrclib.net/api/get/11929515
 ---
 
 피아노와 현악이 가까운 목소리를 받치며 비교적 반듯한 흐름을 시작한다. 보컬은 낮은 말에서 긴 후렴으로 올라가고 현악도 그 선율의 폭을 넓힌다. 두 차례의 큰 후렴을 지나면 박자가 왈츠처럼 흔들리는 구간으로 바뀐다. 소리의 규모만 키우는 결말과 달리 여기서는 걸음 자체가 달라져, 같은 고백을 다른 몸의 시간으로 다시 듣게 된다.

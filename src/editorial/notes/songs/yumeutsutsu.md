@@ -7,6 +7,7 @@ short: >
 sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
+  - https://lrclib.net/api/get/14452926
 ---
 
 부드럽게 퍼지는 반주와 여유 있는 박자가 넓은 공간을 만들고 목소리가 그 안에 조용히 들어온다. 음절은 급하게 잘리지 않고 문장 끝이 긴 울림으로 이어진다. 소리가 겹쳐져도 가까운 보컬의 윤곽은 남아, 멀리 보는 풍경과 바로 앞의 독백이 동시에 들린다. 곡이 자라는 방식도 거친 타격보다 공기의 두께가 조금씩 달라지는 쪽에 가깝다.

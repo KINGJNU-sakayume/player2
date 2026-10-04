@@ -7,6 +7,7 @@ short: >
 sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
+  - https://lrclib.net/api/get/11732077
 ---
 
 전자적인 반주가 매끄러운 흐름을 만들고 목소리는 그 위에서 길게 말을 잇는다. 밝거나 유려하게 들리는 음색이 있어도 발성의 긴장은 완전히 풀리지 않는다. 같은 선율이 돌아올수록 음악의 편안한 표면과 말이 품은 불편함이 함께 커진다. 거친 기타로 감정을 곧바로 드러내는 앞곡과 달리, 여기서는 매끈한 소리 안에 남은 작은 압력이 중요하다.

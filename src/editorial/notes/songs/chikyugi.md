@@ -8,6 +8,7 @@ sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
   - https://en.wikipedia.org/wiki/Spinning_Globe
+  - https://lrclib.net/api/get/3069994
 ---
 
 피아노가 작은 공간을 열고 목소리는 낮은 음에서 조심스럽게 말을 시작한다. 문장 사이의 공백과 건반의 잔향이 충분히 들려 처음부터 큰 선율을 서두르지 않는다. 뒤로 갈수록 여러 악기의 울림이 더해지고 보컬도 더 넓은 음역으로 뻗는다. 그러나 피아노의 출발점이 곡 안에 남아, 큰 풍경으로 나가도 한 사람이 자기 경험을 말하는 거리가 유지된다.

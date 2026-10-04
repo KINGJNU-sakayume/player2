@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/a-rush-of-blood-to-the-head/
   - https://pitchfork.com/reviews/albums/1538-a-rush-of-blood-to-the-head/
   - https://en.wikipedia.org/wiki/A_Rush_of_Blood_to_the_Head
+  - https://lrclib.net/api/get/13510
 ---
 
 낮은 음의 무게와 전기 기타의 흐릿한 질감이 먼저 공간을 잡는다. 드럼은 여유를 두면서도 단단한 박자를 유지하고, 목소리는 그 안에서 낮게 출발한다. 후렴으로 갈수록 보컬의 음역과 겹친 소리가 넓어지지만 반주의 어두운 바닥이 완전히 걷히지는 않는다. 밝아지는 말과 남아 있는 저음이 함께 들려 빛의 감각이 단순한 색 교체보다 더 입체적이다.

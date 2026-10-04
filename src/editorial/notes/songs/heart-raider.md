@@ -7,6 +7,7 @@ short: >
 sources:
   - https://en.wikipedia.org/wiki/Assemble24
   - https://www.sputnikmusic.com/review/88548/tripleS-ASSEMBLE24/
+  - https://lrclib.net/api/get/23718089
 ---
 
 잘게 움직이는 리퀴드 개러지 계열의 박자가 '가시권'을 가볍게 밀고, 보컬은 그 빠른 표면에 부드러운 선을 얹는다. 절의 작은 말이 후렴에서 더 넓어져도 리듬은 같은 방향으로 계속 움직인다. 소리가 바쁘다는 사실만 따라가기보다 박자의 틈에서 목소리가 얼마나 여유를 남기는지 들으면 좋다. 빠른 몸과 가까운 마음이 같은 크기로 움직이지 않는 차이가 곡의 들뜸을 만든다.

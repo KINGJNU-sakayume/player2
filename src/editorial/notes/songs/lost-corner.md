@@ -7,6 +7,7 @@ short: >
 sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
+  - https://lrclib.net/api/get/11732129
 ---
 
 반주는 가볍고 마른 흐름을 만들고 목소리도 장대한 발라드의 결론을 서두르지 않는다. 긴 앨범의 끝 가까이에서 소리를 더 무겁게 쌓기보다 편안하게 움직일 수 있는 박자를 마련한다. 선율은 밝게 들리지만 그 밝음이 앞서 겪은 불안을 모두 지운 결과로 들리지는 않는다. 여러 감정을 지나온 사람이 조금 낮은 힘으로 다시 말을 시작하는 듯한 여유가 있다.

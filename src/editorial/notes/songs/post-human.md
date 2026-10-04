@@ -7,6 +7,7 @@ short: >
 sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
+  - https://lrclib.net/api/get/11732088
 ---
 
 전자적인 소리가 곡의 공간을 만들고 목소리는 그 안에서 친근함과 낯섦을 번갈아 드러낸다. 반주의 반복은 기계적인 감각을 남기지만 보컬의 말투는 상대에게 가까이 다가오려는 듯 들린다. 부드러운 음색과 서늘한 질감이 함께 있어 어느 한쪽만으로 곡의 표정을 정하기 어렵다. 듣는 사람이 목소리에 마음을 주는 순간에도 그 목소리가 무엇인지 다시 묻게 하는 소리다.

@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/viva-la-vida-or-death-and-all-his-friends/
   - https://en.wikipedia.org/wiki/Viva_la_Vida_or_Death_and_All_His_Friends
   - https://pitchfork.com/reviews/albums/11621-viva-la-vida-or-death-and-all-his-friends/
+  - https://lrclib.net/api/get/14127
 ---
 
 오르간처럼 두터운 건반 소리와 짧은 타악, 손뼉의 반복이 곡의 바닥을 만든다. 목소리는 그 일정한 박자에 기대어 낮게 시작하고 후렴에서 더 길게 펼쳐진다. 전기 기타가 앞에서 모든 길을 정하기보다 뒤에서 넓은 울림을 보탠다. 여러 종류의 타격이 같은 걸음을 만들기 때문에 멜로디보다 먼저 몸으로 기억되는 리듬이 남는다.

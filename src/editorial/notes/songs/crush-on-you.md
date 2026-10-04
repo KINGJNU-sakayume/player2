@@ -10,6 +10,7 @@ sources:
   - https://nmixx.fandom.com/wiki/Blue_Valentine
   - https://andasian.com/nmixxs-blue-valentine-album-is-almost-a-masterpiece/amp/
   - https://thehoneypop.com/2025/10/22/nmixxs-blue-valentine-album-proves-o-o-was-the-perfect-debut/
+  - https://lrclib.net/api/get/24453590
 ---
 
 재즈 팝 계열의 곡으로 그루브가 있는 드럼과 리듬감 있고 감정적인 기타가 중심이다. 가사는 래퍼 Shins와 멤버 해원이 함께 썼고, 작곡은 MACK, Jonathan BT, Gustav Blomberg가 맡았다.

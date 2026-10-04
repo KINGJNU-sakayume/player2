@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/viva-la-vida-or-death-and-all-his-friends/
   - https://en.wikipedia.org/wiki/Viva_la_Vida_or_Death_and_All_His_Friends
   - https://pitchfork.com/reviews/albums/11621-viva-la-vida-or-death-and-all-his-friends/
+  - https://lrclib.net/api/get/15916
 ---
 
 기타가 짧고 가벼운 음을 반복하고 타악이 그 사이에 다른 움직임을 놓는다. 각 파트는 작은데 함께 들으면 정지하지 않는 부드러운 흔들림을 만든다. 목소리는 리듬처럼 짧게 움직이지 않고 긴 음과 문장으로 그 위에 머문다. 반주가 활발해도 보컬은 서두르지 않아 같은 순간을 조금 오래 바라보는 듯한 시간감이 생긴다.

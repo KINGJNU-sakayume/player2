@@ -8,6 +8,7 @@ sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
   - https://en.wikipedia.org/wiki/Pale_Blue_(song)
+  - https://lrclib.net/api/get/12206559
 ---
 
 발을 딛는 듯한 소리와 마른 리듬 위에서 목소리가 낮게 말을 굴린다. 보컬은 선율을 길게 뻗기보다 음절의 결을 바꾸어 박자에 붙인다. 웃음이나 입으로 만드는 소리도 반주의 재료처럼 들려, 악기와 목소리의 경계가 느슨해진다. 마지막의 불을 끄는 듯한 소리까지 따라가면 노래의 작은 사건이 몸의 움직임으로 열리고 닫힌다는 점을 알 수 있다.

@@ -7,6 +7,7 @@ short: >
 sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
+  - https://lrclib.net/api/get/11731980
 ---
 
 목소리는 매끈하게 모든 음을 잇기보다 문장 안의 힘을 달리하며 움직인다. 반주가 밀도를 얻을수록 보컬도 더 긴 음과 강한 발성으로 공간을 넓힌다. 밝게 들리는 구간이 있어도 노래의 긴장은 쉽게 풀리지 않는다. 음색의 반짝임과 말을 밀어내는 압력이 함께 있어, 빛이 보인다는 감각과 자신이 잘 보이지 않는다는 감각이 한 곡 안에 겹친다.

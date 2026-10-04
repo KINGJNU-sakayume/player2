@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/parachutes/
   - https://pitchfork.com/reviews/albums/1539-parachutes/
   - https://en.wikipedia.org/wiki/Parachutes_(Coldplay_album)
+  - https://lrclib.net/api/get/314359
 ---
 
 어쿠스틱 기타가 작은 박자를 만들고 목소리가 그 위에 길게 머문다. 악기 수가 적어 문장 사이에 생기는 빈칸이 크게 들린다. 보컬이 높은 음으로 올라가도 반주가 곧바로 두꺼워지지 않으므로, 올라간 목소리는 혼자 더 많은 무게를 버텨야 한다. 곡의 친밀함은 편안한 멜로디뿐 아니라 그런 순간의 약한 떨림에서도 생긴다.

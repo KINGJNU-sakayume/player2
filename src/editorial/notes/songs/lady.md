@@ -7,6 +7,7 @@ short: >
 sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
+  - https://lrclib.net/api/get/11929499
 ---
 
 피아노의 밝은 움직임과 반주의 가벼운 박자가 목소리의 자리를 만든다. 보컬은 짧은 말을 급하게 몰아치지 않고 여유를 두어 연결한다. 후렴에서도 단번에 극적인 음량을 얻기보다 선율의 매끄러운 흐름으로 공간을 넓힌다. 반주가 계속 움직이는 동안 목소리가 조금 느긋하게 머무는 차이가 평범한 장면을 편안하게 바라보는 감각을 만든다.

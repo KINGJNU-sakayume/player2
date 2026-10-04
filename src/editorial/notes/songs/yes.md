@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/viva-la-vida-or-death-and-all-his-friends/
   - https://en.wikipedia.org/wiki/Viva_la_Vida_or_Death_and_All_His_Friends
   - https://pitchfork.com/reviews/albums/11621-viva-la-vida-or-death-and-all-his-friends/
+  - https://lrclib.net/api/get/16237
 ---
 
 낮은 목소리가 현악의 굽이치는 선율과 어두운 반주 사이에 놓인다. 보컬은 이전 대표곡의 높은 팔세토처럼 바로 위로 솟지 않고, 낮은 음역에 오래 머물며 무게를 만든다. 현악은 단정한 행진보다 미끄러지는 듯한 움직임으로 긴장을 더한다. 본곡이 끝난 뒤에는 기타가 두껍게 번지고 목소리가 반주 속에 섞이는 'Chinese Sleep Chant'가 이어져 청취의 거리 자체가 달라진다.

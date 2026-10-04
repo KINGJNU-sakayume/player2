@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/a-rush-of-blood-to-the-head/
   - https://pitchfork.com/reviews/albums/1538-a-rush-of-blood-to-the-head/
   - https://en.wikipedia.org/wiki/A_Rush_of_Blood_to_the_Head
+  - https://lrclib.net/api/get/13200
 ---
 
 전기 기타의 반복적인 움직임과 드럼이 짙은 층을 만든다. 목소리는 그 안에 놓여 다른 곡처럼 문장을 맨 앞에 또렷하게 세우지 않는다. 짧은 말이 되돌아올수록 보컬도 악기의 반복에 가까워진다. 제목이 떠올리게 하는 작은 소리와 실제 합주의 두께가 어긋나며, 멀리서 들려오는 말이 넓은 공간에 퍼지는 듯한 효과가 생긴다.

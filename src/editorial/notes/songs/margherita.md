@@ -7,6 +7,7 @@ short: >
 sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
+  - https://lrclib.net/api/get/12414227
 ---
 
 가벼운 전자적인 반주가 반복되는 박자를 만들고 두 목소리가 그 위에서 서로 다른 결을 낸다. 요네즈의 비교적 매끈한 발음과 아이나 디 엔드의 거칠게 휘어지는 음 끝이 나란히 들린다. 후렴의 짧고 선명한 단어가 돌아올 때마다 그 음색 차이가 곡의 표정을 바꾼다. 반주를 크게 부풀리기보다 목소리가 각기 다른 방향으로 움직이는 것만으로 충분한 생기를 만든다.

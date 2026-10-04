@@ -1,4 +1,5 @@
 import type { TimedLyrics } from '../../lyrics/types';
+import { detectLineLanguages, sameLanguage } from '../languageDetect';
 import { alignSegments, SNAP_MS } from './align';
 import { DURATION_TOLERANCE_MS } from './index';
 import type { TranslationTimeline } from './types';
@@ -38,22 +39,26 @@ export function formatLineTable(lyrics: TimedLyrics, durationMs?: number | null)
 }
 
 export interface TimelineCheck {
+  /** Lines requiring translation into the supplied target language. */
   total: number;
+  /** Required lines covered by at least one segment. */
   covered: number;
   /** The loaded record is the one in `timing`, and has its length (±3 s). */
   lrclibIdMatches: boolean;
   durationMatches: boolean;
   /** Segments whose start is not within ±400 ms of any line start. */
   offGrid: { segment: number; startMs: number; nearestLineMs: number | null }[];
-  /** Lines with text that no segment covers. */
+  /** Lines requiring translation that no segment covers. */
   uncovered: LineRow[];
 }
 
-export function checkTimeline(lyrics: TimedLyrics, timeline: TranslationTimeline): TimelineCheck {
+export function checkTimeline(lyrics: TimedLyrics, timeline: TranslationTimeline, targetLanguage?: string): TimelineCheck {
   const rows = lineRows(lyrics, lyrics.timing?.durationMs);
   const starts = rows.map((row) => row.startMs);
+  const languages = detectLineLanguages(lyrics.lines.map((line) => line.text), lyrics.language);
+  const required = rows.filter((row) => !sameLanguage(languages[row.index], targetLanguage));
   const aligned = alignSegments(lyrics.lines, timeline.segments, lyrics.timing?.durationMs ?? timeline.timing.durationMs);
-  const uncovered = new Set(aligned.uncovered);
+  const uncovered = required.filter((row) => aligned.uncovered.includes(row.index));
   const offGrid = timeline.segments.flatMap((segment, index) => {
     const nearest = starts.reduce<number | null>(
       (best, start) => (best === null || Math.abs(start - segment.startMs) < Math.abs(best - segment.startMs) ? start : best),
@@ -63,11 +68,11 @@ export function checkTimeline(lyrics: TimedLyrics, timeline: TranslationTimeline
   });
   const duration = lyrics.timing?.durationMs;
   return {
-    total: rows.length,
-    covered: rows.length - uncovered.size,
+    total: required.length,
+    covered: required.length - uncovered.length,
     lrclibIdMatches: lyrics.timing?.lrclibId === timeline.timing.lrclibId,
     durationMatches: typeof duration === 'number' && Math.abs(duration - timeline.timing.durationMs) <= DURATION_TOLERANCE_MS,
     offGrid,
-    uncovered: rows.filter((row) => uncovered.has(row.index)),
+    uncovered,
   };
 }

@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/a-rush-of-blood-to-the-head/
   - https://pitchfork.com/reviews/albums/1538-a-rush-of-blood-to-the-head/
   - https://en.wikipedia.org/wiki/A_Rush_of_Blood_to_the_Head
+  - https://lrclib.net/api/get/13713
 ---
 
 어쿠스틱 기타의 짧고 마른 음이 리듬을 열고 낮은 보컬이 그 위에 들어온다. 반주가 차례로 붙으면서 기타의 간단한 박자는 밴드 전체의 추진력으로 바뀐다. 전기 기타는 매끈한 선율보다 날이 선 질감을 더하고, 드럼은 문장 사이를 강하게 연결한다. 밝은 코드의 큰 발라드와 달리 이 곡의 상승은 리듬을 더 촘촘하게 조이는 방식이다.

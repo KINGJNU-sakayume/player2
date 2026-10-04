@@ -10,6 +10,7 @@ sources:
   - https://nmixx.fandom.com/wiki/Blue_Valentine
   - https://andasian.com/nmixxs-blue-valentine-album-is-almost-a-masterpiece/amp/
   - https://thehoneypop.com/2025/10/22/nmixxs-blue-valentine-album-proves-o-o-was-the-perfect-debut/
+  - https://lrclib.net/api/get/24453589
 ---
 
 팝 록, 하이퍼팝, 힙합이 한 곡에 섞인 곡이다. 밴드 사운드로 시작해 장르가 연달아 바뀌는 구성은 이 앨범에서 믹스팝의 방식이 가장 전면에 나온 순간 중 하나다. 작곡은 Morwell, Julie Yu, Kamilla Bayrak이 맡았다.

@@ -8,6 +8,7 @@ sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
   - https://en.wikipedia.org/wiki/Sayonara,_Mata_Itsuka!
+  - https://lrclib.net/api/get/32191339
 ---
 
 현악이 밝은 공간을 열고 단단한 박자가 곡을 앞으로 보낸다. 목소리는 간단한 직선으로만 올라가지 않고 음절 사이에서 선율을 굽히며 움직인다. 후렴에는 길게 뻗는 음이 있지만 앞의 작은 발음들이 그 큰 지점까지 길을 만든다. 작별을 말하는 제목과 달리 반주가 계속 다음 걸음을 마련하므로 음악의 시간은 돌아보기와 전진을 함께 품는다.

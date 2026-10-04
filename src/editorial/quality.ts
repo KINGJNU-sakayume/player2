@@ -18,9 +18,6 @@ export const FLOOR = {
   sources: 2,
 } as const;
 
-/** Kept as an audit problem even while the listening note is ready. */
-export const MISSING_TRANSLATION = 'needs a curated translation (translate-lyrics), or "lyricsLanguage: ko | instrumental" when none is needed';
-
 /** Phrases the skill rules out: hearsay instead of a judgement, and promotional clichés. */
 export const BANNED_PHRASES: readonly { pattern: RegExp; reason: string }[] = [
   { pattern: /평이 (있|나왔|많)/, reason: 'hearsay ("~라는 평이 있다"): judge it with evidence or leave it out' },
@@ -134,7 +131,7 @@ export function auditSong(note: SongNote): NoteAudit {
   if (length < FLOOR.songBody) problems.push(`listening note is ${length} characters; a song note needs ${FLOOR.songBody}+`);
   if (paragraphs < FLOOR.songParagraphs) problems.push(`listening note has ${paragraphs} paragraphs; a song note needs ${FLOOR.songParagraphs}+`);
   if (!note.translation && !note.lyricsLanguage) {
-    problems.push(MISSING_TRANSLATION);
+    problems.push('needs a curated translation (translate-lyrics), or "lyricsLanguage: ko | instrumental" when none is needed');
   }
   if (about !== undefined && about.length < FLOOR.translationAbout) {
     problems.push(`"번역에 대하여" is ${about.length} characters; it needs ${FLOOR.translationAbout}+`);
@@ -163,88 +160,3 @@ export function auditNotes(artists: readonly ArtistNote[], albums: readonly Albu
  * shrinks: rewrite a note, then remove its line here.
  */
 export const PENDING_REVIEW: ReadonlySet<string> = new Set();
-
-/**
- * Listening notes ready for review, with full lyric translations awaiting
- * user-supplied source lyrics. This is narrower than PENDING_REVIEW: the
- * missing translation must be the only problem, so body, sources and every
- * other quality check continue to fail normally. Remove a key once its
- * translation is written; the repository test rejects stale entries.
- */
-export const PENDING_TRANSLATION: ReadonlySet<string> = new Set([
-  'songs/24',
-  'songs/42',
-  'songs/a-rush-of-blood-to-the-head',
-  'songs/a-whisper',
-  'songs/adore-u',
-  'songs/amsterdam',
-  'songs/before-the-rise',
-  'songs/beyond-the-beyond',
-  'songs/blue-valentine',
-  'songs/boku-wa-kyou-mo',
-  'songs/bye-by-me',
-  'songs/cemeteries-of-london',
-  'songs/chikyugi',
-  'songs/chiyu',
-  'songs/chowall',
-  'songs/clocks',
-  'songs/crush-on-you',
-  'songs/daylight',
-  'songs/death-and-all-his-friends',
-  'songs/dimension',
-  'songs/dont-panic',
-  'songs/everythings-not-lost',
-  'songs/fukakouryoku',
-  'songs/garakuta',
-  'songs/god-put-a-smile-upon-your-face',
-  'songs/green-eyes',
-  'songs/heart-raider',
-  'songs/high-speed',
-  'songs/in-my-place',
-  'songs/lady',
-  'songs/lens-flare',
-  'songs/life-hack',
-  'songs/lost',
-  'songs/lost-corner',
-  'songs/lovers-in-japan-reign-of-love',
-  'songs/m87',
-  'songs/mainichi',
-  'songs/margherita',
-  'songs/midnight-flower',
-  'songs/napori',
-  'songs/non-scale',
-  'songs/ohayou',
-  'songs/pale-blue',
-  'songs/parachutes',
-  'songs/politik',
-  'songs/pop-song',
-  'songs/post-human',
-  'songs/red-out',
-  'songs/s',
-  'songs/sayonara-mata-itsuka',
-  'songs/shinigami',
-  'songs/shiver',
-  'songs/soramimi',
-  'songs/sparks',
-  'songs/spies',
-  'songs/strawberry-swing',
-  'songs/tokyo-flash',
-  'songs/tomare-miyo',
-  'songs/tomoshibi',
-  'songs/trouble',
-  'songs/tsuki-wo-miteita',
-  'songs/violet-hill',
-  'songs/warning-sign',
-  'songs/we-never-change',
-  'songs/white-soul-sneakers',
-  'songs/yellow-ghost',
-  'songs/yes',
-  'songs/yumeutsutsu',
-]);
-
-export function isTranslationPending(audit: NoteAudit): boolean {
-  return PENDING_TRANSLATION.has(audit.id)
-    && audit.kind === 'song'
-    && audit.problems.length === 1
-    && audit.problems[0] === MISSING_TRANSLATION;
-}

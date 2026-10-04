@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/viva-la-vida-or-death-and-all-his-friends/
   - https://en.wikipedia.org/wiki/Viva_la_Vida_or_Death_and_All_His_Friends
   - https://pitchfork.com/reviews/albums/11621-viva-la-vida-or-death-and-all-his-friends/
+  - https://lrclib.net/api/get/17820033
 ---
 
 피아노와 가까운 목소리가 조용하게 시작하고, 기타와 드럼이 들어오며 소리가 크게 열린다. 초반의 여백을 충분히 둔 뒤 합주를 키우므로 후반의 확장이 한층 강하게 느껴진다. 여러 목소리가 붙는 부분은 개인의 문장을 집단적인 호소로 바꾼다. 본곡 뒤에는 'The Escapist'가 이어져 전자음의 넓은 공간과 낮은 노래가 다시 남는다.

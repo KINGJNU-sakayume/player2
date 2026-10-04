@@ -10,6 +10,7 @@ sources:
   - https://en.wikipedia.org/wiki/Assemble_(EP)
   - https://seoulbeats.com/2023/02/triples-rise-to-the-stage-in-assemble/
   - https://thebiaslist.com/2023/02/17/buried-treasure-triples-new-look/
+  - https://lrclib.net/api/get/4745603
 ---
 
 『ASSEMBLE』의 마지막 곡으로 드럼 앤 베이스를 중심으로 이질적이고 초월적인 분위기를 만든다. 제목의 '초월'은 앨범의 '떠오름'이라는 콘셉트와 이어진다. 앨범의 영어 제목 곡들 사이에서 유일하게 한국어 제목이어서, 한국어와 영어가 섞인 앨범의 구성도 이 곡에서 분명히 드러난다.

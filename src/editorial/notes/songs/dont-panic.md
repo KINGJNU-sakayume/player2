@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/parachutes/
   - https://pitchfork.com/reviews/albums/1539-parachutes/
   - https://en.wikipedia.org/wiki/Parachutes_(Coldplay_album)
+  - https://lrclib.net/api/get/3456773
 ---
 
 어쿠스틱 기타의 둥근 소리와 전기 기타의 짧은 응답이 얇게 포개진다. 보컬은 낮은 곳에서 문장을 시작하고, 드럼도 그 목소리를 앞질러 달리지 않는다. 곡의 짧은 길이 안에서 반주는 조금씩 넓어지지만 기본적인 박자는 그대로다. 첫 후렴부터 밝은 결론을 크게 외치기보다, 불안한 장면을 낮은 음량으로 받아들이는 태도가 먼저 들린다.

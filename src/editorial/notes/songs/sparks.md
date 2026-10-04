@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/parachutes/
   - https://pitchfork.com/reviews/albums/1539-parachutes/
   - https://en.wikipedia.org/wiki/Parachutes_(Coldplay_album)
+  - https://lrclib.net/api/get/309186
 ---
 
 어쿠스틱 기타가 가볍게 흔들리는 박자를 만들고 베이스가 그 아래를 둥글게 움직인다. 드럼은 큰 타격보다 부드러운 질감으로 빈자리를 채운다. 목소리는 반주보다 훨씬 가까이 놓여 작은 숨과 음 끝의 흔들림이 잘 들린다. 후렴에서도 악기를 한꺼번에 폭발시키지 않아, 작은 방 안의 대화가 끝까지 같은 거리에서 이어지는 듯하다.

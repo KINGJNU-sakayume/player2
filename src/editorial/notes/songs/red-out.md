@@ -7,6 +7,7 @@ short: >
 sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
+  - https://lrclib.net/api/get/11746031
 ---
 
 거친 베이스 동기가 곡의 바닥을 먼저 잡고, 목소리의 짧은 발음과 단단한 타격이 그 위에 붙는다. 부드럽게 음을 잇는 발라드와 달리 소리의 모서리가 전면에 있다. 짧은 말이 되풀이될수록 문장의 뜻만큼 음절이 박자에 부딪히는 감각이 커진다. 뒤로 갈수록 겹친 소리가 압력을 더하지만 처음의 저음 동기가 계속 길을 잡아, 혼란스러운 표면 안에도 몸이 따라갈 중심을 남긴다.

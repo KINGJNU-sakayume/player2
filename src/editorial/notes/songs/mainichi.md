@@ -7,6 +7,7 @@ short: >
 sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
+  - https://lrclib.net/api/get/13504285
 ---
 
 목소리의 짧은 문장과 선명한 타격이 서로 맞물려 곡을 움직인다. 매끈하게 길게 흐르는 선율보다 음절이 박자 안에 어떻게 잘려 들어가는지 먼저 들린다. 후렴에서 같은 말이 되돌아오면 반복은 단순한 정보 전달을 넘어 몸이 따라갈 수 있는 동기가 된다. 곡의 활기는 새로운 사건이 많아서 생기는 것이 아니라 같은 모양을 계속 다른 힘으로 밀어내는 데서 나온다.

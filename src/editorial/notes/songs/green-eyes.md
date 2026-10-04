@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/a-rush-of-blood-to-the-head/
   - https://pitchfork.com/reviews/albums/1538-a-rush-of-blood-to-the-head/
   - https://en.wikipedia.org/wiki/A_Rush_of_Blood_to_the_Head
+  - https://lrclib.net/api/get/13741
 ---
 
 어쿠스틱 기타가 소박하게 박자를 잡고 목소리가 바로 앞에서 말을 시작한다. 첫 부분은 음 사이의 공백이 잘 들릴 만큼 얇다. 뒤에서 드럼과 베이스가 붙으며 곡이 커지지만, 기타의 기본적인 흔들림과 보컬의 가까운 거리를 밀어내지 않는다. 후반의 여러 목소리도 화려한 합창의 벽보다 같은 자리에서 함께 흥얼거리는 인상을 만든다.

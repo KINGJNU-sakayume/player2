@@ -27,7 +27,7 @@ import { normaliseLines } from '../src/lyrics/lyricSync';
 import { LRCLIB_BASE_URL, recordToTimedLyrics, type LrclibRecord } from '../src/lyrics/providers/LrclibLyricsProvider';
 import type { TimedLyrics } from '../src/lyrics/types';
 import { checkTimeline, formatLineTable } from '../src/translation/curated/authoring';
-import { sameLanguage } from '../src/translation/languageDetect';
+import { lyricsMatchLanguage } from '../src/translation/languageDetect';
 
 const NOTES_DIR = 'src/editorial/notes/songs';
 const CLIENT = 'ARC Music translation tool (https://github.com/KINGJNU-sakayume/player2)';
@@ -82,7 +82,7 @@ async function findRecord(options: Map<string, string>): Promise<LrclibRecord> {
   if (options.get('album')) query.set('album_name', options.get('album')!);
   if (duration) query.set('duration', String(duration));
   const exact = options.get('album') && duration ? await lrclib<LrclibRecord>(`/get?${query.toString()}`) : null;
-  if (exact?.syncedLyrics) return exact;
+  if (exact?.syncedLyrics && matchesLanguage(exact, options.get('lang'))) return exact;
 
   const results = (await lrclib<LrclibRecord[]>(`/search?${new URLSearchParams({ track_name: title, artist_name: artist })}`)) ?? [];
   const lang = options.get('lang');
@@ -110,7 +110,8 @@ async function findRecord(options: Map<string, string>): Promise<LrclibRecord> {
  */
 function matchesLanguage(record: LrclibRecord, lang: string | undefined): boolean {
   if (!lang) return true;
-  return sameLanguage(recordToTimedLyrics(record)?.language, lang);
+  const lyrics = recordToTimedLyrics(record);
+  return !!lyrics && lyricsMatchLanguage(lyrics.lines.map((line) => line.text), lang);
 }
 
 function readLocalLyrics(path: string, durationMs: number | null): TimedLyrics {
@@ -136,7 +137,7 @@ async function check(key: string, options: Map<string, string>): Promise<void> {
   const lyrics = localPath
     ? readLocalLyrics(localPath, timeline.timing.durationMs)
     : recordLyrics((await lrclib<LrclibRecord>(`/get/${timeline.timing.lrclibId}`)) ?? missing(timeline.timing.lrclibId));
-  const report = checkTimeline(lyrics, timeline);
+  const report = checkTimeline(lyrics, timeline, note!.translation!.brief.targetLanguage);
   const problems: string[] = [];
   if (!localPath && !report.lrclibIdMatches) problems.push(`LRCLIB returned record ${lyrics.timing?.lrclibId}, not ${timeline.timing.lrclibId}.`);
   if (!localPath && !report.durationMatches) {
@@ -147,7 +148,7 @@ async function check(key: string, options: Map<string, string>): Promise<void> {
   }
   for (const row of report.uncovered) problems.push(`line ${row.number} (${row.startMs}–${row.endMs ?? '?'} ms) has no segment: ${row.text}`);
 
-  console.log(`${key}: ${timeline.segments.length} segments cover ${report.covered} / ${report.total} lines${localPath ? ` (local file ${basename(localPath)}: ID and length not checked)` : ''}`);
+  console.log(`${key}: ${timeline.segments.length} segments cover ${report.covered} / ${report.total} lines requiring translation${localPath ? ` (local file ${basename(localPath)}: ID and length not checked)` : ''}`);
   for (const problem of problems) console.log(`  ${problem}`);
   if (problems.length) process.exitCode = 1;
 }
@@ -174,7 +175,7 @@ async function main(): Promise<void> {
   const record = await findRecord(options);
   const lyrics = recordLyrics(record);
   const lang = options.get('lang');
-  if (lang && !sameLanguage(lyrics.language, lang)) {
+  if (lang && !matchesLanguage(record, lang)) {
     throw new Error(`LRCLIB ${record.id} lyrics look ${lyrics.language ?? 'unknown'}, not --lang ${lang}: likely a romanised or translated upload.`);
   }
   console.log(`LRCLIB ${record.id}: ${record.trackName} — ${record.artistName} / ${record.albumName ?? '?'} (${record.duration ?? '?'} s, ${lyrics.language ?? '?'})`);

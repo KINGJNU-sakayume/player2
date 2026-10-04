@@ -9,6 +9,7 @@ sources:
   - https://aramajapan.com/news/newrelease/vaundy-to-release-his-debut-album-strobo-pv-for-life-hack/105087/
   - https://en.wikipedia.org/wiki/Strobo
   - https://spincoaster.com/news/vaundy-release-new-song-tomoshibi
+  - https://lrclib.net/api/get/1408288
 ---
 
 어쿠스틱 기타가 먼저 작은 박자를 만들고 가까운 목소리가 그 위에 들어온다. 벌스의 여백은 충분히 남아 있지만 뒤로 갈수록 악기와 보컬의 힘이 더해져 소리가 넓어진다. 처음의 기타는 그 확장 안에서도 곡의 출발점을 잊지 않게 한다. 후반의 고양이 크게 들리는 이유는 도입에서 모든 음량을 미리 쓰지 않고, 작은 선율을 오래 붙들었기 때문이다.

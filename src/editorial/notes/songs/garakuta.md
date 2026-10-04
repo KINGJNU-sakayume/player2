@@ -7,6 +7,7 @@ short: >
 sources:
   - https://reissuerecords.net/discography/lost-corner/
   - https://www.billboard-japan.com/special/detail/4487
+  - https://lrclib.net/api/get/14452820
 ---
 
 기타와 드럼이 밴드의 단단한 몸을 만들고 목소리가 그 위에서 길게 뻗는다. 조용한 문장이 큰 후렴으로 올라갈 때 반주의 힘도 함께 늘어나지만, 보컬의 거친 음 끝은 매끈하게 지워지지 않는다. 상처를 말하는 노래가 작은 음량에만 머물지 않고 큰 합주 안으로 나가는 방식이다. 기타의 두께와 목소리의 직접적인 호소가 함께 있어 말의 무게가 몸으로 느껴진다.

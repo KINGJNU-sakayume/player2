@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/viva-la-vida-or-death-and-all-his-friends/
   - https://en.wikipedia.org/wiki/Viva_la_Vida_or_Death_and_All_His_Friends
   - https://pitchfork.com/reviews/albums/11621-viva-la-vida-or-death-and-all-his-friends/
+  - https://lrclib.net/api/get/13428
 ---
 
 어두운 반주의 공간에 낮은 목소리가 들어오고, 짧고 마른 박자가 그 밑에서 걸음을 만든다. 기타는 크게 늘어지는 코드보다 리듬과 장면을 번갈아 짚는다. 후렴에 여러 목소리가 붙으면 음악은 더 넓어지지만 낮의 밝은 합창처럼 색이 바뀌지는 않는다. 발을 구르며 같은 길을 걷는 듯한 반복이 어두운 시야를 계속 움직이게 한다.

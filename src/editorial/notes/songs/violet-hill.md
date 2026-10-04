@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/viva-la-vida-or-death-and-all-his-friends/
   - https://en.wikipedia.org/wiki/Viva_la_Vida_or_Death_and_All_His_Friends
   - https://pitchfork.com/reviews/albums/11621-viva-la-vida-or-death-and-all-his-friends/
+  - https://lrclib.net/api/get/16158
 ---
 
 낮게 퍼지는 전자음이 도입의 시간을 길게 만들고, 기타와 드럼이 거친 타격으로 들어온다. 목소리도 그 반주에 맞추어 짧고 단단하게 문장을 낸다. 전기 기타가 매끈한 장식보다 마찰을 일으키는 소리로 전면에 놓인 점이 앞의 제목곡과 다르다. 후반에는 큰 밴드 소리가 걷히고 피아노와 목소리가 남아, 공적인 풍경에서 가까운 말의 거리로 내려온다.

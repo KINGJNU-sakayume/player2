@@ -8,6 +8,7 @@ sources:
   - https://spincoaster.com/news/vaundy-release-1st-album-strobo
   - https://aramajapan.com/news/newrelease/vaundy-to-release-his-debut-album-strobo-pv-for-life-hack/105087/
   - https://en.wikipedia.org/wiki/Strobo
+  - https://lrclib.net/api/get/1407932
 ---
 
 작은 리듬과 반복되는 반주가 일정한 공간을 만들고 목소리는 그 안에 가까이 놓인다. 보컬은 강한 음량으로 멀리 나가기보다 짧은 말을 편안하게 연결한다. 같은 패턴이 여러 번 돌아와도 악기의 수를 크게 늘리지 않으므로 곡은 절정을 향해 서두르지 않는다. 낮은 강도로 오래 이어지는 소리가 상대와 같은 자리에 머무는 감각을 만든다.

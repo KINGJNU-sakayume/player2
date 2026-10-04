@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/a-rush-of-blood-to-the-head/
   - https://pitchfork.com/reviews/albums/1538-a-rush-of-blood-to-the-head/
   - https://en.wikipedia.org/wiki/A_Rush_of_Blood_to_the_Head
+  - https://lrclib.net/api/get/13249
 ---
 
 피아노가 천천히 진행하고 목소리는 그 위에 긴 문장을 놓는다. 처음에는 악기와 음 사이의 공백이 크며, 보컬의 약한 떨림도 숨기지 않는다. 곡은 그 상태를 충분히 오래 유지한 뒤 드럼과 기타를 받아들인다. 후반의 합주가 크게 들리는 이유는 악기의 수뿐 아니라, 앞에서 작은 소리로 버텼던 시간이 이미 길게 쌓였기 때문이다.

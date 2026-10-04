@@ -8,6 +8,7 @@ sources:
   - https://spincoaster.com/news/vaundy-release-1st-album-strobo
   - https://aramajapan.com/news/newrelease/vaundy-to-release-his-debut-album-strobo-pv-for-life-hack/105087/
   - https://en.wikipedia.org/wiki/Strobo
+  - https://lrclib.net/api/get/1408136
 ---
 
 낮은 목소리가 리듬에 가깝게 말을 이어 가고 베이스와 짧은 반주가 그 흐름을 받친다. 첫 부분은 선율의 높은 지점보다 음절이 박자에 붙는 방식이 중요하다. 후렴으로 넘어가면 보컬이 더 크게 펼쳐지고 겹친 목소리가 곡의 규모를 넓힌다. 반주의 기본적인 걸음이 이어지는 동안 화자가 한 사람의 말에서 집단적인 노래의 자리로 올라오는 듯한 차이가 생긴다.

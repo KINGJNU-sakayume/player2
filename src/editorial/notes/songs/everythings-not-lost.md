@@ -8,6 +8,7 @@ sources:
   - https://www.coldplay.com/release/parachutes/
   - https://pitchfork.com/reviews/albums/1539-parachutes/
   - https://en.wikipedia.org/wiki/Parachutes_(Coldplay_album)
+  - https://lrclib.net/api/get/13601
 ---
 
 피아노가 둥근 동기를 꺼내고 목소리는 여유 있게 그 위를 걷는다. 베이스와 드럼이 들어오며 곡은 서서히 넓어지고, 후반에는 반복되는 선율과 여러 목소리의 울림이 중심이 된다. 같은 문장을 오래 이어 가는 방식은 새로운 정보를 더하기보다 함께 부를 시간을 늘린다. 작은 방에서 출발한 노래가 점차 더 많은 사람을 수용하는 공간으로 바뀐다.
