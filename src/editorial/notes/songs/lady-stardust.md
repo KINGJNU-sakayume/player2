@@ -10,6 +10,7 @@ sources:
   - https://www.davidbowie.com/blog/2022/6/15/starman-top-of-the-pops-version-2022-mix-streaming-single
   - https://open.spotify.com/track/2ZWKuGuQ087pzwK4vO4E31
   - https://www.allmusic.com/song/lady-stardust-mt0044072050
+updated: 2026-10-04
 translation:
   sourceLanguage: en
   targetLanguage: ko
@@ -42,6 +43,8 @@ translation:
 공식 Bowie 자료에 따르면 이 곡의 초기 제목은 Marc Bolan을 염두에 둔 것이었다. 완성된 앨범 안에서는 특정 인물의 초상을 넘어, 성별의 경계와 무대의 시선을 흔드는 스타를 관객이 받아들이는 장면으로 기능한다.
 
 특히 후렴의 따뜻함만 듣기보다, 노래 속 스타와 그를 바라보는 사람 사이에 남아 있는 거리를 들어보면 좋다. Ziggy의 힘은 자신이 무엇이라고 선언하는 데만 있지 않고, 주변 사람들이 그를 어떻게 보게 되는가에서도 만들어진다.
+
+Ronson의 피아노는 선율이 길게 머무를 자리를 만들고, 후렴의 겹친 목소리는 객석의 반응을 개인적인 감정과 나란히 놓는다. 화자는 사람들이 스타를 비웃는 장면을 기억하면서도 자신이 느낀 애정을 완전히 드러내지는 않는다. 이 유보 때문에 부드러운 노래가 마냥 편안하게 끝나지 않는다. 무대 위 존재를 사랑하는 일과 그 사랑을 실제 삶에서 따르는 일 사이에 틈이 남는다. 바로 뒤의 'Star'가 스타가 되려는 사람의 욕망을 빠르게 펼칠 때, 이 곡에서 남긴 객석의 망설임과 대비를 이룬다.
 
 ## 번역에 대하여
 

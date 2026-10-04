@@ -56,9 +56,10 @@ describe('ARC Music (preview archive)', () => {
     expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Next track' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'まちがいさがし' })).toBeInTheDocument();
-    // This track's note holds only its translation note: the Listening note shows no cue, just the link to the note.
+    // This track now has its own listening cue as well as the preserved translation.
     expect(screen.queryByText(/애도를 다루는 곡이지만/)).not.toBeInTheDocument();
     expect(screen.getByText('Listening note')).toBeInTheDocument();
+    expect(screen.getByText(/절의 자기 판단이 후렴에서/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Read full note →' })).toBeInTheDocument();
     expect(screen.getByRole('slider', { name: 'Seek' })).toHaveAttribute('aria-valuemax', '302');
   });
@@ -73,7 +74,7 @@ describe('ARC Music (preview archive)', () => {
     await user.click(more);
     const dialog = screen.getByRole('dialog', { name: 'Kenshi Yonezu' });
     expect(within(dialog).getByText('Editorial note / Artist')).toBeInTheDocument();
-    expect(within(dialog).getByText(/니코니코 동화에서/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/요네즈 켄시\(米津玄師\)의 디스코그래피는/)).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Close note' })).toHaveFocus();
     await user.keyboard('{Escape}');
     await waitFor(() => expect(more).toHaveFocus());

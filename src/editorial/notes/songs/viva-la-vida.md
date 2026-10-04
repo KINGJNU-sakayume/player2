@@ -4,8 +4,11 @@ trackIds: [1mea3bSkSGXuIRvnydlB5b, 6WrUT7FOAlDscRWU7ndmyd, 7fcgisGFCr4mfbfNSztr8
 titles: [Viva La Vida]
 short: >
   기타 대신 현악과 팀파니, 종소리가 곡을 끌고 간다. 왕좌에서 내려온 화자의 회상이라는 점을 떠올리며, 끝없이 반복되는 현악의 행진감을 들어보면 좋다.
+updated: 2026-10-04
 sources:
   - https://en.wikipedia.org/wiki/Viva_la_Vida_(song)
+  - https://pitchfork.com/reviews/albums/11621-viva-la-vida-or-death-and-all-his-friends/
+  - https://www.coldplay.com/release/viva-la-vida-or-death-and-all-his-friends/
 translation:
   sourceLanguage: en
   targetLanguage: ko
@@ -31,6 +34,10 @@ translation:
 'Viva la Vida'는 한때 세상을 다스렸지만 이제는 모든 것을 잃은 왕의 독백으로 쓰인 곡이다. 쉼 없이 반복되는 현악의 리듬과 팀파니, 종소리가 곡 전체를 행진처럼 끌고 가며, 밴드의 이전 곡들과 달리 기타는 전면에 거의 나서지 않는다.
 
 가사는 몰락을 다루지만 곡의 표면은 밝고 웅장하다. 이 대비 덕분에 곡은 비극이라기보다 무너진 뒤에야 비로소 보이는 것들에 대한 회상처럼 들린다. 공연장에서 관객이 함께 부르는 ‘오-’ 하는 후렴은 한 사람의 몰락을 모두의 노래로 바꿔 놓는다.
+
+첫 절의 회상을 받치는 현악은 후렴이 올 때도 같은 박동을 유지한다. 목소리와 타격의 층이 더해지며 공간은 커지지만, 화자는 과거의 권위를 다시 얻지 못한다. Davide Rossi의 현악은 장식적인 오케스트라의 배경보다 곡을 실제로 움직이는 리듬이다. Markus Dravs와 Brian Eno가 참여한 앨범의 제작은 익숙한 기타 중심의 절정을 대신할 이런 다른 추진력을 찾는다.
+
+성경과 왕권의 이미지는 화자를 역사 속 한 왕의 이름으로 좁히지 않는다. 자신이 믿었던 기반이 무너졌다는 회상과 더는 구원을 장담할 수 없다는 불안이 함께 남는다. 번역의 해라체는 이 독백을 관객에게 보내는 승리 연설로 바꾸지 않는다. 앨범에서 'Yes'의 낮고 내밀한 목소리 뒤에 곡이 놓이고, 다음 'Violet Hill'은 더 거친 기타와 정치적인 시선으로 넘어간다. 한 사람의 몰락을 함께 부르는 밝은 후렴이 만들어도, 그 뒤의 세계까지 안전해진 것은 아니다.
 
 ## 번역에 대하여
 
