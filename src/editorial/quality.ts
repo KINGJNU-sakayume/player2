@@ -239,7 +239,7 @@ export const PENDING_TRANSLATION: ReadonlySet<string> = new Set([
   'songs/white-soul-sneakers',
   'songs/yellow-ghost',
   'songs/yes',
-  'songs/yume-utsutsu',
+  'songs/yumeutsutsu',
 ]);
 
 export function isTranslationPending(audit: NoteAudit): boolean {

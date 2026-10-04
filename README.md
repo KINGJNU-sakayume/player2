@@ -113,7 +113,7 @@ Korean. [`src/editorial/quality.ts`](src/editorial/quality.ts) holds the quality
 prints it per note. `PENDING_TRANSLATION` explicitly tracks listening notes awaiting user-supplied lyrics for a
 full translation. Those entries may have **only** the missing-translation problem; all prose and source checks
 still apply. They are reported as `translation pending`, not complete. Current coverage and remaining work are
-recorded in [`notes_handoff.md`](notes_handoff.md). Matching, in
+recorded in [`NOTES_HANDOFF.md`](NOTES_HANDOFF.md). Matching, in
 [`src/editorial/lookup.ts`](src/editorial/lookup.ts):
 
 1. **Spotify IDs first** — `artistIds`, `albumIds`, `trackIds` (the 22-character part of an `open.spotify.com` link).
