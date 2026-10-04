@@ -12,6 +12,23 @@ sources:
   - https://en.wikipedia.org/wiki/Stray_Sheep
 short: >
   'Lemon' 이후의 타이업 히트와 2020년의 혼란 속에서 쓴 새 곡이 한 장에 모였다. 마지막에 완성된 'カムパネルラ'로 문을 열고 'カナリヤ'로 닫는 순서가, 흩어진 히트곡들을 길 잃은 사람들을 위한 한 권의 이야기로 묶는다.
+updated: 2026-10-04
+tracks:
+  - kanpanella
+  - flamingo
+  - kanden
+  - placebo
+  - paprika
+  - uma-to-shika
+  - yasashii-hito
+  - lemon
+  - machigai-sagashi
+  - himawari
+  - mayoeru-hitsuji
+  - decollete
+  - teenage-riot
+  - umi-no-yuurei
+  - kanaria
 ---
 
 『STRAY SHEEP』이 풀어야 했던 문제는 분명했다. 'Lemon'으로 일본 대중음악의 한가운데에 선 뒤 드라마, 애니메이션 영화, 광고를 위해 쓴 곡들이 이미 저마다 다른 얼굴로 흩어져 있었다. 이것을 히트곡 모음이 아니라 한 장의 앨범으로 만들 수 있는가. 요네즈 켄시는 그 답을 곡의 배치와, 2020년이라는 시간 속에서 새로 쓴 곡들에서 찾았다. 결과적으로 이 앨범은 서로 다른 의뢰에서 출발한 곡들이 '무리에서 떨어진 양'이라는 하나의 이미지 아래 다시 줄을 서는 기록이 되었다.

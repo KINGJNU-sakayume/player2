@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { App } from './App';
 import { readConfig } from './app/config';
 import { createAppServices } from './app/services';
+import { getArtistNote, getSongNote } from './editorial/lookup';
 import { findActiveLineIndex } from './lyrics/lyricSync';
 import { TEST_TRANSLATIONS_KO } from './lyrics/providers/testLines';
 import { PREVIEW_LYRICS, PREVIEW_START } from './preview/previewData';
@@ -45,7 +46,8 @@ describe('ARC Music (preview archive)', () => {
     expect(await screen.findByText(TEST_TRANSLATIONS_KO[line]!)).toBeInTheDocument();
     expect(within(screen.getByRole('list', { name: 'Next lines' })).getAllByRole('listitem')).toHaveLength(2);
     expect(screen.getByText('Listening note')).toBeInTheDocument();
-    expect(screen.getByText(/애도를 다루는 곡이지만/)).toBeInTheDocument();
+    const lemonCue = getSongNote({ id: '04TshWXkhV1qkqHzf31Hn6' })!.short!;
+    expect(screen.getByText(lemonCue)).toBeInTheDocument();
 
     const toggle = screen.getByRole('button', { name: /Translation/ });
     expect(toggle).toHaveAttribute('aria-pressed', 'true');
@@ -56,8 +58,9 @@ describe('ARC Music (preview archive)', () => {
     expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Next track' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'まちがいさがし' })).toBeInTheDocument();
-    // This track's note holds only its translation note: the Listening note shows no cue, just the link to the note.
-    expect(screen.queryByText(/애도를 다루는 곡이지만/)).not.toBeInTheDocument();
+    expect(screen.queryByText(lemonCue)).not.toBeInTheDocument();
+    const nextCue = getSongNote({ title: 'まちがいさがし', artistNames: ['米津玄師'] })!.short!;
+    expect(screen.getByText(nextCue)).toBeInTheDocument();
     expect(screen.getByText('Listening note')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Read full note →' })).toBeInTheDocument();
     expect(screen.getByRole('slider', { name: 'Seek' })).toHaveAttribute('aria-valuemax', '302');
@@ -73,7 +76,8 @@ describe('ARC Music (preview archive)', () => {
     await user.click(more);
     const dialog = screen.getByRole('dialog', { name: 'Kenshi Yonezu' });
     expect(within(dialog).getByText('Editorial note / Artist')).toBeInTheDocument();
-    expect(within(dialog).getByText(/니코니코 동화에서/)).toBeInTheDocument();
+    const introduction = getArtistNote({ id: '1snhtMLeb2DYoMOcVbb8iB' })!.full!.split('\n\n')[0]!;
+    expect(within(dialog).getByText(introduction)).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Close note' })).toHaveFocus();
     await user.keyboard('{Escape}');
     await waitFor(() => expect(more).toHaveFocus());
@@ -96,7 +100,7 @@ describe('ARC Music (preview archive)', () => {
     expect(screen.getByText(/데뷔작의 조용함 위에/)).toBeInTheDocument();
     const scientist = screen.getByRole('button', { name: /The Scientist/ });
     expect(within(scientist).getByText('Note')).toBeInTheDocument();
-    expect(within(screen.getByRole('button', { name: /Politik/ })).queryByText('Note')).not.toBeInTheDocument();
+    expect(within(screen.getByRole('button', { name: /Politik/ })).getByText('Note')).toBeInTheDocument();
   });
 
   it('lists the library with liked songs and artists first', async () => {

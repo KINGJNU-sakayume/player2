@@ -9,6 +9,7 @@ sources:
   - https://www.davidbowie.com/1999/1999/12/31/the-rise-and-fall-of-ziggy-stardust-and-the-spiders-from-mars
   - https://www.davidbowie.com/blog/2022/6/15/starman-top-of-the-pops-version-2022-mix-streaming-single
   - https://open.spotify.com/track/3W8FGZsAODJJBRQMwccha6
+  - https://pitchfork.com/reviews/albums/21066-five-years-1969-1973/
 translation:
   sourceLanguage: en
   targetLanguage: ko
@@ -35,14 +36,18 @@ translation:
       target: 우주 얼굴 / 광선총
       note: SF 장난감 같은 과장된 성적 이미지를 직역에 가깝게 남겼다.
   written: 2026-10-03
+  updated: 2026-10-04
+updated: 2026-10-04
 ---
 
 'Moonage Daydream'은 Ziggy가 설명되는 곡이라기보다 Ziggy가 자기 자신을 크게 선언하는 곡이다. 보위의 보컬은 처음부터 현실적인 인물 묘사를 포기하고 몸짓이 보일 만큼 과장되어 있고, 느린 코드 진행은 그 목소리가 차지할 공간을 넓게 비워 둔다.
 
 후반부로 갈수록 Mick Ronson의 기타가 길게 뻗고 현악이 그 선을 따라 붙으면서 곡의 크기가 갑자기 확장된다. 기타 솔로를 단순한 클라이맥스로 듣기보다, 보컬이 먼저 만든 허풍과 자기 신화를 밴드가 물리적인 소리로 증명하는 순간처럼 들으면 곡의 역할이 선명하다.
 
+절의 목소리는 상대에게 명령을 던지며 공간을 장악하고, 후렴은 그 명령을 길게 늘여 관객이 들어올 자리를 만든다. 짧게 등장하는 관악기의 선과 길게 이어지는 기타의 선도 같은 일을 서로 다른 크기로 한다. 론슨의 솔로가 시작된 뒤에는 보컬이 모든 것을 설명할 필요가 없어지고, 지속되는 음과 굽어지는 음색이 스타의 몸짓을 대신한다. 'Soul Love'에서 여러 사랑을 바깥에서 보던 목소리가 여기서는 사랑받아야 할 자기 자신을 중심에 놓는다. 이 시점 변화 때문에 과장된 우주 이미지도 앨범의 인물극 안에서 구체적인 욕망이 된다.
+
 이 곡과 'Hang On to Yourself'는 Arnold Corns 명의의 초기 버전이 먼저 존재했다. 완성된 『Ziggy Stardust』에서는 이미 있던 곡이 새 인물의 핵심 장면으로 재배치되었다는 점도 함께 들을 만하다.
 
 ## 번역에 대하여
 
-명령형과 애칭이 반복되고 상대와의 거리를 적극적으로 없애는 곡이므로 **해체**로 통일했다. 거친 표현은 지나치게 점잖게 순화하지 않되 한국어에서 혐오어처럼 더 세게 들리지 않도록 조정했다.
+명령형과 애칭이 반복되고 상대와의 거리를 적극적으로 없애는 곡이므로 **해체**로 통일했다. 거친 표현은 지나치게 점잖게 순화하지 않되 한국어에서 혐오어처럼 더 세게 들리지 않도록 조정했다. 기묘한 자기소개를 현실의 인물 정보로 풀어 쓰지 않았다. 상대를 끌어들이는 명령과 과장된 신체 이미지를 함께 남겨 무대 위 인물의 도발적인 말투를 살렸다.

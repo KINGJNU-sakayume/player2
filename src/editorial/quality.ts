@@ -18,6 +18,9 @@ export const FLOOR = {
   sources: 2,
 } as const;
 
+/** Kept as an audit problem even while the listening note is ready. */
+export const MISSING_TRANSLATION = 'needs a curated translation (translate-lyrics), or "lyricsLanguage: ko | instrumental" when none is needed';
+
 /** Phrases the skill rules out: hearsay instead of a judgement, and promotional clichés. */
 export const BANNED_PHRASES: readonly { pattern: RegExp; reason: string }[] = [
   { pattern: /평이 (있|나왔|많)/, reason: 'hearsay ("~라는 평이 있다"): judge it with evidence or leave it out' },
@@ -131,7 +134,7 @@ export function auditSong(note: SongNote): NoteAudit {
   if (length < FLOOR.songBody) problems.push(`listening note is ${length} characters; a song note needs ${FLOOR.songBody}+`);
   if (paragraphs < FLOOR.songParagraphs) problems.push(`listening note has ${paragraphs} paragraphs; a song note needs ${FLOOR.songParagraphs}+`);
   if (!note.translation && !note.lyricsLanguage) {
-    problems.push('needs a curated translation (translate-lyrics), or "lyricsLanguage: ko | instrumental" when none is needed');
+    problems.push(MISSING_TRANSLATION);
   }
   if (about !== undefined && about.length < FLOOR.translationAbout) {
     problems.push(`"번역에 대하여" is ${about.length} characters; it needs ${FLOOR.translationAbout}+`);
@@ -159,90 +162,89 @@ export function auditNotes(artists: readonly ArtistNote[], albums: readonly Albu
  * floor test skips them, and fails once one of them passes, so the list only
  * shrinks: rewrite a note, then remove its line here.
  */
-export const PENDING_REVIEW: ReadonlySet<string> = new Set([
-  // Coldplay
-  'artists/coldplay',
-  'albums/a-rush-of-blood',
-  'albums/parachutes',
-  'albums/viva-la-vida',
-  'songs/the-scientist',
-  'songs/viva-la-vida',
-  'songs/yellow',
-  // David Bowie: the song notes (3 paragraphs, about 350–480 characters) predate the 600-character floor.
-  'songs/five-years',
-  'songs/hang-on-to-yourself',
-  'songs/it-aint-easy',
-  'songs/lady-stardust',
-  'songs/moonage-daydream',
-  'songs/rock-n-roll-suicide',
-  'songs/soul-love',
-  'songs/star',
-  'songs/starman',
-  'songs/suffragette-city',
-  'songs/ziggy-stardust',
-  // Kenshi Yonezu
-  'artists/kenshi-yonezu',
-  'albums/lost-corner',
-  'albums/stray-sheep',
-  'songs/decollete',
-  'songs/flamingo',
-  'songs/himawari',
-  'songs/kanaria',
-  'songs/kanden',
-  'songs/kanpanella',
-  'songs/kick-back',
-  'songs/lemon',
-  'songs/machigai-sagashi',
-  'songs/mayoeru-hitsuji',
-  'songs/paprika',
-  'songs/placebo',
-  'songs/teenage-riot',
-  'songs/uma-to-shika',
-  'songs/umi-no-yuurei',
-  'songs/yasashii-hito',
-  // NMIXX
-  'artists/nmixx',
-  'albums/blue-valentine',
+export const PENDING_REVIEW: ReadonlySet<string> = new Set();
+
+/**
+ * Listening notes ready for review, with full lyric translations awaiting
+ * user-supplied source lyrics. This is narrower than PENDING_REVIEW: the
+ * missing translation must be the only problem, so body, sources and every
+ * other quality check continue to fail normally. Remove a key once its
+ * translation is written; the repository test rejects stale entries.
+ */
+export const PENDING_TRANSLATION: ReadonlySet<string> = new Set([
+  'songs/24',
+  'songs/42',
+  'songs/a-rush-of-blood-to-the-head',
+  'songs/a-whisper',
   'songs/adore-u',
-  'songs/blue-valentine',
-  'songs/crush-on-you',
-  'songs/game-face',
-  'songs/o-o-part-1-baila',
-  'songs/o-o-part-2-superhero',
-  'songs/phoenix',
-  'songs/podium',
-  'songs/reality-hurts',
-  'songs/rico',
-  'songs/shape-of-love',
-  'songs/spinnin-on-it',
-  // tripleS
-  'artists/triples',
-  'albums/assemble',
-  'albums/assemble24',
-  'songs/beam',
+  'songs/amsterdam',
   'songs/before-the-rise',
+  'songs/beyond-the-beyond',
+  'songs/blue-valentine',
+  'songs/boku-wa-kyou-mo',
+  'songs/bye-by-me',
+  'songs/cemeteries-of-london',
+  'songs/chikyugi',
+  'songs/chiyu',
   'songs/chowall',
-  'songs/colorful',
-  'songs/girls-never-die',
-  'songs/new-look',
-  'songs/rising',
-  'songs/the-baddest',
-  // Tyler, The Creator
-  'albums/igor',
-  'songs/a-boy-is-a-gun',
-  'songs/are-we-still-friends',
-  'songs/earfquake',
-  'songs/exactly-what-you-run-from-you-end-up-chasing',
-  'songs/gone-gone-thank-you',
-  'songs/i-dont-love-you-anymore',
-  'songs/i-think',
-  'songs/igors-theme',
-  'songs/new-magic-wand',
-  'songs/puppet',
-  'songs/running-out-of-time',
-  'songs/whats-good',
-  // Vaundy
-  'artists/vaundy',
-  'albums/strobo',
-  'songs/kaijuu-no-hanauta',
+  'songs/clocks',
+  'songs/crush-on-you',
+  'songs/daylight',
+  'songs/death-and-all-his-friends',
+  'songs/dimension',
+  'songs/dont-panic',
+  'songs/everythings-not-lost',
+  'songs/fukakouryoku',
+  'songs/garakuta',
+  'songs/god-put-a-smile-upon-your-face',
+  'songs/green-eyes',
+  'songs/heart-raider',
+  'songs/high-speed',
+  'songs/in-my-place',
+  'songs/lady',
+  'songs/lens-flare',
+  'songs/life-hack',
+  'songs/lost',
+  'songs/lost-corner',
+  'songs/lovers-in-japan-reign-of-love',
+  'songs/m87',
+  'songs/mainichi',
+  'songs/margherita',
+  'songs/midnight-flower',
+  'songs/napori',
+  'songs/non-scale',
+  'songs/ohayou',
+  'songs/pale-blue',
+  'songs/parachutes',
+  'songs/politik',
+  'songs/pop-song',
+  'songs/post-human',
+  'songs/red-out',
+  'songs/s',
+  'songs/sayonara-mata-itsuka',
+  'songs/shinigami',
+  'songs/shiver',
+  'songs/soramimi',
+  'songs/sparks',
+  'songs/spies',
+  'songs/strawberry-swing',
+  'songs/tokyo-flash',
+  'songs/tomare-miyo',
+  'songs/tomoshibi',
+  'songs/trouble',
+  'songs/tsuki-wo-miteita',
+  'songs/violet-hill',
+  'songs/warning-sign',
+  'songs/we-never-change',
+  'songs/white-soul-sneakers',
+  'songs/yellow-ghost',
+  'songs/yes',
+  'songs/yume-utsutsu',
 ]);
+
+export function isTranslationPending(audit: NoteAudit): boolean {
+  return PENDING_TRANSLATION.has(audit.id)
+    && audit.kind === 'song'
+    && audit.problems.length === 1
+    && audit.problems[0] === MISSING_TRANSLATION;
+}

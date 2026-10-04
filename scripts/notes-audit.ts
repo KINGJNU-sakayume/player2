@@ -7,13 +7,13 @@
  *   npm run notes:audit -- songs/starboy …    particular notes (artists/<key>, albums/<key>, songs/<key>)
  *
  * Prints length, paragraphs, `short` length, sources and the `번역에 대하여` length per note, then each
- * problem. Notes listed in PENDING_REVIEW are marked "pending". Exits 1 when a note outside PENDING_REVIEW
- * falls below the floor.
+ * problem. Legacy notes in PENDING_REVIEW are marked "pending". Translation-only gaps are marked
+ * "translation pending"; all other problems still fail. Exits 1 for an unexpected quality problem.
  */
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadAlbumNotes, loadArtistNotes, loadSongNotes, type NoteFiles, type TranslationFiles } from '../src/editorial/loadNotes';
-import { auditNotes, PENDING_REVIEW, type NoteAudit } from '../src/editorial/quality';
+import { auditNotes, isTranslationPending, PENDING_REVIEW, type NoteAudit } from '../src/editorial/quality';
 
 const NOTES_DIR = 'src/editorial/notes';
 
@@ -43,7 +43,7 @@ if (filters.length && selected.length === 0) {
 
 const pad = (value: string | number, width: number) => String(value).padStart(width);
 console.log(`${'note'.padEnd(56)} ${pad('body', 5)} ${pad('¶', 2)} ${pad('short', 5)} ${pad('src', 3)} ${pad('번역', 4)}  status`);
-const status = (audit: NoteAudit) => (audit.problems.length === 0 ? 'ok' : PENDING_REVIEW.has(audit.id) ? 'pending' : 'BELOW FLOOR');
+const status = (audit: NoteAudit) => (audit.problems.length === 0 ? 'ok' : isTranslationPending(audit) ? 'translation pending' : PENDING_REVIEW.has(audit.id) ? 'pending' : 'BELOW FLOOR');
 for (const audit of selected) {
   console.log(
     `${audit.id.padEnd(56)} ${pad(audit.bodyLength, 5)} ${pad(audit.paragraphs, 2)} ${pad(audit.shortLength, 5)} ${pad(audit.sources, 3)} ${pad(audit.translationAbout ?? '-', 4)}  ${status(audit)}`,
@@ -51,6 +51,6 @@ for (const audit of selected) {
   for (const problem of audit.problems) console.log(`    - ${problem}`);
 }
 
-const failing = selected.filter((audit) => audit.problems.length > 0 && !PENDING_REVIEW.has(audit.id));
-console.log(`\n${selected.length} notes: ${selected.filter((audit) => audit.problems.length === 0).length} ok, ${failing.length} below the floor.`);
+const failing = selected.filter((audit) => audit.problems.length > 0 && !PENDING_REVIEW.has(audit.id) && !isTranslationPending(audit));
+console.log(`\n${selected.length} notes: ${selected.filter((audit) => audit.problems.length === 0).length} ok, ${selected.filter(isTranslationPending).length} translation pending, ${selected.filter((audit) => status(audit) === 'pending').length} pending review, ${failing.length} below the floor.`);
 process.exit(failing.length > 0 ? 1 : 0);

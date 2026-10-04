@@ -12,6 +12,20 @@ sources:
   - https://thehoneypop.com/2025/10/22/nmixxs-blue-valentine-album-proves-o-o-was-the-perfect-debut/
 short: >
   데뷔 때부터 '산만하다'는 말을 들어 온 믹스팝이 처음으로 한 장의 감정선 위에 정렬된 앨범. 장르를 바꾸는 이유가 곡의 감정이 되었고, 마지막에는 데뷔곡을 둘로 갈라 그 방식의 출발점까지 스스로 해부한다.
+updated: 2026-10-04
+tracks:
+  - blue-valentine
+  - spinnin-on-it
+  - phoenix
+  - reality-hurts
+  - rico
+  - game-face
+  - podium
+  - crush-on-you
+  - adore-u
+  - shape-of-love
+  - o-o-part-1-baila
+  - o-o-part-2-superhero
 ---
 
 『Blue Valentine』은 엔믹스가 데뷔 3년 8개월 만에 낸 첫 정규 앨범이고, 동시에 '믹스팝'이라는 고집이 처음으로 설득력을 얻은 앨범이다. 한 곡 안에서 장르를 갈아타는 이들의 방식은 그동안 재치와 산만함 사이를 오갔다. 이 앨범에서 장르의 전환은 더 이상 놀라게 하려는 장치가 아니라, 사랑의 따뜻함과 차가움이 한꺼번에 밀려오는 감정을 옮기는 방법으로 쓰인다. 열두 곡은 그 감정을 '파란색'이라는 하나의 색으로 묶는다.
