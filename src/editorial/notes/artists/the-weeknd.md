@@ -7,13 +7,14 @@ eras:
   - 2015–2018 · 팝 슈퍼스타와 'Starboy'
   - 2020– · 『After Hours』 이후
 written: 2026-10-03
-updated: 2026-10-03
+updated: 2026-10-05
 sources:
   - https://open.spotify.com/artist/1Xyo4u8uXC1ZmMpatF05PJ
   - https://en.wikipedia.org/wiki/The_Weeknd_discography
   - https://www.billboard.com/pro/the-weeknd-starboy-billboard-200-no-1/
   - https://www.songfacts.com/facts/the-weeknd/starboy
   - https://www.thefader.com/2016/11/23/the-weeknd-beats-1-zane-lowe-interview-kendrick-lamar
+  - https://variety.com/2025/music/news/the-weeknd-hurry-up-tomorrow-interview-ending-career-1236268897/
 short: >
   어두운 R&B에서 출발해 앨범마다 팝의 문법을 더 크게 빌려 오면서도 쾌락과 공허라는 화자의 자리는 끝까지 놓지 않은 음악가. 사운드는 바뀌어도 '화려한 밤 뒤의 쓸쓸함'이 이 디스코그래피를 묶는 실이다.
 ---
@@ -30,6 +31,6 @@ short: >
 
 ## 『After Hours』 이후 (2020–)
 
-2020년 3월 『After Hours』와 'Blinding Lights'를 기점으로 위켄드는 80년대 신스팝의 서사적인 질감을 정면에 세웠다. 2022년 1월의 『Dawn FM』, 2025년 1월의 『Hurry Up Tomorrow』는 앨범 한 장을 하나의 콘셉트와 이야기로 묶는 방식을 이어 간다. 『Starboy』에서 처음 크게 드러난 '페르소나를 세우고 부수는' 작법, 그리고 'Secrets'와 'False Alarm'에서 시험한 80년대 신스팝과 뉴 웨이브의 문법이 이후 작품들의 뼈대가 되었다.
+2020년 3월 『After Hours』와 'Blinding Lights'를 기점으로 위켄드는 80년대 신스팝의 서사적인 질감을 정면에 세웠다. 2022년 1월의 『Dawn FM』, 2025년 1월의 『Hurry Up Tomorrow』는 앨범 한 장을 하나의 콘셉트와 이야기로 묶는 방식을 이어 간다. 『Starboy』에서 처음 크게 드러난 '페르소나를 세우고 부수는' 작법, 그리고 'Secrets'와 'False Alarm'에서 시험한 80년대 신스팝과 뉴 웨이브의 문법이 이후 작품들의 뼈대가 되었다. 세 장은 하룻밤의 붕괴, 연옥에서의 성찰, 그리고 장례식으로 이어지는 3부작이고, 위켄드는 2022년 공연 도중 목소리를 잃었던 경험을 바탕으로 만든 『Hurry Up Tomorrow』를 '위켄드'라는 페르소나로 내는 마지막 앨범이 될 거라고 밝혔다. 그 마지막 곡은 첫 믹스테이프의 첫 곡 'High for This'로 이어지며 원을 닫는다.
 
 처음 듣는다면 『Starboy』를 권한다. 어둠에서 팝으로 넘어가던 시기의 야심과 불균형이 한 장에 모두 담겨 있고, 거기서 앞뒤로 걸어가며 위켄드가 무엇을 버렸고 무엇을 지켰는지 가늠하기 쉽다.
