@@ -7,10 +7,15 @@ import { ArtistPage } from '../pages/ArtistPage';
 import { LibraryPage } from '../pages/LibraryPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { NowPlayingPage } from '../pages/NowPlayingPage';
+import { MobileArchivePage } from '../pages/mobile/MobileArchivePage';
+import { MobileLibraryPage } from '../pages/mobile/MobileLibraryPage';
+import { MobileNowPlayingPage } from '../pages/mobile/MobileNowPlayingPage';
+import { MobileSearchPage } from '../pages/mobile/MobileSearchPage';
 import { AppShell } from './AppShell';
 import { useAppServices, useAuthState } from './appContext';
 import { AuthCallbackView, isAuthCallback } from './AuthCallback';
 import { ConnectView } from './ConnectView';
+import { DesktopSearchRoute, Responsive } from './Responsive';
 import {
   createPreviewSession,
   createSpotifySession,
@@ -28,9 +33,10 @@ function SessionScope({ session }: { session: Session }) {
       <Routes>
         <Route element={<AppShell />}>
           <Route index element={<Navigate to="/now-playing" replace />} />
-          <Route path="now-playing" element={<NowPlayingPage />} />
-          <Route path="library" element={<LibraryPage />} />
-          <Route path="archive" element={<ArchivePage />} />
+          <Route path="now-playing" element={<Responsive desktop={<NowPlayingPage />} mobile={<MobileNowPlayingPage />} />} />
+          <Route path="library" element={<Responsive desktop={<LibraryPage />} mobile={<MobileLibraryPage />} />} />
+          <Route path="search" element={<Responsive desktop={<DesktopSearchRoute />} mobile={<MobileSearchPage />} />} />
+          <Route path="archive" element={<Responsive desktop={<ArchivePage />} mobile={<MobileArchivePage />} />} />
           <Route path="artist/:artistId" element={<ArtistPage />} />
           <Route path="album/:albumId" element={<AlbumPage />} />
           <Route path="*" element={<NotFoundPage />} />

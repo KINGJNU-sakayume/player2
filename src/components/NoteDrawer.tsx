@@ -14,7 +14,7 @@ export function NoteDrawer() {
   // Each note opens at its top, not where the previous one was scrolled to.
   const topRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (note && shown === note) topRef.current?.closest('.side-drawer-body')?.scrollTo?.({ top: 0 });
+    if (note && shown === note) topRef.current?.closest('.side-drawer-body, .m-sheet-body')?.scrollTo?.({ top: 0 });
   }, [note, shown]);
 
   return (

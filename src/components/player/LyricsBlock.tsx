@@ -1,15 +1,7 @@
-import { useMemo } from 'react';
-import { useSession } from '../../app/sessionContext';
 import type { TrackIdentity } from '../../domain/types';
-import type { TimedLyricLine } from '../../lyrics/types';
+import { useLyricView } from '../../lyrics/useLyricView';
 import type { LyricsState } from '../../lyrics/useTimedLyrics';
-import { useLyricCursor } from '../../playback/hooks';
-import { usePreferences } from '../../preferences/preferences';
-import { detectLineLanguages } from '../../translation/languageDetect';
-import { useLyricTranslation, type TranslationState } from '../../translation/useLyricTranslation';
-
-/** v7 shows the current line, its translation and the next two lines. */
-const UPCOMING_LINES = 2;
+import type { TranslationState } from '../../translation/useLyricTranslation';
 
 export const LANGUAGE_NAMES: Record<string, string> = { ko: 'Korean', ja: 'Japanese', en: 'English', zh: 'Chinese' };
 
@@ -19,7 +11,7 @@ export function languageName(tag: string | undefined): string | null {
 }
 
 /** A curated translation shows like any other: its brief and reasoning live in the song's Listening note. */
-function TranslationStatus({ state, target, prepare }: { state: TranslationState; target: string; prepare: (() => Promise<void>) | null }) {
+export function TranslationStatus({ state, target, prepare }: { state: TranslationState; target: string; prepare: (() => Promise<void>) | null }) {
   switch (state.status) {
     case 'loading':
       return <span>Translating…</span>;
@@ -47,26 +39,25 @@ function TranslationStatus({ state, target, prepare }: { state: TranslationState
  * Translation is secondary: when it fails only its row disappears.
  */
 export function LyricsBlock({ track, lyricsState, context }: { track: TrackIdentity; lyricsState: LyricsState; context: string }) {
-  const { translation: provider, translationTarget } = useSession();
-  const [preferences, setPreferences] = usePreferences();
-  const lyrics = lyricsState.status === 'ready' ? lyricsState.lyrics : null;
-  const lines: TimedLyricLine[] | null = lyrics?.lines ?? null;
-  const { state: translation, prepare, curated } = useLyricTranslation(track, lyrics, preferences.translationEnabled);
-  const { activeIndex, nextIndex } = useLyricCursor(lines);
-
-  const lineLanguages = useMemo(
-    () => (lines ? detectLineLanguages(lines.map((l) => l.text), lyrics?.language) : []),
-    [lines, lyrics?.language],
-  );
-
-  const source = lyricsState.status === 'ready' ? lyrics?.source : lyricsState.status === 'instrumental' ? lyricsState.source : null;
-  const current = lines && activeIndex >= 0 ? lines[activeIndex]! : null;
-  const upcoming = lines ? lines.slice(nextIndex, nextIndex + UPCOMING_LINES) : [];
-  const translated = translation.status === 'ready' && activeIndex >= 0 ? (translation.lines[activeIndex] ?? '').trim() : '';
-  // A curated segment spanning several lines keeps one element (same key), dimmed while it continues.
-  const curatedLine = translation.status === 'ready' && translation.curated && activeIndex >= 0 ? translation.curated : null;
-  const segment = curatedLine?.segmentOf[activeIndex] ?? null;
-  const continued = Boolean(curatedLine?.continued[activeIndex]);
+  const {
+    provider,
+    translationTarget,
+    preferences,
+    setPreferences,
+    translation,
+    prepare,
+    curated,
+    lines,
+    activeIndex,
+    nextIndex,
+    lineLanguages,
+    source,
+    current,
+    upcoming,
+    translated,
+    segment,
+    continued,
+  } = useLyricView(track, lyricsState);
 
   return (
     <>

@@ -13,9 +13,9 @@ import { usePlay } from '../playback/hooks';
 import { describeSpotifyError } from '../spotify/errors';
 import { detectLineLanguage } from '../translation/languageDetect';
 
-type Filter = 'all' | SearchType;
+export type Filter = 'all' | SearchType;
 
-const FILTERS: Array<{ id: Filter; label: string }> = [
+export const FILTERS: Array<{ id: Filter; label: string }> = [
   { id: 'all', label: 'All' },
   { id: 'track', label: 'Tracks' },
   { id: 'artist', label: 'Artists' },
@@ -23,12 +23,12 @@ const FILTERS: Array<{ id: Filter; label: string }> = [
   { id: 'playlist', label: 'Playlists' },
 ];
 
-const DEBOUNCE_MS = 280;
-const PER_TYPE_IN_ALL = 4;
+export const DEBOUNCE_MS = 280;
+export const PER_TYPE_IN_ALL = 4;
 const RESULT = '[data-result]';
 const FOCUSABLE = 'button:not([disabled]), input';
 
-function combine<T>(parts: Array<Page<T> | null>): Page<T> | null {
+export function combine<T>(parts: Array<Page<T> | null>): Page<T> | null {
   const present = parts.filter((part): part is Page<T> => part !== null);
   const last = present[present.length - 1];
   if (!last) return null;
@@ -37,7 +37,7 @@ function combine<T>(parts: Array<Page<T> | null>): Page<T> | null {
 }
 
 /** Flattens the pages of a single-type infinite search into one result set. */
-function mergePages(pages: SearchResults[] | undefined, type: SearchType): SearchResults {
+export function mergePages(pages: SearchResults[] | undefined, type: SearchType): SearchResults {
   const all = pages ?? [];
   return {
     tracks: type === 'track' ? combine(all.map((p) => p.tracks)) : null,
@@ -47,7 +47,7 @@ function mergePages(pages: SearchResults[] | undefined, type: SearchType): Searc
   };
 }
 
-function countResults(results: SearchResults | undefined): number {
+export function countResults(results: SearchResults | undefined): number {
   if (!results) return 0;
   return (
     (results.tracks?.items.length ?? 0) +

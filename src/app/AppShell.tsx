@@ -9,13 +9,16 @@ import { SearchOverlay } from '../components/SearchOverlay';
 import { SettingsPanel } from '../components/SettingsPanel';
 import { usePlayerSelector } from '../playback/hooks';
 import { AccentTokens } from './AccentTokens';
-import { useAppServices, useAuthState } from './appContext';
+import { useAppServices } from './appContext';
 import { GlobalShortcuts } from './GlobalShortcuts';
+import { ScopeNotice } from './ScopeNotice';
+import { MobileShell } from './MobileShell';
 import { useCurrentPageTitle } from './pageTitle';
 import { RouteErrorBoundary } from './RouteErrorBoundary';
 import { useSessionControls } from './sessionControls';
 import { useSession } from './sessionContext';
 import { ShellContext, useShell, type ShellControls } from './shellContext';
+import { useIsMobile } from './useIsMobile';
 
 function initials(name: string | null | undefined): string {
   if (!name) return 'ARC';
@@ -139,20 +142,9 @@ function TopBar() {
   );
 }
 
-/** Shown when a stored authorization predates scopes the app now requires. */
-function ScopeNotice() {
-  const auth = useAuthState();
-  const services = useAppServices();
-  const { pathname } = useLocation();
-  if (auth.status !== 'signed-in' || auth.missingScopes.length === 0 || !services.auth) return null;
-  return (
-    <div className="scope-notice" role="status">
-      <span>ARC needs {auth.missingScopes.length} more Spotify permission(s) for every feature.</span>
-      <button type="button" className="note-more" onClick={() => void services.auth?.beginLogin(pathname)}>
-        Reconnect Spotify →
-      </button>
-    </div>
-  );
+/** The desktop shell, or the phone's tab shell on a narrow or sideways touch screen. Playback survives the switch. */
+export function AppShell() {
+  return useIsMobile() ? <MobileShell /> : <DesktopShell />;
 }
 
 /**
@@ -161,7 +153,7 @@ function ScopeNotice() {
  * There is no global playback footer — transport lives on Now Playing only —
  * and playback survives every route change.
  */
-export function AppShell() {
+function DesktopShell() {
   const { pathname } = useLocation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
