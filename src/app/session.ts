@@ -7,6 +7,7 @@ import type { LyricsProvider } from '../lyrics/types';
 import type { PlaybackEngine } from '../playback/engine';
 import { PlayerStore } from '../playback/playerStore';
 import { SpotifyPlaybackEngine } from '../playback/spotifyEngine';
+import { isHandheldBrowser } from './useIsMobile';
 import { PREVIEW_LYRICS, PREVIEW_PALETTES } from '../preview/previewData';
 import { PreviewPlaybackEngine } from '../preview/previewEngine';
 import { createPreviewCatalogueSource } from '../preview/previewSource';
@@ -42,6 +43,8 @@ export function createSpotifySession(services: AppServices): Session {
       client,
       getAccessToken: () => auth.getAccessToken(),
       refreshAccessToken: () => auth.refreshAfterUnauthorized(),
+      // Spotify's Web Playback SDK does not run in phone browsers: there ARC is a remote for the Spotify app.
+      ...(isHandheldBrowser() ? { isPlaybackSupported: () => false } : {}),
     }),
     lyrics: createLyricsProvider(config.lyricsProvider),
     translation: createTranslationProvider(config.translationProvider, config.translationEndpoint),

@@ -1,4 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { useIsMobile } from '../app/useIsMobile';
+import { BottomSheet } from './BottomSheet';
 
 const FOCUSABLE = 'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -14,12 +16,29 @@ interface SideDrawerProps {
 }
 
 /**
+ * Notes and the queue: the right-hand drawer on desktop, a bottom sheet on a
+ * phone (same content, same close and focus behaviour).
+ */
+export function SideDrawer(props: SideDrawerProps) {
+  const mobile = useIsMobile();
+  if (mobile) {
+    const { open, onClose, label, labelledBy, closeLabel, children } = props;
+    return (
+      <BottomSheet open={open} onClose={onClose} label={label} labelledBy={labelledBy} closeLabel={closeLabel} tall>
+        {children}
+      </BottomSheet>
+    );
+  }
+  return <DesktopSideDrawer {...props} />;
+}
+
+/**
  * The one right-hand drawer of the v7 design (warm paper, left hairline,
  * restrained shadow). Notes and the queue share it. Closes on the close
  * button, the backdrop and Escape; traps focus while open and returns it to
  * the trigger afterwards.
  */
-export function SideDrawer({ open, onClose, label, labelledBy, closeLabel, children }: SideDrawerProps) {
+function DesktopSideDrawer({ open, onClose, label, labelledBy, closeLabel, children }: SideDrawerProps) {
   const drawerRef = useRef<HTMLElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);

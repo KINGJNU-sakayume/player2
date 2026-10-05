@@ -33,3 +33,7 @@ export const VolumeIcon = ({ muted }: { muted: boolean }) => (
     {muted ? <path d="m15.5 9.5 5 5M20.5 9.5l-5 5"/> : <path d="M15.2 9.2a4 4 0 0 1 0 5.6M17.8 6.6a7.6 7.6 0 0 1 0 10.8"/>}
   </Icon>
 );
+export const BackIcon = () => <Icon><path d="m15 5-7 7 7 7"/></Icon>;
+export const ChevronDownIcon = () => <Icon><path d="m6 9 6 6 6-6"/></Icon>;
+export const ExpandIcon = () => <Icon><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></Icon>;
+export const MoreIcon = () => <Icon><path d="M5 12h.01M12 12h.01M19 12h.01" strokeWidth="2.6"/></Icon>;

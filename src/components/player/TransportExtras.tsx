@@ -68,7 +68,8 @@ function LikeButton() {
   );
 }
 
-function Volume() {
+/** Mute and volume of the active device. */
+export function Volume() {
   const snapshot = usePlayerSnapshot();
   const engine = useEngine();
   const restoreTo = useRef(0.6);

@@ -25,7 +25,7 @@ or Specimen mode, and transport controls appear only on Now Playing.
 | **Queue** | The real Spotify queue in the same right-hand drawer as the notes. |
 
 **Contents** — [Setup](#setup) · [Environment variables](#environment-variables) · [Notes](#notes-editorial-and-listening) ·
-[Lyrics and translation](#lyrics-and-translation) · [Preview mode](#preview-mode) · [Commands](#commands) ·
+[Lyrics and translation](#lyrics-and-translation) · [Preview mode](#preview-mode) · [Phone](#phone-and-home-screen-app) · [Commands](#commands) ·
 [Deployment](#github-pages-deployment) · [Architecture](#architecture) · [Limitations](#known-limitations) ·
 [Troubleshooting](#troubleshooting)
 
@@ -209,6 +209,27 @@ needs a secret must sit behind your own backend. No copyrighted lyrics are store
 Kenshi Yonezu, tripleS, Coldplay, Vaundy and Tyler, The Creator with their noted albums. Artist, album and noted-track
 IDs are real Spotify IDs, so the preview shows the real notes; track lists and timings are sample data and every lyric
 line is an original test line. It never calls Spotify, LRCLIB or a translation service.
+
+## Phone and Home Screen app
+
+On a phone (a window up to 760px wide, or a touch screen turned sideways) ARC switches to its phone shell; the desktop
+layout above is unchanged. It is tuned for an iPhone 15 Pro, in Safari and as a Home Screen app.
+
+- **Four bottom tabs** — Now Playing · Library · Search · Archive. Artist and album pages open inside the current tab
+  with a back button; tapping the current tab returns it to its first page. Away from Now Playing, a mini player sits
+  above the tabs.
+- **Now Playing** takes the playing album's colour (player1's stage theme, [`src/palette/stageTheme.ts`](src/palette/stageTheme.ts)):
+  where it plays, the cover, title and ♡, artist · album, the current lyric with its translation, the one-line
+  Listening note, the seek bar and the transport. Tapping the lyric opens the **lyrics view** — the phone's Focus Mode,
+  with *Translation* and *Screen: Stays on* (Screen Wake Lock); sideways it puts the cover beside the lyrics.
+- **Bottom sheets** replace the drawers and popovers: notes, the queue, devices (with the active device's volume),
+  settings and a track menu (⋯). Drag the grip down, tap outside or press `Esc` to close.
+- **A remote, not a player.** Spotify's Web Playback SDK does not run in phone browsers, so on a phone ARC controls the
+  Spotify app or another device; *Open Spotify app* in the device sheet wakes the app so the phone joins the list.
+- **Home Screen app.** In Safari, Share → *Add to Home Screen*. ARC then opens full screen with
+  [`public/manifest.webmanifest`](public/manifest.webmanifest); [`public/sw.js`](public/sw.js) keeps the app shell, so
+  it starts offline and Archive and every note stay readable. Spotify, its login, the SDK and LRCLIB always go to the
+  network. The service worker is registered in production builds only.
 
 ## Keyboard
 
