@@ -62,7 +62,7 @@ export function AuthCallbackView({ onDone }: { onDone: () => void }) {
   const cancelled = error instanceof SpotifyAuthError && error.kind === 'access-denied';
 
   return (
-    <MinimalShell crumb="Authorization">
+    <MinimalShell>
       <div className="state-page" data-tone={error && !cancelled ? 'alert' : 'neutral'}>
         <div className="label">Spotify authorization</div>
         {!auth || error ? (

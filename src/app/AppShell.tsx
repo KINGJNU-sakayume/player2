@@ -4,6 +4,7 @@ import { useProfile } from '../catalogue/queries';
 import { CoverImage } from '../components/CoverImage';
 import { SidePanel } from '../components/desktop/SidePanel';
 import { AlbumIcon, ArchiveIcon, ArtistIcon, LibraryIcon, MusicIcon, QueueIcon, SearchIcon, SettingsIcon } from '../components/icons';
+import { Logo } from '../components/Logo';
 import { NoteContent } from '../components/NoteContent';
 import { NoteProvider, useNote } from '../components/NoteContext';
 import { PlayingMark } from '../components/PlayingMark';
@@ -62,8 +63,7 @@ function Rail({ panel }: { panel: Panel | null }) {
   return (
     <aside className="rail" aria-label="Primary navigation">
       <Link className="logo" to="/now-playing" aria-label="ARC Music — Now Playing">
-        <b>ARC</b>
-        <span>music</span>
+        <Logo size={40} />
       </Link>
       <nav className="rail-nav">
         <NavLink className="rail-item" to="/now-playing" aria-label="Now Playing">

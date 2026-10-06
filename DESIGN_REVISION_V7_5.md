@@ -34,6 +34,10 @@ otherwise. The prototype used to settle these decisions is
   Library · Archive · Search · Artist · Album, then Queue · Settings · the account. Away from Now Playing, the playing
   cover, its progress and a playing mark sit above Queue and lead back to Now Playing. There is still no global
   playback footer.
+- **Logo.** player1's record mark ([`src/components/Logo.tsx`](src/components/Logo.tsx)) replaces the "ARC / music"
+  box. It is drawn in `--ink` and `--bg`, so it takes each page's colour and turns light on a dark album stage. The
+  favicon and the Home Screen icons use the same mark.
+- **Signed out.** The Connect and authorization screens keep the rail and the logo, without a top bar.
 - **Right-hand column.** It holds one thing at a time: a note, the queue or settings.
   - It sits beside the page and pushes it aside, so it is a complementary region, not a dialog.
   - Opening it moves focus to its close button, closing it returns focus to whatever opened it, and `Esc` closes it.

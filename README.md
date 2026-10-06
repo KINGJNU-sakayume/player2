@@ -234,7 +234,8 @@ layout above is unchanged. It is tuned for an iPhone 15 Pro, in Safari and as a 
 - **Home Screen app.** In Safari, Share → *Add to Home Screen*. ARC then opens full screen with
   [`public/manifest.webmanifest`](public/manifest.webmanifest); [`public/sw.js`](public/sw.js) keeps the app shell, so
   it starts offline and Archive and every note stay readable. Spotify, its login, the SDK and LRCLIB always go to the
-  network. The service worker is registered in production builds only.
+  network. The service worker is registered in production builds only. The icon is player1's record mark; iOS keeps
+  an icon it has already added, so remove ARC from the Home Screen and add it again to see a new one.
 
 ## Keyboard
 
