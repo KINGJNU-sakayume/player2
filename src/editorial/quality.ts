@@ -14,6 +14,13 @@ export const FLOOR = {
   albumBody: 1800,
   songBody: 600,
   songParagraphs: 3,
+  /**
+   * A song whose lyrics are mainly Korean (`lyricsLanguage: ko`) has no curated
+   * translation and no `## 번역에 대하여`, so its listening note carries the
+   * lyrics reading itself and has a higher floor.
+   */
+  koSongBody: 900,
+  koSongParagraphs: 4,
   translationAbout: 150,
   sources: 2,
 } as const;
@@ -25,7 +32,8 @@ export const BANNED_PHRASES: readonly { pattern: RegExp; reason: string }[] = [
   { pattern: /명반|전설적|귀를 사로잡|역대급|완성도 높/, reason: 'promotional cliché: say what is good and how' },
 ];
 
-const SECONDARY_SOURCE = /wikipedia\.org|open\.spotify\.com/;
+/** Starting points, not evidence: they never satisfy the "one independent source" rule. */
+const SECONDARY_SOURCE = /wikipedia\.org|namu\.wiki|open\.spotify\.com/;
 
 export type AuditKind = Lowercase<NoteKind>;
 
@@ -58,7 +66,7 @@ function commonProblems(texts: (string | undefined)[], sources: string[] | undef
   const list = sources ?? [];
   if (list.length < FLOOR.sources) problems.push(`needs at least ${FLOOR.sources} sources (has ${list.length})`);
   if (list.length > 0 && list.every((source) => SECONDARY_SOURCE.test(source))) {
-    problems.push('needs a source beyond Wikipedia and Spotify (interview, official site, liner notes, review)');
+    problems.push('needs a source beyond Wikipedia, Namu Wiki and Spotify (interview, official site, liner notes, review)');
   }
   const text = texts.filter(Boolean).join('\n');
   for (const { pattern, reason } of BANNED_PHRASES) {
@@ -128,10 +136,17 @@ export function auditSong(note: SongNote): NoteAudit {
   const length = bodyLength(note.full);
   const paragraphs = countParagraphs(note.full);
   if (!note.short) problems.push('needs a "short" listening cue');
-  if (length < FLOOR.songBody) problems.push(`listening note is ${length} characters; a song note needs ${FLOOR.songBody}+`);
-  if (paragraphs < FLOOR.songParagraphs) problems.push(`listening note has ${paragraphs} paragraphs; a song note needs ${FLOOR.songParagraphs}+`);
+  const korean = note.lyricsLanguage === 'ko';
+  const bodyFloor = korean ? FLOOR.koSongBody : FLOOR.songBody;
+  const paragraphFloor = korean ? FLOOR.koSongParagraphs : FLOOR.songParagraphs;
+  const kind = korean ? 'a Korean-language song note' : 'a song note';
+  if (length < bodyFloor) problems.push(`listening note is ${length} characters; ${kind} needs ${bodyFloor}+`);
+  if (paragraphs < paragraphFloor) problems.push(`listening note has ${paragraphs} paragraphs; ${kind} needs ${paragraphFloor}+`);
   if (!note.translation && !note.lyricsLanguage) {
-    problems.push('needs a curated translation (translate-lyrics), or "lyricsLanguage: ko | instrumental" when none is needed');
+    problems.push(
+      'needs a curated translation (translate-lyrics) for a song in a foreign language, or "lyricsLanguage: ko | instrumental" ' +
+        '(ko: the lyrics are mainly Korean, even with some English)',
+    );
   }
   if (about !== undefined && about.length < FLOOR.translationAbout) {
     problems.push(`"번역에 대하여" is ${about.length} characters; it needs ${FLOOR.translationAbout}+`);
@@ -160,7 +175,8 @@ export function auditNotes(artists: readonly ArtistNote[], albums: readonly Albu
  * shrinks: rewrite a note, then remove its line here.
  */
 // Album prose and standard tracklists are complete; these six albums still lack song-note files.
-// Five song notes have listening prose but still lack curated translations or verified language metadata.
+// Four song notes have listening prose but still lack curated translations or verified language metadata
+// (adore-u, crush-on-you, before-the-rise, chowall: their lyrics language could not be checked against LRCLIB).
 export const PENDING_REVIEW: ReadonlySet<string> = new Set([
   'albums/parachutes',
   'albums/a-rush-of-blood',
@@ -170,7 +186,6 @@ export const PENDING_REVIEW: ReadonlySet<string> = new Set([
   'albums/strobo',
   'songs/adore-u',
   'songs/before-the-rise',
-  'songs/blue-valentine',
   'songs/chowall',
   'songs/crush-on-you',
 ]);

@@ -15,7 +15,7 @@ const song = (overrides: Partial<SongNote> = {}): SongNote => ({
   trackIds: [],
   titles: ['Test Song'],
   short: '감상 큐.',
-  full: paragraphs(3, FLOOR.songBody + 30),
+  full: paragraphs(FLOOR.koSongParagraphs, FLOOR.koSongBody + 40),
   sources: SOURCES,
   lyricsLanguage: 'ko',
   ...overrides,
@@ -56,9 +56,17 @@ describe('the note quality floor', () => {
   });
 
   it('fails a short song note with too few paragraphs', () => {
-    const problems = auditSong(song({ full: paragraphs(2, 300) })).problems.join('\n');
+    const problems = auditSong(song({ lyricsLanguage: 'instrumental', full: paragraphs(2, 300) })).problems.join('\n');
     expect(problems).toMatch(/600\+/);
     expect(problems).toMatch(/3\+/);
+  });
+
+  it('holds a Korean-language song to a higher floor than other songs', () => {
+    const thin = paragraphs(FLOOR.songParagraphs, FLOOR.songBody + 30);
+    const korean = auditSong(song({ full: thin })).problems.join('\n');
+    expect(korean).toMatch(/Korean-language song note needs 900\+/);
+    expect(korean).toMatch(/needs 4\+/);
+    expect(auditSong(song({ full: thin, lyricsLanguage: 'instrumental' })).problems).toEqual([]);
   });
 
   it('fails a translation-only song note', () => {
@@ -74,6 +82,12 @@ describe('the note quality floor', () => {
   it('fails Wikipedia-only sources', () => {
     const problems = auditSong(song({ sources: ['https://en.wikipedia.org/wiki/A', 'https://en.wikipedia.org/wiki/B'] })).problems;
     expect(problems.join('\n')).toMatch(/beyond Wikipedia/);
+  });
+
+  it('does not count Namu Wiki as an independent source', () => {
+    const problems = auditSong(song({ sources: ['https://namu.wiki/w/A', 'https://en.wikipedia.org/wiki/B'] })).problems;
+    expect(problems.join('\n')).toMatch(/beyond Wikipedia, Namu Wiki/);
+    expect(auditSong(song({ sources: ['https://namu.wiki/w/A', 'https://www.tenasia.co.kr/article/1'] })).problems).toEqual([]);
   });
 
   it('fails hearsay and clichés', () => {
