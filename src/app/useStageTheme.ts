@@ -1,7 +1,8 @@
 import { useEffect, useMemo, type CSSProperties } from 'react';
 import { pickImageUrl } from '../lib/images';
 import { NEUTRAL_BASE } from '../palette/mapPaletteToTokens';
-import { mapPaletteToStageTheme, type StageTone } from '../palette/stageTheme';
+import { mapPaletteToStageTheme, type StageToken, type StageTone } from '../palette/stageTheme';
+import type { AlbumPalette } from '../palette/types';
 import { useAlbumPalette } from '../palette/usePalette';
 import { usePlayerSelector } from '../playback/hooks';
 
@@ -9,7 +10,7 @@ export interface StageVars {
   tone: StageTone;
   /** The album-coloured surface, for `theme-color`. */
   background: string;
-  /** `--s-*` custom properties; the phone's Now Playing, mini player and lyrics read them. */
+  /** Custom properties: `--s-*` for the phone stylesheet, player2's own token names on the desktop. */
   style: CSSProperties;
 }
 
@@ -29,7 +30,34 @@ const STAGE_NAMES = {
   '--active-text': '--s-main-text',
   '--cover-shadow': '--s-shadow',
   '--stage-glow': '--s-glow',
-} as const;
+} as const satisfies Partial<Record<StageToken, string>>;
+
+/** The same tokens under player2's own names: the desktop paints the whole page with them. */
+export const DESKTOP_STAGE_NAMES = {
+  '--bg': '--bg',
+  '--paper': '--paper',
+  '--surface': '--surface',
+  '--surface-strong': '--surface-strong',
+  '--ink': '--ink',
+  '--ink-2': '--ink-2',
+  '--muted': '--muted',
+  '--subtle': '--dim',
+  '--line': '--line',
+  '--line-2': '--line-soft',
+  '--active': '--main',
+  '--active-text': '--main-text',
+  '--cover-shadow': '--cover-shadow',
+  '--stage-glow': '--stage-glow',
+} as const satisfies Partial<Record<StageToken, string>>;
+
+/** A palette's stage theme as inline custom properties under the given names; null when the cover could not be read. */
+export function stageVars(palette: AlbumPalette | null, names: Partial<Record<StageToken, string>>): StageVars | null {
+  const theme = mapPaletteToStageTheme(palette);
+  if (!theme) return null;
+  const style: Record<string, string> = {};
+  for (const [from, to] of Object.entries(names)) style[to] = theme.tokens[from as StageToken];
+  return { tone: theme.tone, background: theme.tokens['--bg'], style: style as CSSProperties };
+}
 
 /**
  * The playing album's colour as a whole surface (player1's stage theme). Null
@@ -43,13 +71,7 @@ export function useStageTheme(): StageVars | null {
   const imageUrl = track ? pickImageUrl(track.album.images, 64) : null;
   const palette = useAlbumPalette(albumId, imageUrl);
 
-  return useMemo(() => {
-    const theme = mapPaletteToStageTheme(palette);
-    if (!theme) return null;
-    const style: Record<string, string> = {};
-    for (const [from, to] of Object.entries(STAGE_NAMES)) style[to] = theme.tokens[from as keyof typeof STAGE_NAMES];
-    return { tone: theme.tone, background: theme.tokens['--bg'], style: style as CSSProperties };
-  }, [palette]);
+  return useMemo(() => stageVars(palette, STAGE_NAMES), [palette]);
 }
 
 /** Keeps the browser chrome (status bar, Safari toolbar) the colour of the surface behind it. */

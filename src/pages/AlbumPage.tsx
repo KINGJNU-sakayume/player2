@@ -1,6 +1,9 @@
 import { useMemo, type CSSProperties } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { BackLink } from '../app/backHistory';
 import { usePageTitle } from '../app/pageTitle';
+import { usePageSurface } from '../app/surface';
+import { useIsMobile } from '../app/useIsMobile';
 import { useAlbum, useSavedState, useToggleSaved } from '../catalogue/queries';
 import { ArtistLinks } from '../components/ArtistLinks';
 import { CoverImage } from '../components/CoverImage';
@@ -122,7 +125,10 @@ export function AlbumPage() {
   const data = album.data;
   const palette = useAlbumPalette(albumId, data ? pickImageUrl(data.images, 64) : null);
   const accent = useMemo(() => mapPaletteToTokens(palette), [palette]);
+  const mobile = useIsMobile();
   usePageTitle('Album', data?.name ?? null);
+  // Desktop (v7.5): the page takes its own cover's colour. The phone keeps paper with the cover's accent.
+  usePageSurface(isSpotifyId(albumId) ? { key: albumId, imageUrl: data ? pickImageUrl(data.images, 64) : null } : null);
 
   if (!isSpotifyId(albumId)) {
     return (
@@ -177,8 +183,9 @@ export function AlbumPage() {
   return (
     <div className="view active">
       <div className="album-page">
-        <div className="album-shell" style={accent as CSSProperties}>
+        <div className="album-shell" style={mobile ? (accent as CSSProperties) : undefined}>
           <section className="album-object" aria-label="Album details">
+            {!mobile && <BackLink />}
             <div className="album-hero-cover">
               <CoverImage
                 images={loaded.images}

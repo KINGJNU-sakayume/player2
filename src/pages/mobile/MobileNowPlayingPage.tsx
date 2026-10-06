@@ -19,7 +19,7 @@ import {
 } from '../../components/icons';
 import { DeviceSheet, SPOTIFY_APP_URL } from '../../components/mobile/DeviceSheet';
 import { useNote } from '../../components/NoteContext';
-import { TranslationStatus } from '../../components/player/LyricsBlock';
+import { PreviousLine, TranslationStatus } from '../../components/player/LyricsBlock';
 import { Slider } from '../../components/Slider';
 import { songNotePayload } from '../../components/SongNote';
 import type { TrackIdentity } from '../../domain/types';
@@ -292,6 +292,7 @@ function LyricsMode({
           <p className="current-lyric is-state">{state}</p>
         ) : (
           <>
+            <PreviousLine key={`prev-${view.previousIndex}`} line={view.previous} index={view.previousIndex} lang={view.lineLanguages[view.previousIndex]} />
             {view.current ? (
               <p key={`line-${view.activeIndex}`} className="current-lyric" lang={view.lineLanguages[view.activeIndex]}>
                 {view.current.text}

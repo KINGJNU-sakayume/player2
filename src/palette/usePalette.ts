@@ -7,7 +7,12 @@ import type { AlbumPalette } from './types';
  * Pass `imageUrl: null` to read only known palettes without extracting.
  */
 export function useAlbumPalette(key: string | null | undefined, imageUrl: string | null): AlbumPalette | null {
-  const { data } = useQuery({
+  return useAlbumPaletteState(key, imageUrl).palette;
+}
+
+/** The palette and whether it is still being extracted (so a surface can hold its last colour meanwhile). */
+export function useAlbumPaletteState(key: string | null | undefined, imageUrl: string | null): { palette: AlbumPalette | null; pending: boolean } {
+  const { data, fetchStatus } = useQuery({
     queryKey: ['palette', key, imageUrl],
     queryFn: () => paletteCache.load(key!, imageUrl),
     enabled: Boolean(key),
@@ -15,5 +20,5 @@ export function useAlbumPalette(key: string | null | undefined, imageUrl: string
     gcTime: 60 * 60_000,
     initialData: () => (key ? (paletteCache.peek(key) ?? undefined) : undefined),
   });
-  return data ?? null;
+  return { palette: data ?? null, pending: !data && fetchStatus === 'fetching' };
 }

@@ -1,5 +1,4 @@
 import { useSyncExternalStore, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
 import { usePageTitle } from '../app/pageTitle';
 import { useSession } from '../app/sessionContext';
 import {
@@ -10,12 +9,13 @@ import {
   useRecentlyPlayed,
   useSavedAlbums,
 } from '../catalogue/queries';
-import { Portrait } from '../components/CoverImage';
-import { ObjectRow, TrackIndexRow } from '../components/IndexRow';
+import { CoverImage, Portrait } from '../components/CoverImage';
+import { CoverTile } from '../components/desktop/CoverTile';
+import { TrackIndexRow } from '../components/IndexRow';
 import { QuietRow } from '../components/StateView';
-import { getAlbumNote, getSongNote } from '../editorial/lookup';
+import { getAlbumNote, getArtistNote, getSongNote } from '../editorial/lookup';
 import type { TrackIdentity } from '../domain/types';
-import { albumTypeLabel, formatRelativeTime, joinArtistNames, pluralise, releaseYear } from '../lib/format';
+import { formatRelativeTime, joinArtistNames, pluralise, releaseYear } from '../lib/format';
 import { useEngine, usePlay } from '../playback/hooks';
 import { useCurrentTrackMatcher } from '../playback/useCurrentTrack';
 import { describeSpotifyError } from '../spotify/errors';
@@ -155,19 +155,18 @@ function FollowedArtists() {
         <QuietRow>Artists you follow on Spotify appear here.</QuietRow>
       ) : (
         <>
-          <ul className="artist-list">
+          <ul className="cover-tiles">
             {items.map((artist) => (
-              <li key={artist.id}>
-                <Link to={`/artist/${artist.id}`} tabIndex={-1} aria-hidden="true" className="artist-list-portrait">
-                  <Portrait images={artist.images} name={artist.name} size={48} />
-                </Link>
-                <Link className="linkish artist-list-name" to={`/artist/${artist.id}`}>
-                  {artist.name}
-                </Link>
-                <button type="button" className="row-play" aria-label={`Play ${artist.name}`} onClick={() => play({ contextUri: artist.uri }, { openNowPlaying: true })}>
-                  Play
-                </button>
-              </li>
+              <CoverTile
+                key={artist.id}
+                round
+                art={<Portrait images={artist.images} name={artist.name} size={220} />}
+                title={artist.name}
+                to={`/artist/${artist.id}`}
+                meta="Artist"
+                noted={getArtistNote({ id: artist.id, name: artist.name }) !== null}
+                onPlay={() => play({ contextUri: artist.uri }, { openNowPlaying: true })}
+              />
             ))}
           </ul>
           {artists.hasNextPage && (
@@ -196,27 +195,18 @@ function SavedAlbums() {
         <QuietRow>Albums you save on Spotify — or from an album page here — collect in this archive.</QuietRow>
       ) : (
         <>
-          <ul className="object-rows">
-            {items.map((album) => {
-              const noted = getAlbumNote({ id: album.id, name: album.name, artistNames: album.artists.map((a) => a.name), releaseDate: album.releaseDate });
-              return (
-                <ObjectRow
-                  key={album.id}
-                  images={album.images}
-                  title={album.name}
-                  to={`/album/${album.id}`}
-                  paletteKey={album.id}
-                  kicker={
-                    <>
-                      {releaseYear(album.releaseDate) ?? '—'} / {albumTypeLabel(album.albumType)}
-                      {noted && <span className="release-note"> · Note</span>}
-                    </>
-                  }
-                  meta={joinArtistNames(album.artists)}
-                  onPlay={() => play({ contextUri: album.uri }, { openNowPlaying: true })}
-                />
-              );
-            })}
+          <ul className="cover-tiles">
+            {items.map((album) => (
+              <CoverTile
+                key={album.id}
+                art={<CoverImage images={album.images} size={220} alt="" title={album.name} paletteKey={album.id} />}
+                title={album.name}
+                to={`/album/${album.id}`}
+                meta={[joinArtistNames(album.artists), releaseYear(album.releaseDate)].filter(Boolean).join(' · ')}
+                noted={getAlbumNote({ id: album.id, name: album.name, artistNames: album.artists.map((a) => a.name), releaseDate: album.releaseDate }) !== null}
+                onPlay={() => play({ contextUri: album.uri }, { openNowPlaying: true })}
+              />
+            ))}
           </ul>
           {albums.hasNextPage && (
             <MoreButton onClick={() => void albums.fetchNextPage()} busy={albums.isFetchingNextPage} label="Show more albums" />
@@ -244,14 +234,13 @@ function Playlists() {
         <QuietRow>Playlists you create or follow on Spotify appear here.</QuietRow>
       ) : (
         <>
-          <ul className="object-rows compact">
+          <ul className="cover-tiles">
             {items.map((playlist) => (
-              <ObjectRow
+              <CoverTile
                 key={playlist.id}
-                images={playlist.images}
+                art={<CoverImage images={playlist.images} size={220} alt="" title={playlist.name} />}
                 title={playlist.name}
-                kicker={['Playlist', playlist.ownerName].filter(Boolean).join(' / ')}
-                meta={[playlist.itemCount !== null ? pluralise(playlist.itemCount, 'item') : null, playlist.description].filter(Boolean).join(' · ')}
+                meta={['Playlist', playlist.itemCount !== null ? pluralise(playlist.itemCount, 'item') : null].filter(Boolean).join(' · ')}
                 onPlay={() => play({ contextUri: playlist.uri }, { openNowPlaying: true })}
               />
             ))}
@@ -308,9 +297,9 @@ function RecentlyPlayed() {
 }
 
 /**
- * The listener's Spotify library as an archive index: what is listened to
- * most (liked songs, followed artists) first, liked albums next, playlists
- * and history as a quieter band at the end.
+ * The listener's Spotify library on one screen (v7.5): liked songs and recent
+ * plays as lists; liked albums, playlists and followed artists as big covers.
+ * Two columns on a 16:9 window, three on 21:9 (desktop.css).
  */
 export function LibraryPage() {
   const { mode } = useSession();
@@ -330,14 +319,18 @@ export function LibraryPage() {
               </p>
             )}
           </header>
-          <div className="library-band">
-            <LikedSongs />
-            <FollowedArtists />
-          </div>
-          <SavedAlbums />
-          <div className="library-band quiet">
-            <Playlists />
-            <RecentlyPlayed />
+          <div className="library-columns">
+            <div className="library-col library-col-lists">
+              <LikedSongs />
+              <RecentlyPlayed />
+            </div>
+            <div className="library-col library-col-covers">
+              <SavedAlbums />
+              <Playlists />
+            </div>
+            <div className="library-col library-col-artists">
+              <FollowedArtists />
+            </div>
           </div>
         </div>
       </div>

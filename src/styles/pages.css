@@ -182,8 +182,8 @@ button.index-title:hover { text-decoration: underline; text-underline-offset: 4p
 .connect-warning { padding: 10px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 12.5px; }
 .connect-facts { margin-top: 38px; padding-top: 16px; border-top: 1px solid var(--line); max-width: 720px; }
 .connect-facts ol { display: grid; gap: 8px; counter-reset: fact; }
-.connect-facts ol li { counter-increment: fact; display: grid; grid-template-columns: 34px 1fr; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
-.connect-facts ol li::before { content: counter(fact, decimal-leading-zero); font-size: 11px; letter-spacing: .1em; color: var(--dim); padding-top: 2px; }
+.connect-facts ol li { counter-increment: fact; position: relative; padding-left: 34px; font-size: 12.5px; line-height: 1.6; color: var(--muted); overflow-wrap: anywhere; }
+.connect-facts ol li::before { content: counter(fact, decimal-leading-zero); position: absolute; left: 0; top: 2px; font-size: 11px; letter-spacing: .1em; color: var(--dim); }
 .connect-facts details { margin-top: 18px; font-size: 12px; color: var(--muted); }
 .connect-facts summary { cursor: pointer; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink); }
 .connect-facts details ul { margin-top: 10px; display: grid; gap: 6px; }

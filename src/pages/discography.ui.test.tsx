@@ -67,32 +67,40 @@ describe('discography digging (preview archive)', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'STRAY SHEEP' })).toBeInTheDocument();
   });
 
-  it('indexes every note by artist in the Archive', async () => {
+  it('indexes every note by artist in the Archive and reads them beside the page', async () => {
     const user = userEvent.setup();
     renderApp('#/archive');
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Archive' })).toBeInTheDocument();
     // Counts and order follow the note files, so adding a note never breaks this test.
     expect(
-      screen.getByText(`${artistNotes.length} artists · ${albumNotes.length} album notes · ${songNotes.length} listening notes`),
+      screen.getByText(`${artistNotes.length} artists · ${albumNotes.length} album notes · ${songNotes.length} listening notes · works offline`),
     ).toBeInTheDocument();
-    const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
+    const index = screen.getByRole('navigation', { name: 'Artists with notes' });
     const names = artistNotes.map((artist) => artist.names[0]!).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
-    expect(headings.slice(0, names.length)).toEqual(names);
-    expect(headings).toEqual(expect.arrayContaining(['Coldplay', 'Kenshi Yonezu', 'NMIXX']));
+    expect(within(index).getAllByRole('button').map((button) => button.querySelector('b')!.textContent)).toEqual(names);
 
-    const kenshi = screen.getByRole('region', { name: 'Kenshi Yonezu' });
-    expect(within(kenshi).getByRole('link', { name: 'STRAY SHEEP' })).toHaveAttribute('href', `#/album/${STRAY_SHEEP}`);
-    await user.click(within(kenshi).getByRole('button', { name: 'Read the note on STRAY SHEEP' }));
-    expect(screen.getByRole('dialog', { name: 'STRAY SHEEP' })).toHaveTextContent('Editorial note / Album');
+    // The playing artist (the preview plays Lemon) is chosen first; another is one click away and lives in the address.
+    expect(screen.getByRole('region', { name: 'Kenshi Yonezu' })).toBeInTheDocument();
+    expect(within(index).getByRole('button', { name: /^Kenshi Yonezu/ })).toHaveAttribute('aria-current', 'true');
+    await user.click(within(index).getByRole('button', { name: /^Coldplay/ }));
+    expect(await screen.findByRole('region', { name: 'Coldplay' })).toBeInTheDocument();
+    expect(window.location.hash).toContain('artist=coldplay');
+    await user.click(within(index).getByRole('button', { name: /^Kenshi Yonezu/ }));
+    const chosen = await screen.findByRole('region', { name: 'Kenshi Yonezu' });
 
-    // One row per song, all Listening notes: no separate translation entries or marks.
-    const row = (title: string) => within(kenshi).getByText(title, { selector: 'b' }).closest('li')!;
-    expect(within(kenshi).getAllByText('Lemon', { selector: 'b' })).toHaveLength(1);
-    expect(kenshi).not.toHaveTextContent(/Translation/);
+    expect(within(chosen).getByRole('link', { name: 'STRAY SHEEP' })).toHaveAttribute('href', `#/album/${STRAY_SHEEP}`);
+    await user.click(within(chosen).getByRole('button', { name: 'Read the note on STRAY SHEEP' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('complementary', { name: 'STRAY SHEEP' })).toHaveTextContent('Editorial note / Album');
+
+    // One row per song, all Listening notes: no separate translation entries.
+    const row = (title: string) => within(chosen).getByText(title, { selector: 'b' }).closest('li')!;
+    expect(within(chosen).getAllByText('Lemon', { selector: 'b' })).toHaveLength(1);
+    expect(chosen).not.toHaveTextContent(/Translation/);
     expect(row('Flamingo')).toHaveTextContent('Song');
     await user.click(within(row('Lemon')).getByRole('button', { name: 'Read the note on Lemon' }));
-    const lemon = screen.getByRole('dialog', { name: 'Lemon' });
+    const lemon = screen.getByRole('complementary', { name: 'Lemon' });
     expect(lemon).toHaveTextContent('Listening note / Song');
     expect(within(lemon).getByRole('heading', { name: '번역에 대하여' })).toBeInTheDocument();
   });

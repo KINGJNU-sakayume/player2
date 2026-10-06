@@ -5,7 +5,8 @@ import { useShell } from './shellContext';
 
 /**
  * "/" opens search; Space toggles playback when focus is not on a control
- * (so it never hijacks buttons, links or sliders).
+ * (so it never hijacks buttons, links or sliders); F toggles the desktop's
+ * Focus Mode.
  */
 export function GlobalShortcuts() {
   const engine = useEngine();
@@ -18,6 +19,11 @@ export function GlobalShortcuts() {
       if (event.key === '/') {
         event.preventDefault();
         shell.openSearch();
+        return;
+      }
+      if ((event.key === 'f' || event.key === 'F') && shell.toggleFocus) {
+        event.preventDefault();
+        shell.toggleFocus();
         return;
       }
       const target = event.target as HTMLElement | null;

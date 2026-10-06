@@ -1,33 +1,20 @@
 import { useEffect, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Logo } from '../components/Logo';
 import { SPOTIFY_SCOPES } from '../spotify/scopes';
 import { useAppServices, useAuthState } from './appContext';
 import { useSessionControls } from './sessionControls';
 
-/** Rail and top bar without a session: the same frame as the app, nothing to navigate yet. */
-export function MinimalShell({ crumb, children }: { crumb: string; children: ReactNode }) {
+/** The rail without a session: the same frame as the app, nothing to navigate yet. */
+export function MinimalShell({ children }: { children: ReactNode }) {
   return (
     <div className="app">
       <aside className="rail" aria-label="ARC Music">
         <span className="logo" aria-hidden="true">
-          <b>ARC</b>
-          <span>music</span>
+          <Logo size={40} />
         </span>
       </aside>
       <main className="workspace">
-        <header className="topbar">
-          <div className="crumbs">
-            <span>Player</span>
-            <span>
-              <i>/</i>
-              {crumb}
-            </span>
-          </div>
-          <div className="top-mark">
-            <b>Personal Music Archive</b>
-          </div>
-          <div className="top-right" />
-        </header>
         <section className="stage" id="main">
           <div className="view active">{children}</div>
         </section>
@@ -64,7 +51,7 @@ export function ConnectView() {
   const expired = authState.status === 'expired';
 
   return (
-    <MinimalShell crumb={expired ? 'Reconnect' : 'Connect'}>
+    <MinimalShell>
       <div className="state-page connect-page">
         <div className="label">{expired ? 'Authorization expired' : 'Now playing'}</div>
         <h1>{!auth ? 'Spotify isn’t configured' : expired ? 'Reconnect Spotify' : 'Connect Spotify'}</h1>

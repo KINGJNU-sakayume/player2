@@ -1,12 +1,6 @@
 @media (max-width: 1180px) {
-  .player-page, .artist-page, .album-page, .library-page { padding-left: 28px; padding-right: 28px; }
-  .player-shell { column-gap: 42px; }
+  .artist-page, .album-page, .library-page { padding-left: 28px; padding-right: 28px; }
   .album-shell { gap: 42px; }
-  :root { --note-width: 400px; --corner-cover: 150px; }
-  .note-open .player-stage { column-gap: 30px; }
-  /* Too narrow for cover, copy and note side by side: the note preview and controls go under the album. */
-  .note-open .player-shell { grid-template-columns: var(--corner-cover) minmax(0,1fr); grid-template-areas: "head head" "lyrics lyrics" "cover copy" "cover meta" "note note" "controls controls"; column-gap: 24px; }
-  .note-open .player-shell .player-meta { margin-bottom: 26px; }
   .artist-hero { grid-template-columns: 310px 1fr; gap: 38px; }
   .library-band { gap: 42px; }
   .object-rows { column-gap: 42px; }
@@ -20,27 +14,16 @@
   .app { min-height: 100dvh; height: auto; grid-template-columns: 56px minmax(0,1fr); }
   .rail { height: 100dvh; position: sticky; top: 0; }
   .workspace { height: auto; min-height: 100dvh; }
-  .topbar { height: 64px; }
   .stage { flex: none; min-height: 760px; }
   .view { position: relative; inset: auto; }
-  .player-page, .artist-page, .album-page, .library-page, .state-page { height: auto; overflow: visible; }
+  .artist-page, .album-page, .library-page, .state-page { height: auto; overflow: visible; }
   .artist-hero, .album-shell, .library-band, .library-band.quiet { grid-template-columns: 1fr; }
   .album-object { position: static; }
-  .player-shell, .note-open .player-shell { grid-template-columns: minmax(0,1fr); grid-template-rows: none; grid-template-areas: "cover" "copy" "meta" "head" "lyrics" "note" "controls"; min-height: 0; }
-  .player-shell .player-meta { margin-bottom: 32px; }
-  .note-open .player-cover { width: min(100%,430px); }
-  .player-stage, .note-open .player-stage { grid-template-columns: minmax(0,1fr); column-gap: 0; }
-  .player-note-panel { position: static; max-height: none; margin-top: 28px; border-left: 0; border-top: 1px solid var(--line); }
-  .player-cover, .album-hero-cover { width: min(100%,430px); }
+  .album-hero-cover { width: min(100%,430px); }
   .artist-portrait { max-width: 360px; }
   .release-card { grid-template-columns: 130px minmax(0,1fr); }
   .release-cover { width: 130px; height: 130px; }
   .release-actions { grid-column: 2; justify-self: start; }
-  .top-mark { display: none; }
-  .topbar { grid-template-columns: minmax(0,1fr) auto; padding: 0 18px; }
-  .top-right { grid-column: 2; }
-  .top-right > span, .now-marker { display: none; }
-  .player-listening { min-height: 680px; }
   .object-rows { grid-template-columns: 1fr; }
   .scope-notice { padding: 9px 18px; }
   .year-section, .archive-artist { grid-template-columns: 1fr; }
@@ -50,9 +33,7 @@
 }
 
 @media (max-width: 620px) {
-  .player-page, .artist-page, .album-page, .library-page { padding: 20px 18px 46px; }
-  .topbar { grid-template-columns: minmax(0,1fr) auto; }
-  .player-transport { grid-template-columns: 1fr; }
+  .artist-page, .album-page, .library-page { padding: 20px 18px 46px; }
   .progress-wrap { grid-template-columns: 38px 1fr 38px; }
   .transport-extras { justify-content: flex-start; }
   .artist-copy h1 { font-size: clamp(48px,15vw,72px); }

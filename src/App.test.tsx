@@ -39,7 +39,7 @@ describe('ARC Music (preview archive)', () => {
     renderApp('?preview', '#/now-playing');
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Lemon' })).toBeInTheDocument();
-    expect(await screen.findByText('08 / 15')).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Now playing' })).getByRole('link', { name: 'STRAY SHEEP' })).toBeInTheDocument();
     const line = startLine();
     expect(await screen.findByText(line)).toBeInTheDocument();
     expect(await screen.findByText(TEST_TRANSLATIONS_KO[line]!)).toBeInTheDocument();
@@ -64,7 +64,7 @@ describe('ARC Music (preview archive)', () => {
     expect(screen.getByRole('slider', { name: 'Seek' })).toHaveAttribute('aria-valuemax', '302');
   });
 
-  it('opens the shared note drawer, closes it on Escape and returns focus', async () => {
+  it('opens a note in the right-hand column, closes it on Escape and returns focus', async () => {
     const user = userEvent.setup();
     renderApp('?preview', '#/artist/1snhtMLeb2DYoMOcVbb8iB');
 
@@ -72,13 +72,15 @@ describe('ARC Music (preview archive)', () => {
     expect(screen.getByText('Tokushima, Japan · singer-songwriter / producer / illustrator')).toBeInTheDocument();
     const more = screen.getByRole('button', { name: 'Read full note →' });
     await user.click(more);
-    const dialog = screen.getByRole('dialog', { name: 'Kenshi Yonezu' });
-    expect(within(dialog).getByText('Editorial note / Artist')).toBeInTheDocument();
-    expect(within(dialog).getByText(/요네즈 켄시\(米津玄師\)의 디스코그래피는/)).toBeInTheDocument();
-    expect(within(dialog).getByRole('button', { name: 'Close note' })).toHaveFocus();
+    // Beside the page, not over it: no dialog.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    const note = screen.getByRole('complementary', { name: 'Kenshi Yonezu' });
+    expect(within(note).getByText('Editorial note / Artist')).toBeInTheDocument();
+    expect(within(note).getByText(/요네즈 켄시\(米津玄師\)의 디스코그래피는/)).toBeInTheDocument();
+    expect(within(note).getByRole('button', { name: 'Close note' })).toHaveFocus();
     await user.keyboard('{Escape}');
     await waitFor(() => expect(more).toHaveFocus());
-    expect(screen.queryByRole('dialog', { name: 'Kenshi Yonezu' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('complementary', { name: 'Kenshi Yonezu' })).not.toBeInTheDocument();
   });
 
   it.each([
@@ -100,11 +102,11 @@ describe('ARC Music (preview archive)', () => {
     expect(within(screen.getByRole('button', { name: /Politik/ })).queryByText('Note')).not.toBeInTheDocument();
   });
 
-  it('lists the library with liked songs and artists first', async () => {
+  it('lays the library out on one screen: lists, then covers, then artists', async () => {
     renderApp('?preview', '#/library');
     expect(await screen.findByRole('heading', { level: 1, name: 'Library' })).toBeInTheDocument();
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
-    expect(headings).toEqual(['Liked songs', 'Artists', 'Liked albums', 'Playlists', 'Recently played']);
+    expect(headings).toEqual(['Liked songs', 'Recently played', 'Liked albums', 'Playlists', 'Artists']);
     expect(await screen.findAllByRole('link', { name: 'Kenshi Yonezu' })).not.toHaveLength(0);
   });
 });

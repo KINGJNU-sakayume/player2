@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAppServices, useAuthState } from '../app/appContext';
 import { useSessionControls } from '../app/sessionControls';
@@ -24,33 +23,32 @@ function sdkLabel(kind: string): string {
   }
 }
 
-/** Small settings sheet beside the rail: account, device, translation, preview. */
+/** The phone's settings sheet. On the desktop the same body opens in the right-hand column. */
 export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null;
+  return (
+    <BottomSheet open onClose={onClose} label="Settings" ariaLabel="ARC Music settings" closeLabel="Close settings">
+      <SettingsBody />
+    </BottomSheet>
+  );
+}
+
+/** Account, device, translation and (phone) install or (desktop) the keyboard. */
+export function SettingsBody() {
   const { config, auth } = useAppServices();
   const authState = useAuthState();
   const controls = useSessionControls();
   const { mode, translation, lyrics } = useSession();
   const engine = useEngine();
   const sdk = usePlayerSelector((s) => s.sdk);
+  const device = usePlayerSelector((s) => s.snapshot.device);
+  const source = usePlayerSelector((s) => s.snapshot.source);
   const [preferences, setPreferences] = usePreferences();
   const { pathname } = useLocation();
-  const panelRef = useRef<HTMLDivElement>(null);
   const mobile = useIsMobile();
-
-  useEffect(() => {
-    if (!open) return;
-    panelRef.current?.querySelector<HTMLElement>('button')?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
-
-  if (!open) return null;
   const missing = authState.status === 'signed-in' ? authState.missingScopes : [];
 
-  const body = (
+  return (
     <div className="settings-body">
       <div className="label">Spotify</div>
       {mode === 'preview' ? (
@@ -60,6 +58,7 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
       ) : (
         <p>
           Connected · {sdk.kind === 'error' ? `${sdkLabel(sdk.kind)} — ${sdk.message}` : sdkLabel(sdk.kind)}
+          {device && (source === 'sdk' ? ' · playing in this browser' : ` · playing on ${device.name}`)}
         </p>
       )}
       {missing.length > 0 && (
@@ -114,30 +113,34 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
       {mobile ? (
         <InstallHint />
       ) : (
-        <p className="settings-help">
-          Shortcuts: <kbd>/</kbd> search · <kbd>Space</kbd> play / pause
-        </p>
+        <>
+          <div className="label">Keyboard</div>
+          <dl className="settings-keys">
+            <div>
+              <dt><kbd>/</kbd></dt>
+              <dd>Search</dd>
+            </div>
+            <div>
+              <dt><kbd>Space</kbd></dt>
+              <dd>Play / pause</dd>
+            </div>
+            <div>
+              <dt><kbd>F</kbd></dt>
+              <dd>Focus Mode</dd>
+            </div>
+            <div>
+              <dt>
+                <kbd>[</kbd> <kbd>]</kbd>
+              </dt>
+              <dd>Previous / next release on an album</dd>
+            </div>
+            <div>
+              <dt><kbd>Esc</kbd></dt>
+              <dd>Close the note, queue or settings column</dd>
+            </div>
+          </dl>
+        </>
       )}
-    </div>
-  );
-
-  if (mobile) {
-    return (
-      <BottomSheet open onClose={onClose} label="Settings" ariaLabel="ARC Music settings" closeLabel="Close settings">
-        {body}
-      </BottomSheet>
-    );
-  }
-
-  return (
-    <div ref={panelRef} className="settings-panel" role="dialog" aria-label="ARC Music settings">
-      <div className="settings-head">
-        <span>Settings</span>
-        <button type="button" onClick={onClose} aria-label="Close settings">
-          ×
-        </button>
-      </div>
-      {body}
     </div>
   );
 }

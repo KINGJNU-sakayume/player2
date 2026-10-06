@@ -208,6 +208,7 @@ html:has(.m-lyrics) body, html:has(.m-sheet-layer) body { overflow: hidden; }
 .m-lyrics .current-lyric.is-state { font-size: 24px; }
 .m-lyrics .current-lyric.is-gap { font-size: 22px; }
 .m-lyrics .current-trans { margin-top: 12px; font-size: 18px; line-height: 1.4; max-width: none; }
+.m-lyrics .previous-lyric { margin: 0 0 14px; font-size: 16.5px; line-height: 1.4; color: var(--dim); opacity: .8; white-space: pre-line; }
 .m-lyrics .next-lines { gap: 10px; margin-top: 20px; }
 .m-lyrics .next-line { font-size: 16.5px; }
 .m-lyrics-foot { grid-area: foot; padding-top: 10px; border-top: 1px solid var(--line); }
@@ -397,10 +398,10 @@ html:has(.m-lyrics) body, html:has(.m-sheet-layer) body { overflow: hidden; }
 .m-shell .track-item:hover:not(:disabled), .m-shell .track-item.active { padding-left: 0; }
 .m-shell .discography-step b { font-size: 16px; }
 
-/* Signed-out screens on a phone: no rail or top bar, just the page. */
+/* Signed-out screens on a phone: no rail, just the page. */
 @media (max-width: 760px), (pointer: coarse) and (max-height: 520px) {
   .app:not(.m-shell) { display: block; height: auto; min-height: 100dvh; }
-  .app:not(.m-shell) > .rail, .app:not(.m-shell) .topbar { display: none; }
+  .app:not(.m-shell) > .rail { display: none; }
   .app:not(.m-shell) .workspace, .app:not(.m-shell) .stage { height: auto; min-height: 100dvh; }
   .app:not(.m-shell) .state-page { padding: calc(env(safe-area-inset-top, 0px) + 28px) 20px calc(env(safe-area-inset-bottom, 0px) + 28px); }
 }

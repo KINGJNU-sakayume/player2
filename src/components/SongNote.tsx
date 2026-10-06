@@ -106,9 +106,10 @@ export function songNotePayload(note: SongNote, { title, subtitle, titleLang }: 
 }
 
 /**
- * Now Playing's note area: "Listening note", the cue when there is one, and
- * "Read full note →". `onOpen` shows the note in-page (Now Playing's note
- * column); without it the app-level drawer opens. Nothing without a note.
+ * Now Playing's one-line Listening note: the kicker, the cue on one line and
+ * "Read full note →". `onOpen` opens or closes the note in the right-hand
+ * column (Now Playing tracks which note is open); without it the note opens
+ * through the shared note context. Nothing without a note.
  */
 export function SongNotePreview({
   note,
@@ -123,21 +124,17 @@ export function SongNotePreview({
   const hasBody = Boolean(note.full?.trim() || note.translation);
   if (!short && !hasBody) return null;
   return (
-    <div className={className ? `note-preview ${className}` : 'note-preview'}>
-      <div className="note-kicker">
-        <span>Listening note</span>
-        <span className="index">SONG</span>
-      </div>
-      {short && <p lang="ko">{short}</p>}
+    <div className={className ? `note-line ${className}` : 'note-line'}>
+      <span className="note-line-kicker">Listening note</span>
+      {short ? <p lang="ko">{short}</p> : <p aria-hidden="true" />}
       {hasBody && (
         <button
           type="button"
           className="note-more"
-          aria-haspopup={onOpen ? undefined : 'dialog'}
           aria-expanded={onOpen ? Boolean(expanded) : undefined}
           onClick={() => (onOpen ? onOpen() : openNote(songNotePayload(note, context)))}
         >
-          Read full note →
+          {expanded ? 'Close note ×' : 'Read full note →'}
         </button>
       )}
     </div>

@@ -77,6 +77,7 @@ describe('ARC Music on a phone (preview archive)', () => {
     await user.click(await screen.findByRole('button', { name: 'Open lyrics' }));
     const lyrics = await screen.findByRole('dialog', { name: 'Lyrics · Lemon' });
     expect(within(lyrics).getByRole('list', { name: 'Next lines' })).toBeInTheDocument();
+    expect(within(lyrics).getByText('Previous line:', { exact: false })).toBeInTheDocument();
     expect(within(lyrics).getByRole('button', { name: /Translation/ })).toHaveAttribute('aria-pressed', 'true');
     await user.click(within(lyrics).getByRole('button', { name: 'Close lyrics' }));
     expect(screen.queryByRole('dialog', { name: 'Lyrics · Lemon' })).not.toBeInTheDocument();
