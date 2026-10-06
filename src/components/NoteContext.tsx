@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 export interface NotePayload {
+  /** Optional identity, e.g. `track:<id>` for the playing song's note, so a page can tell its own note is open. */
+  id?: string;
   /** e.g. "Editorial note / Album". */
   context: string;
   title: string;

@@ -2,44 +2,38 @@ import { useRef } from 'react';
 import { useShell } from '../../app/shellContext';
 import { useSavedState, useToggleSaved } from '../../catalogue/queries';
 import { useEngine, usePlayerSnapshot } from '../../playback/hooks';
-import { HeartIcon, QueueIcon, ShuffleIcon, VolumeIcon } from '../icons';
+import { ExpandIcon, HeartIcon, QueueIcon, VolumeIcon } from '../icons';
 import { Slider } from '../Slider';
 import { DevicePicker } from './DevicePicker';
 
 /**
- * Secondary playback controls ported from the catalogue player — shuffle,
- * like, queue, device and volume — set as one quiet line beneath the v7
- * transport, in the same micro type as the rest of the listening column.
+ * The right half of Now Playing's transport line: like, queue, the playback
+ * device, volume and Focus Mode, as quiet icon buttons.
  */
 export function TransportExtras() {
-  const snapshot = usePlayerSnapshot();
-  const engine = useEngine();
   const shell = useShell();
-  const hasTrack = Boolean(snapshot.track);
 
   return (
     <div className="transport-extras">
-      <div className="transport-extras-group">
+      <LikeButton />
+      <button type="button" className="ctl" title="Queue" aria-label="Queue" onClick={shell.openQueue}>
+        <QueueIcon />
+      </button>
+      <DevicePicker />
+      <Volume />
+      {shell.toggleFocus && (
         <button
           type="button"
-          className="text-toggle"
-          aria-pressed={snapshot.shuffle}
-          disabled={!hasTrack || snapshot.disallows.togglingShuffle}
-          onClick={() => void engine.setShuffle(!snapshot.shuffle)}
+          className="ctl"
+          title="Focus Mode (F)"
+          aria-label={shell.focusMode ? 'Exit Focus Mode' : 'Enter Focus Mode'}
+          aria-pressed={Boolean(shell.focusMode)}
+          aria-keyshortcuts="F"
+          onClick={shell.toggleFocus}
         >
-          <ShuffleIcon />
-          <span>Shuffle</span>
+          <ExpandIcon />
         </button>
-        <LikeButton />
-        <button type="button" className="text-toggle" aria-haspopup="dialog" onClick={shell.openQueue}>
-          <QueueIcon />
-          <span>Queue</span>
-        </button>
-      </div>
-      <div className="transport-extras-group">
-        <DevicePicker />
-        <Volume />
-      </div>
+      )}
     </div>
   );
 }
@@ -54,7 +48,8 @@ function LikeButton() {
   return (
     <button
       type="button"
-      className="text-toggle"
+      className="ctl"
+      title={isSaved ? 'Liked' : 'Like'}
       aria-pressed={isSaved}
       aria-label={isSaved ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
       disabled={unknown || toggle.isPending}
@@ -63,7 +58,6 @@ function LikeButton() {
       }}
     >
       <HeartIcon filled={isSaved} />
-      <span aria-hidden="true">{isSaved ? 'Liked' : 'Like'}</span>
     </button>
   );
 }

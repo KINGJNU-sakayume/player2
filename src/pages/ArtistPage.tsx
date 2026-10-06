@@ -1,7 +1,10 @@
 import { Fragment, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { BackLink } from '../app/backHistory';
 import { usePageTitle } from '../app/pageTitle';
 import { useSession } from '../app/sessionContext';
+import { usePageSurface } from '../app/surface';
+import { useIsMobile } from '../app/useIsMobile';
 import { useArtist, useDiscography } from '../catalogue/queries';
 import { CoverImage, Portrait } from '../components/CoverImage';
 import { ObjectRow } from '../components/IndexRow';
@@ -13,6 +16,7 @@ import type { AlbumSummary, ReleaseGroup } from '../domain/types';
 import { getAlbumNote, getArtistNote } from '../editorial/lookup';
 import type { ArtistEra } from '../editorial/types';
 import { albumTypeLabel, formatReleaseDate, joinArtistNames, pluralise } from '../lib/format';
+import { pickImageUrl } from '../lib/images';
 import { isSpotifyId } from '../lib/spotifyUri';
 import { usePlay } from '../playback/hooks';
 import { describeSpotifyError, isSpotifyApiError } from '../spotify/errors';
@@ -259,7 +263,11 @@ export function ArtistPage() {
   const artist = useArtist(artistId);
   const play = usePlay();
   const { mode } = useSession();
+  const mobile = useIsMobile();
   usePageTitle('Artist', artist.data?.name ?? null);
+  // Desktop (v7.5): the page takes the colour of the artist's photograph; without one it stays on paper.
+  const portraitUrl = artist.data ? pickImageUrl(artist.data.images, 64) : null;
+  usePageSurface(isSpotifyId(artistId) && portraitUrl ? { key: `artist:${artistId}`, imageUrl: portraitUrl } : null);
 
   if (!isSpotifyId(artistId)) {
     return (
@@ -316,6 +324,7 @@ export function ArtistPage() {
     <div className="view active">
       <div className="artist-page">
         <div className="artist-shell">
+          {!mobile && <BackLink />}
           <section className="artist-hero">
             <Portrait images={data.images} name={data.name} />
             <div className="artist-copy">

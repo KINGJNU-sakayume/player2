@@ -1,8 +1,9 @@
 # ARC Music v7 — Spotify web player
 
-ARC Music is a restrained personal music archive: the canonical v7 Now Playing, Artist and Album compositions, one
-warm paper surface, and short hand-written **notes** — the Editorial Note for artists and albums and the Listening
-Note for songs — that open in one shared drawer. Spotify provides authentication, metadata, search and playback.
+ARC Music is a restrained personal music archive: the v7 Now Playing, Artist and Album compositions, each page in the
+colour of its own image (or the warm paper), and short hand-written **notes** — the Editorial Note for artists and
+albums and the Listening Note for songs — that open in one right-hand column. Spotify provides authentication,
+metadata, search and playback.
 
 The playback, library, search, lyrics and translation features of the ARC Catalogue player
 ([player1](https://github.com/KINGJNU-sakayume/player1)) have been brought over, re-set in the v7 design language
@@ -11,18 +12,21 @@ is built for digging through discographies. Album notes can be long critic-style
 translation whose Korean speech level (존댓말 / 반말) is fixed from the song's context before any line is translated.
 v7.3 ([`DESIGN_REVISION_V7_3.md`](DESIGN_REVISION_V7_3.md)) adds the discography timeline, previous / next release
 navigation and the Archive index. v7.4 ([`DESIGN_REVISION_V7_4.md`](DESIGN_REVISION_V7_4.md)) raises the small type and
-the lyric translation line for a 24" desktop monitor. There is still no global playback footer, no Catalogue
-or Specimen mode, and transport controls appear only on Now Playing.
+the lyric translation line for a 24" desktop monitor. v7.5 ([`DESIGN_REVISION_V7_5.md`](DESIGN_REVISION_V7_5.md))
+rebuilds the desktop around player1's Now Playing for a 24" 16:9 and a 34" 21:9 monitor: no top bar, a colour per
+page, one right-hand column for notes, queue and settings, Focus Mode, and lyrics with the line just sung. There is
+still no global playback footer, no Catalogue or Specimen mode, and transport controls appear only on Now Playing.
 
 | Surface | What it does |
 | --- | --- |
-| **Now Playing** | v7 42 / 58 spread. Cover, title, artist · album and Track / Release / Duration / Language on the left; on the right the synced current lyric with its translation and the next two lines, the Listening Note — *Read full note* opens it as a column on the right, in the page: the lyrics then run across the whole width left of it and the album drops to the bottom-left corner — and the transport. Both sides share rows, so the cover starts on the Lyrics rule, the Now playing block is as tall as the Listening note, and the Track / Release rule continues the transport's — previous / play-pause / next and seek — with shuffle, like, queue, device and volume on one quiet line beneath it. The accent colour follows the album cover. |
-| **Artist** | Compact dossier: portrait, name, origin line and Editorial Note. Below it, the **Discography** as a chronology. Albums, Singles & EPs, Compilations and Appears on each load in full, oldest first (or newest first). Releases are grouped by year, with deluxe / remaster / regional editions folded under the original (*+2 editions*), the note's career eras marked in the timeline, and noted releases marked. *Play artist*, *Open in Spotify*. |
-| **Album** | Cover, title, artist, release / format / tracks / duration and Editorial Note left; the complete Track Sequence right, with the playing track, guests, explicit marks, discs and a *Note* mark on songs with a song note. *Play album*, *Save album*. Under the sequence, the release's place in the discography (`03 / 12 · Albums`) with the previous and next release — `[` / `]` step through. |
-| **Archive** | The index of the archive's own writing: every artist with a note, their reviewed albums in release order, and one Listening note per song (with the song's translation note inside it), each opening its note or playing the track. No Spotify request. |
-| **Library** | Liked songs (*Shuffle* draws from the whole library, *Play all*), followed artists, liked albums, then playlists and recently played. |
-| **Search** | The v7 overlay (`/`): tracks, artists, albums and playlists, type filters with paging, `↓` / `↑` through results. |
-| **Queue** | The real Spotify queue in the same right-hand drawer as the notes. |
+| **Now Playing** | In the playing album's colour. A big cover with the title and artist · album beneath it; beside it the synced lyrics — the line just sung, the current line with its translation, the next two lines — a one-line Listening note, the seek bar and one transport line (shuffle · previous · play · next · like · queue · device · volume · Focus Mode). *Read full note →* opens the note in the right-hand column: on 16:9 the lyrics then run across and the album drops to the corner; on 21:9 the cover stays. Only problems show beneath the transport. |
+| **Focus Mode** | `F` or the transport button: full screen, cover, lyrics and progress. `Esc` leaves. |
+| **Artist** | In the colour of the artist's photograph. Portrait, name, origin line and Editorial Note; below it, the **Discography** as a chronology in two or three columns. Albums, Singles & EPs, Compilations and Appears on each load in full, oldest first (or newest first). Releases are grouped by year, with deluxe / remaster / regional editions folded under the original (*+2 editions*), the note's career eras marked in the timeline, and noted releases marked. *Play artist*, *Open in Spotify*. |
+| **Album** | In the cover's colour. Cover, title, artist, release / format / tracks / duration and Editorial Note left; the complete Track Sequence right, with the playing track, guests, explicit marks, discs and a *Note* mark on songs with a song note. *Play album*, *Save album*. Under the sequence, the release's place in the discography (`03 / 12 · Albums`) with the previous and next release — `[` / `]` step through. |
+| **Archive** | The index of the archive's own writing: every artist with a note on the left; the chosen artist's note, album notes and one Listening note per song (with the song's translation note inside it) on the right, each opening its note or playing the track. No Spotify request. |
+| **Library** | One screen: liked songs (*Shuffle* draws from the whole library, *Play all*) and recently played as lists; liked albums, playlists and followed artists as big covers. |
+| **Search** | The overlay (`/`): tracks, artists, albums and playlists side by side, type filters with paging, `↓` / `↑` through results. |
+| **Queue · Settings** | The real Spotify queue, and the account, device, lyrics and keyboard, in the same right-hand column as the notes. |
 
 **Contents** — [Setup](#setup) · [Environment variables](#environment-variables) · [Notes](#notes-editorial-and-listening) ·
 [Lyrics and translation](#lyrics-and-translation) · [Preview mode](#preview-mode) · [Phone](#phone-and-home-screen-app) · [Commands](#commands) ·
@@ -103,8 +107,8 @@ tripleS / `<ASSEMBLE24>` / Girls Never Die — and three example artists with re
   The Scientist, Viva la Vida
 
 The file name is the key. The frontmatter holds the match fields and a `short` preview (2–3 lines; a song cue is
-shorter). The body is the long-form note for the drawer. It can use paragraphs, `##` sections, lists, quotes, emphasis
-and links. Optional `written` / `updated` dates and `sources` appear at the foot of the drawer. To have Claude
+shorter). The body is the long-form note for the right-hand column. It can use paragraphs, `##` sections, lists, quotes, emphasis
+and links. Optional `written` / `updated` dates and `sources` appear at the foot of the note. To have Claude
 write one, ask for it (*"STRAY SHEEP 리뷰 써줘"*); the procedure and style rules are in
 [`.claude/skills/write-note/SKILL.md`](.claude/skills/write-note/SKILL.md). An album request covers the artist note,
 the review, a listening note for every track (`tracks:` in the album note) and translations of the songs not in
@@ -220,9 +224,10 @@ layout above is unchanged. It is tuned for an iPhone 15 Pro, in Safari and as a 
   above the tabs.
 - **Now Playing** takes the playing album's colour (player1's stage theme, [`src/palette/stageTheme.ts`](src/palette/stageTheme.ts)):
   where it plays, the cover, title and ♡, artist · album, the current lyric with its translation, the one-line
-  Listening note, the seek bar and the transport. Tapping the lyric opens the **lyrics view** — the phone's Focus Mode,
-  with *Translation* and *Screen: Stays on* (Screen Wake Lock); sideways it puts the cover beside the lyrics.
-- **Bottom sheets** replace the drawers and popovers: notes, the queue, devices (with the active device's volume),
+  Listening note, the seek bar and the transport. Tapping the lyric opens the **lyrics view** — the phone's Focus Mode:
+  the line just sung, the current line with its translation and the next two, with *Translation* and *Screen: Stays on*
+  (Screen Wake Lock); sideways it puts the cover beside the lyrics.
+- **Bottom sheets** replace the desktop's right-hand column and popovers: notes, the queue, devices (with the active device's volume),
   settings and a track menu (⋯). Drag the grip down, tap outside or press `Esc` to close.
 - **A remote, not a player.** Spotify's Web Playback SDK does not run in phone browsers, so on a phone ARC controls the
   Spotify app or another device; *Open Spotify app* in the device sheet wakes the app so the phone joins the list.
@@ -234,8 +239,9 @@ layout above is unchanged. It is tuned for an iPhone 15 Pro, in Safari and as a 
 ## Keyboard
 
 `/` opens search (`↓` / `↑` move, `Enter` opens or plays, `Esc` steps back). On an album, `[` / `]` open the previous / next release in the artist's discography. `Space` plays / pauses when focus is not
-on a control. Seek and volume take arrow keys, Page Up / Down, Home and End. The note and queue drawer closes on
-`Esc`, traps focus while open and returns it afterwards. `prefers-reduced-motion` removes motion.
+on a control. `F` toggles Focus Mode on the desktop. Seek and volume take arrow keys, Page Up / Down, Home and End.
+The right-hand column (a note, the queue or settings) closes on `Esc` and returns focus to what opened it.
+`prefers-reduced-motion` removes motion.
 
 ## Commands
 
@@ -280,7 +286,7 @@ src/
                 (brief + segment parsing, matching, time alignment)
   palette/      cover colour extraction and the contrast-safe accent
   preview/      sample archive, preview source and simulated engine
-  components/   covers, notes + shared drawer, search, queue, settings, transport
+  components/   covers, notes + the right-hand column (desktop/) and sheets, search, queue, settings, transport
   pages/        Now Playing, Artist, Album, Library
 ```
 
@@ -291,9 +297,12 @@ so lyrics follow seeks, pauses, device switches and track changes. Commands upda
 reconcile with Spotify's next report. The engine handles SDK reconnects, token refresh, Premium / account errors,
 autoplay blocking, "no active device", transfer between devices, and browsers that cannot decrypt Spotify audio.
 
-**Colour.** [`src/palette/`](src/palette/) extracts the playing album's dominant colour once, caches it, and adjusts it
-until it reaches 3:1 (marks) and 4.5:1 (text) on the warm page — the v7 `--main` accent. Greyscale covers get the ink
-accent; surfaces, text and separators always stay neutral.
+**Colour.** [`src/palette/`](src/palette/) extracts an image's dominant colour once, caches it, and adjusts it until it
+reaches 3:1 (marks) and 4.5:1 (text) on the warm page — the v7 `--main` accent. Greyscale covers get the ink accent. On
+the desktop each page may declare its image ([`src/app/surface.tsx`](src/app/surface.tsx)): Now Playing the playing
+album, Album its cover, Artist the photograph. Its palette becomes player1's stage theme
+([`stageTheme.ts`](src/palette/stageTheme.ts)) over the whole shell. Pages without one (Library, Archive) keep the
+paper and the playing album's accent.
 
 ## Known limitations
 
@@ -308,7 +317,8 @@ accent; surfaces, text and separators always stay neutral.
 - **Playlists** play as a context; there is no playlist page.
 - **Autoplay.** The first play in a session may need one click or key press.
 - **Lyrics** coverage and timing on LRCLIB vary; translation is machine translation (desktop Chrome for `browser`).
-- **Cover colour** falls back to the v7 red when a cover cannot be read.
+- **Cover colour** falls back to the v7 red when a cover cannot be read; a page whose image cannot be read (or an artist
+  without a photograph, as in the preview) stays on the paper.
 
 ## Troubleshooting
 

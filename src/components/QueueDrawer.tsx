@@ -16,8 +16,17 @@ function contextLabel(context: { type: string; name: string | null } | null, tra
   return null;
 }
 
-/** The real Spotify queue in the shared right drawer. Informational: the Web API cannot reorder it. */
+/** The real Spotify queue in the phone's queue sheet. */
 export function QueueDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  return (
+    <SideDrawer open={open} onClose={onClose} label="Playback" labelledBy="queue-title" closeLabel="Close queue">
+      <QueueContent open={open} />
+    </SideDrawer>
+  );
+}
+
+/** The real Spotify queue: the phone's sheet and the desktop's right-hand column. Informational: the Web API cannot reorder it. */
+export function QueueContent({ open }: { open: boolean }) {
   const engine = useEngine();
   const { mode } = useSession();
   const track = usePlayerSelector((s) => s.snapshot.track);
@@ -34,7 +43,7 @@ export function QueueDrawer({ open, onClose }: { open: boolean; onClose: () => v
   const from = contextLabel(context, track);
 
   return (
-    <SideDrawer open={open} onClose={onClose} label="Playback" labelledBy="queue-title" closeLabel="Close queue">
+    <>
       <div className="note-drawer-context">Queue / Spotify</div>
       <h2 id="queue-title" className="note-drawer-title">
         Queue
@@ -71,6 +80,6 @@ export function QueueDrawer({ open, onClose }: { open: boolean; onClose: () => v
       )}
 
       <div className="note-drawer-foot">Spotify’s Web API lists the queue but cannot reorder it</div>
-    </SideDrawer>
+    </>
   );
 }

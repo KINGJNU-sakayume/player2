@@ -1,4 +1,5 @@
 import type { TrackIdentity } from '../../domain/types';
+import type { TimedLyricLine } from '../../lyrics/types';
 import { useLyricView } from '../../lyrics/useLyricView';
 import type { LyricsState } from '../../lyrics/useTimedLyrics';
 import type { TranslationState } from '../../translation/useLyricTranslation';
@@ -33,12 +34,25 @@ export function TranslationStatus({ state, target, prepare }: { state: Translati
   }
 }
 
+/** The line just sung, quiet above the current one. */
+export function PreviousLine({ line, index, lang }: { line: TimedLyricLine | null; index: number; lang: string | undefined }) {
+  if (!line) return null;
+  return (
+    <p className="previous-lyric" lang={lang} data-line={index}>
+      <span className="visually-hidden">Previous line: </span>
+      {line.text}
+    </p>
+  );
+}
+
 /**
- * The right-hand listening column's lyric area. The active line comes from
- * the central playback clock, so pause, seek and device changes stay in sync.
- * Translation is secondary: when it fails only its row disappears.
+ * Now Playing's lyric area: the "Lyrics" head with the translation toggle,
+ * then the line just sung, the current line and its translation, and the next
+ * two lines. The active line comes from the central playback clock, so pause,
+ * seek and device changes stay in sync. Translation is secondary: when it
+ * fails only its row disappears.
  */
-export function LyricsBlock({ track, lyricsState, context }: { track: TrackIdentity; lyricsState: LyricsState; context: string }) {
+export function LyricsBlock({ track, lyricsState }: { track: TrackIdentity; lyricsState: LyricsState }) {
   const {
     provider,
     translationTarget,
@@ -51,8 +65,9 @@ export function LyricsBlock({ track, lyricsState, context }: { track: TrackIdent
     activeIndex,
     nextIndex,
     lineLanguages,
-    source,
     current,
+    previous,
+    previousIndex,
     upcoming,
     translated,
     segment,
@@ -63,24 +78,21 @@ export function LyricsBlock({ track, lyricsState, context }: { track: TrackIdent
     <>
       <div className="listening-head">
         <h2 id="lyrics-label">Lyrics</h2>
-        <div className="listening-context">
-          <span>{[context, source].filter(Boolean).join(' · ')}</span>
-          {(provider || curated) && (
-            <span className="translation-tools">
-              {preferences.translationEnabled && lines && (
-                <TranslationStatus state={translation} target={translationTarget} prepare={prepare} />
-              )}
-              <button
-                type="button"
-                className="text-toggle"
-                aria-pressed={preferences.translationEnabled}
-                onClick={() => setPreferences({ translationEnabled: !preferences.translationEnabled })}
-              >
-                Translation <b>{preferences.translationEnabled ? 'On' : 'Off'}</b>
-              </button>
-            </span>
-          )}
-        </div>
+        {(provider || curated) && (
+          <span className="translation-tools">
+            {preferences.translationEnabled && lines && (
+              <TranslationStatus state={translation} target={translationTarget} prepare={prepare} />
+            )}
+            <button
+              type="button"
+              className="text-toggle"
+              aria-pressed={preferences.translationEnabled}
+              onClick={() => setPreferences({ translationEnabled: !preferences.translationEnabled })}
+            >
+              Translation <b>{preferences.translationEnabled ? 'On' : 'Off'}</b>
+            </button>
+          </span>
+        )}
       </div>
 
       <section className="lyrics-panel" aria-labelledby="lyrics-label">
@@ -118,6 +130,7 @@ export function LyricsBlock({ track, lyricsState, context }: { track: TrackIdent
 
         {lines && (
           <>
+            <PreviousLine key={`prev-${previousIndex}`} line={previous} index={previousIndex} lang={lineLanguages[previousIndex]} />
             {current ? (
               <p key={`line-${activeIndex}`} className="current-lyric" lang={lineLanguages[activeIndex]}>
                 {current.text}

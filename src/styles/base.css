@@ -7,11 +7,16 @@
   --bg: #f1eee6;
   --paper: #f8f5ee;
   --surface: #e7e2d8;
+  --surface-strong: #dcd6ca;
   --ink: #171917;
+  --ink-2: #444844;
   --muted: #686b66;
   --dim: #747771;
   --line: rgba(23, 25, 23, .15);
   --line-soft: rgba(23, 25, 23, .075);
+  /* Only a page painted in its image's colour (desktop.css) moves these two off paper. */
+  --stage-glow: transparent;
+  --cover-shadow: rgba(23, 25, 23, .2);
   /* The one semantic accent. AccentTokens re-derives it from the playing album's cover. */
   --main: #b91f2e;
   --main-text: #b91f2e;
@@ -57,20 +62,6 @@ kbd { padding: 0 4px; border: 1px solid var(--line); font-size: .9em; }
 .rail nav a[aria-current='page']::after { content: ''; position: absolute; left: -12px; top: 12px; bottom: 12px; width: 2px; background: var(--main); }
 .user { width: 30px; height: 30px; margin-top: 4px; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-size: 10px; font-weight: 600; letter-spacing: .02em; }
 .workspace { height: 100dvh; min-width: 0; display: flex; flex-direction: column; }
-.topbar { flex: none; height: 68px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: center; padding: 0 30px; border-bottom: 1px solid var(--line-soft); }
-.crumbs { display: flex; gap: 9px; align-items: center; min-width: 0; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); overflow: hidden; white-space: nowrap; }
-.crumbs span { display: inline-flex; gap: 9px; min-width: 0; }
-.crumbs .crumb-title { overflow: hidden; text-overflow: ellipsis; display: block; }
-.crumbs i { font-style: normal; margin-right: 9px; color: color-mix(in srgb, var(--dim) 55%, transparent); }
-.top-mark { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
-.top-mark b { color: var(--ink); font-weight: 600; }
-.top-right { display: flex; justify-content: flex-end; align-items: center; gap: 18px; min-width: 0; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
-.top-right button { border: 0; background: transparent; padding: 5px 0; color: var(--ink); letter-spacing: inherit; text-transform: inherit; font-size: inherit; }
-.top-right kbd { margin-left: 4px; color: var(--dim); }
-.now-marker { display: inline-flex; align-items: center; gap: 8px; min-width: 0; max-width: 240px; color: var(--muted); }
-.now-marker:hover { color: var(--ink); }
-.now-marker i { width: 6px; height: 6px; border-radius: 50%; background: var(--main); flex: none; }
-.now-marker span { overflow: hidden; text-overflow: ellipsis; text-transform: none; letter-spacing: .02em; font-size: 11px; }
 .scope-notice { flex: none; display: flex; align-items: baseline; gap: 16px; padding: 9px 30px; border-bottom: 1px solid var(--line-soft); font-size: 11.5px; color: var(--muted); background: color-mix(in srgb, var(--main) 3%, transparent); }
 .stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
 .stage:focus { outline: none; }
@@ -88,49 +79,14 @@ kbd { padding: 0 4px; border: 1px solid var(--line); font-size: .9em; }
 .cover-plate-subtitle { font-size: max(8px, 4.4cqi); letter-spacing: .06em; opacity: .72; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
 /* Now playing */
-.player-page { height: 100%; overflow: auto; padding: 32px 44px 50px; }
-/* The stage holds the album object + listening column, and the Listening note column when it is open (same layer, pushes left). */
-.player-stage { display: grid; grid-template-columns: minmax(0,1fr) 0; column-gap: 0; align-items: start; transition: grid-template-columns .34s var(--ease), column-gap .34s var(--ease); }
-.note-open .player-stage { grid-template-columns: minmax(0,1fr) var(--note-width); column-gap: 44px; }
-.player-note-panel { position: sticky; top: 0; max-height: calc(100dvh - 68px - 64px); display: flex; flex-direction: column; background: var(--paper); border-left: 1px solid var(--line); min-width: 0; animation: note-panel-in .34s var(--ease); }
-.player-note-panel-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 18px 26px 14px; border-bottom: 1px solid var(--line-soft); }
-.player-note-panel-head span { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); }
-.player-note-panel-head button { width: 36px; height: 36px; border: 0; background: transparent; font-size: 18px; color: var(--muted); }
-.player-note-panel-body { overflow: auto; padding: 30px 34px 44px; }
-@keyframes note-panel-in { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
-/*
- * One grid with shared rows, so the album side and the lyrics side meet on the same lines:
- *   ".     head"        the cover starts on the Lyrics rule
- *   "cover lyrics"      (this row takes the spare height)
- *   "copy  note"        Now playing block and Listening note: one row, one height
- *   "meta  controls"    the Track / Release rule continues the transport rule
- * The album object and the listening column are `display: contents`; their pieces are the grid items.
- */
-.player-shell { width: 100%; max-width: 1760px; margin: 0 auto; display: grid; grid-template-columns: minmax(350px,42%) minmax(0,58%); grid-template-rows: auto 1fr auto auto; grid-template-areas: ". head" "cover lyrics" "copy note" "meta controls"; column-gap: 64px; row-gap: 0; padding: 12px 0 30px; min-height: calc(100dvh - 150px); }
-.player-object, .player-listening { display: contents; }
-.player-shell .listening-head { grid-area: head; min-width: 0; }
-.player-shell .lyrics-panel { grid-area: lyrics; min-width: 0; }
-.player-cover { grid-area: cover; align-self: start; width: min(48vh,32vw,520px,100%); aspect-ratio: 1; }
-/* Same padding as the Listening note preview: the two share a row and its height. */
-.player-copy { grid-area: copy; min-width: 0; padding: 14px 0 22px; }
-.player-shell .player-note { grid-area: note; min-width: 0; margin-top: 0; padding: 14px 0 22px; }
-.player-shell .player-meta { grid-area: meta; align-self: start; min-width: 0; margin-top: 0; }
 .player-controls { grid-area: controls; align-self: start; min-width: 0; border-top: 1px solid var(--line); padding-top: 18px; }
-.player-controls .player-transport { margin-top: 0; border-top: 0; padding-top: 0; }
-/* Note open: the lyrics take the whole width left of the note; the album drops to the bottom-left corner. */
-.note-open .player-shell { grid-template-columns: var(--corner-cover) auto minmax(0,1fr); grid-template-areas: "head head head" "lyrics lyrics lyrics" "cover copy note" "cover meta controls"; column-gap: 32px; }
-.note-open .player-cover { width: var(--corner-cover); }
-.note-open .player-copy h1 { font-size: clamp(30px,2.6vw,44px); }
-.note-open .player-shell .player-meta { gap: 18px; }
-.player-copy h1 { margin: 8px 0 0; font-size: clamp(42px,5.2vw,78px); line-height: .93; letter-spacing: -.055em; font-weight: 500; overflow-wrap: anywhere; }
 .artist-line { margin-top: 11px; font-size: 15px; }
-.player-meta, .album-hero-meta { display: flex; gap: 26px; flex-wrap: wrap; margin-top: 23px; padding-top: 13px; border-top: 1px solid var(--line); }
-.player-meta div b, .album-hero-meta div b { display: block; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); }
-.player-meta div span, .album-hero-meta div span { display: block; margin-top: 5px; font-size: 12.5px; }
+.album-hero-meta { display: flex; gap: 26px; flex-wrap: wrap; margin-top: 23px; padding-top: 13px; border-top: 1px solid var(--line); }
+.album-hero-meta div b { display: block; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); }
+.album-hero-meta div span { display: block; margin-top: 5px; font-size: 12.5px; }
 .listening-head, .sequence-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--ink); }
 .listening-head h2, .sequence-head h2 { margin: 0; font-size: clamp(28px,2.8vw,42px); line-height: 1; letter-spacing: -.04em; font-weight: 500; }
 .listening-head span, .sequence-head span { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); text-align: right; }
-.listening-context { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; min-width: 0; }
 .translation-tools { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; align-items: baseline; gap: 4px 12px; }
 .translation-tools > * { white-space: nowrap; }
 .translation-tools .text-toggle b { font-weight: 500; color: var(--ink); }
@@ -144,12 +100,6 @@ kbd { padding: 0 4px; border: 1px solid var(--line); font-size: .9em; }
 .next-line { font-size: clamp(18px,1.55vw,25px); line-height: 1.4; color: var(--muted); white-space: pre-line; }
 .next-line.second { color: var(--dim); }
 .lyrics-panel .note-more { margin-top: 16px; }
-.player-transport { margin-top: auto; border-top: 1px solid var(--line); padding-top: 18px; display: grid; grid-template-columns: auto minmax(0,1fr); gap: 20px; align-items: center; }
-.controls { display: flex; gap: 8px; align-items: center; }
-.controls button { border: 0; background: transparent; padding: 7px; color: var(--muted); display: grid; place-items: center; }
-.controls button:hover:not(:disabled) { color: var(--ink); }
-.controls .play { width: 42px; height: 42px; border-radius: 50%; background: var(--ink); color: var(--paper); }
-.controls .play:hover:not(:disabled) { color: var(--paper); background: color-mix(in srgb, var(--ink) 86%, var(--main)); }
 .progress-wrap { display: grid; grid-template-columns: 42px minmax(0,1fr) 42px; gap: 10px; align-items: center; font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
 .progress-wrap > span:last-child { text-align: right; }
 .playback-state { margin: 9px 0 0; min-height: 1.3em; font-size: 12px; line-height: 1.5; letter-spacing: .01em; color: var(--dim); text-align: right; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: baseline; gap: 4px 12px; }
@@ -174,7 +124,6 @@ kbd { padding: 0 4px; border: 1px solid var(--line); font-size: .9em; }
 
 /* Secondary controls beneath the transport */
 .transport-extras { display: flex; justify-content: space-between; align-items: center; gap: 10px 22px; flex-wrap: wrap; margin-top: 14px; }
-.transport-extras-group { display: flex; align-items: center; gap: 18px; min-width: 0; }
 .text-toggle { display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; padding: 4px 0; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
 .text-toggle .icon { width: 15px; height: 15px; }
 .text-toggle:hover:not(:disabled) { color: var(--ink); }
@@ -218,7 +167,7 @@ kbd { padding: 0 4px; border: 1px solid var(--line); font-size: .9em; }
 .note-drawer-title { margin: 9px 0 0; font-size: clamp(34px,4vw,54px); line-height: .98; letter-spacing: -.045em; font-weight: 500; overflow-wrap: anywhere; }
 .note-drawer-subtitle { margin-top: 9px; font-size: 13px; color: var(--muted); }
 .note-drawer-rule { height: 1px; background: var(--ink); margin: 25px 0 24px; }
-.note-drawer-copy { font-size: 16px; line-height: 1.85; color: #444844; }
+.note-drawer-copy { font-size: 16px; line-height: 1.85; color: var(--ink-2); }
 /* Long-form notes (v7.2): sections read as quiet kickers, never as a second title. */
 .note-body p { margin: 0 0 1.15em; }
 .note-body > :last-child { margin-bottom: 0; }

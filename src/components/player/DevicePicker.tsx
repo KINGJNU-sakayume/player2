@@ -5,6 +5,9 @@ import { useEngine, usePlayerSelector } from '../../playback/hooks';
 import { describeSpotifyError } from '../../spotify/errors';
 import { DeviceIcon } from '../icons';
 
+/** Dispatched on `window` to open the desktop device popover (e.g. from "No active device"). */
+export const OPEN_DEVICES_EVENT = 'arc:open-devices';
+
 /** Shows the active Spotify Connect device and transfers playback to another one. */
 export function DevicePicker() {
   const [open, setOpen] = useState(false);
@@ -27,6 +30,15 @@ export function DevicePicker() {
       document.removeEventListener('keydown', onKey);
     };
   }, [open]);
+
+  useEffect(() => {
+    const onOpen = () => {
+      setOpen(true);
+      rootRef.current?.querySelector<HTMLButtonElement>('.device-button')?.focus();
+    };
+    window.addEventListener(OPEN_DEVICES_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_DEVICES_EVENT, onOpen);
+  }, []);
 
   const label = device ? (device.isThisBrowser ? 'This browser' : device.name) : 'No device';
 

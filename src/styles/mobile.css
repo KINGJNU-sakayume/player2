@@ -208,6 +208,7 @@ html:has(.m-lyrics) body, html:has(.m-sheet-layer) body { overflow: hidden; }
 .m-lyrics .current-lyric.is-state { font-size: 24px; }
 .m-lyrics .current-lyric.is-gap { font-size: 22px; }
 .m-lyrics .current-trans { margin-top: 12px; font-size: 18px; line-height: 1.4; max-width: none; }
+.m-lyrics .previous-lyric { margin: 0 0 14px; font-size: 16.5px; line-height: 1.4; color: var(--dim); opacity: .8; white-space: pre-line; }
 .m-lyrics .next-lines { gap: 10px; margin-top: 20px; }
 .m-lyrics .next-line { font-size: 16.5px; }
 .m-lyrics-foot { grid-area: foot; padding-top: 10px; border-top: 1px solid var(--line); }
