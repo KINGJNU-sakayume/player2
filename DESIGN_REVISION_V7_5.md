@@ -74,7 +74,7 @@ otherwise. The prototype used to settle these decisions is
 | Album | Cover colour. On the left, kept in view: the cover, title, artist, release meta, note preview and actions. On the right: the track sequence and the previous / next release | The same two columns, centred (at most 2300px), with a bigger cover | As 16:9 |
 | Artist | Photograph colour. Above: the portrait, name, origin, note preview and actions. Below: the discography timeline in two or three columns (by its own width), with era markers across the full width | The introduction is kept in view on the left; the timeline runs on the right | As 16:9 |
 | Library | Liked songs and Recently played on the left. On the right: Liked albums and Playlists as big covers, then Artists | Three columns: lists · covers · artists | Two columns |
-| Archive | The artists with notes on the left. On the right, the chosen artist (`?artist=`): the artist note, album-note cards and Listening notes. Notes open in the right-hand column. No Spotify request | The same two panes | As 16:9 |
+| Archive | The artists with notes on the left. On the right, the chosen artist (`?artist=`): the artist note with a portrait, album-note cards with covers, and the Listening notes under their albums in tracklist order. Notes open in the right-hand column. Notes are local; artwork is the note's `image` / `cover` URL, else Spotify's when connected, else the archive plates | The same two panes | As 16:9 |
 
 ### Now Playing
 

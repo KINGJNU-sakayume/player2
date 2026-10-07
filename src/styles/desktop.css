@@ -328,6 +328,11 @@
 .desktop .archive-index-item:hover b { color: var(--main-text); }
 .desktop .archive-index-item[aria-current='true']::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; background: var(--main); }
 .desktop .archive-artist { display: block; padding: 0; border-top: 0; }
+.desktop .archive-artist-head { display: grid; grid-template-columns: minmax(0, 1fr) clamp(140px, 19vh, 240px); gap: clamp(24px, 3vw, 64px); align-items: start; }
+.desktop .archive-artist-copy { min-width: 0; }
+.desktop .archive-artist-portrait { max-width: none; margin-top: 0; }
+.desktop .archive-artist-portrait .artist-portrait { width: 100%; box-shadow: 0 0 0 1px var(--line-soft); }
+.desktop .archive-artist-portrait .artist-portrait::after { font-size: clamp(56px, 7vh, 104px); }
 .desktop .archive-artist-head h2 { margin: 8px 0 0; font-size: clamp(36px, min(3.2vw, 5.5vh), 72px); line-height: .95; letter-spacing: -.05em; }
 .desktop .archive-origin { font-size: calc(12.5px * var(--t)); }
 .desktop .archive-short { margin: 14px 0 0; font-size: calc(15px * var(--t)); line-height: 1.75; color: var(--ink-2); max-width: 68ch; }
@@ -341,6 +346,9 @@
 .desktop .archive-card-text { min-width: 0; display: grid; align-content: start; gap: 6px; }
 .desktop .archive-card-text b { font-size: clamp(19px, 2vh, 26px); font-weight: 500; letter-spacing: -.02em; line-height: 1.15; }
 .desktop .archive-card-preview { font-size: calc(13.5px * var(--t)); line-height: 1.6; color: var(--muted); display: -webkit-box; overflow: hidden; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.desktop .archive-song-group { margin-top: 22px; }
+.desktop .archive-song-group-head { display: flex; align-items: baseline; gap: 12px; margin: 0 0 4px; padding-bottom: 8px; border-bottom: 1px solid var(--line-soft); font-weight: 400; }
+.desktop .archive-song-group-head b { font-size: calc(16px * var(--t)); font-weight: 500; letter-spacing: -.02em; }
 .desktop .archive-rows .archive-row { grid-template-columns: 110px minmax(0, 1fr) auto; }
 .desktop .archive-text b { font-size: calc(15px * var(--t)); }
 .desktop .archive-preview { font-size: calc(13.5px * var(--t)); }

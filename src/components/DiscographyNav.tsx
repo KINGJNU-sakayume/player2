@@ -2,9 +2,10 @@ import { useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { shortcutBlocked } from '../app/shortcuts';
 import { useDiscography } from '../catalogue/queries';
-import { adjacentReleases, sortChronologically } from '../discography/chronology';
+import { adjacentReleases, curatedSequence, sortChronologically } from '../discography/chronology';
 import { groupEditions, type EditionGroup } from '../discography/editions';
 import type { AlbumDetail } from '../domain/types';
+import { getArtistNote } from '../editorial/lookup';
 import { releaseYear } from '../lib/format';
 import { detectLineLanguage } from '../translation/languageDetect';
 
@@ -31,7 +32,9 @@ function Neighbour({ group, direction }: { group: EditionGroup | null; direction
 /**
  * Where this release sits in its artist's discography, with the releases
  * before and after it — finish the sequence, move on to the next record.
- * `[` and `]` step through. Hidden when the release is not one of the
+ * `[` and `]` step through. For albums, the artist note's `discography:`
+ * list sets the order when this release is on it (so a live album can be
+ * left out); otherwise the order is chronological. Hidden when the release is not one of the
  * artist's own (e.g. an appearance), is their only one, or the discography
  * cannot be read.
  */
@@ -39,10 +42,14 @@ export function DiscographyNav({ album }: { album: AlbumDetail }) {
   const navigate = useNavigate();
   const artist = album.artists[0];
   const discography = useDiscography(artist?.id, album.albumType);
+  const curated = album.albumType === 'album' ? getArtistNote({ id: artist?.id, name: artist?.name })?.discography : undefined;
   const adjacent = useMemo(() => {
     if (!discography.data) return null;
-    return adjacentReleases(sortChronologically(groupEditions(discography.data.releases)), album.id);
-  }, [discography.data, album.id]);
+    const groups = groupEditions(discography.data.releases);
+    return (
+      (curated && adjacentReleases(curatedSequence(groups, curated), album.id)) ?? adjacentReleases(sortChronologically(groups), album.id)
+    );
+  }, [discography.data, album.id, curated]);
 
   const previousId = adjacent?.previous?.primary.id;
   const nextId = adjacent?.next?.primary.id;

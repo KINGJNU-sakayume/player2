@@ -13,6 +13,7 @@
     "test:run": "vitest run",
     "lyrics:lines": "NODE_USE_ENV_PROXY=1 vite-node scripts/lyrics-lines.ts --",
     "notes:audit": "vite-node scripts/notes-audit.ts --",
+    "notes:art": "NODE_USE_ENV_PROXY=1 vite-node scripts/notes-art.ts --",
     "notes:migrate": "NODE_USE_ENV_PROXY=1 vite-node scripts/notes-migrate.ts --",
     "check": "npm run typecheck && npm run lint && npm run test:run && npm run build"
   },

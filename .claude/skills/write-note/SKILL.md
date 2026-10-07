@@ -117,6 +117,21 @@ WebSearch / WebFetch로 확인한 사실만 쓴다. 조사할 것:
     - 2012–2017 · 『diorama』부터 직접 노래하기
     - 2018– · 'Lemon' 이후
   ```
+- `discography`(선택): 앨범 페이지의 이전/다음 순서를 직접 정한다. 정규작 순서대로 한 줄에 하나, 발매 제목
+  (모든 에디션에 맞는다) 또는 Spotify 앨범 ID를 쓴다. 목록에 없는 앨범(라이브 앨범, 앨범으로 분류된 편집반)은
+  건너뛴다. 목록에 없는 앨범 페이지에서는 기존처럼 발매일 순서를 쓴다. 아티스트 페이지 타임라인은 바뀌지 않는다.
+
+  ```yaml
+  discography:
+    - The College Dropout
+    - Late Registration
+    - Graduation
+  ```
+
+  (Late Registration 다음이 라이브 앨범 Late Orchestration이 아니라 Graduation이 된다. frontmatter에는 줄 끝 주석이 없으니
+  목록 항목 뒤에 `#`을 붙이지 않는다.)
+- `image`(선택): 아티스트 사진 URL(https). 앨범 노트의 `cover`(선택)도 같은 방식으로 Archive 카드의 커버가 된다. Archive 머리에 보인다. 없으면 Spotify에 연결됐을 때 Spotify 사진을,
+  아니면 모노그램을 보여준다. `npm run notes:art`가 비어 있는 `image`/`cover`를 채운다.
 
 ### 곡 — Listening Note (곡 하나에 노트 하나)
 
@@ -171,6 +186,7 @@ artist: kenshi-yonezu
 albumIds: [052EiTRYh35MuDVJN9Emdh, 5XuZE4dvsiYEvRndrllt1t]
 titles: [STRAY SHEEP]
 releaseYear: 2020
+cover: https://i.scdn.co/image/…
 tracks:
   - kanpanella
   - flamingo
@@ -192,8 +208,8 @@ short: >
 
 | 종류 | 필수 | 선택 |
 | --- | --- | --- |
-| artists | `artistIds`, `names`, `short` | `origin`, `eras`, `written`, `updated`, `sources` |
-| albums | `artist`, `titles`, `short` | `albumIds`, `releaseYear`, `tracks`, `written`, `updated`, `sources` |
+| artists | `artistIds`, `names`, `short` | `origin`, `eras`, `discography`, `image`, `written`, `updated`, `sources` |
+| albums | `artist`, `titles`, `short` | `albumIds`, `releaseYear`, `cover`, `tracks`, `written`, `updated`, `sources` |
 | songs | `artist`, `titles`, `short`(번역 블록이 있으면 선택) | `trackIds`, `written`, `updated`, `sources`, `translation`, `lyricsLanguage` |
 
 위 표는 파일을 읽을 수 있는 최소 조건이다. **품질 기준**(`src/editorial/quality.ts`, `npm run check`에서 검사)은

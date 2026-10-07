@@ -40,6 +40,14 @@ export interface ArtistNote extends EditorialBody {
   origin?: string;
   /** Periods of the career, oldest first; the Artist page marks them in the discography timeline. */
   eras?: ArtistEra[];
+  /** Artist image URL (https), shown on the Archive; without it the Archive asks Spotify when connected. */
+  image?: string;
+  /**
+   * The artist's own album sequence for the Album page's previous / next, in
+   * order: release titles (every edition matches) or Spotify album IDs.
+   * Releases left out (live albums, compilations filed as albums) are skipped.
+   */
+  discography?: string[];
 }
 
 /** A period of an artist's career, written in the note as `- 2012–2015 · 직접 노래하기 시작`. */
@@ -59,6 +67,8 @@ export interface AlbumNote extends EditorialBody {
   /** Titles as Spotify may show them, including localised or romanised forms. */
   titles: string[];
   releaseYear?: number;
+  /** Cover image URL (https), shown on the Archive; without it the Archive asks Spotify when connected. */
+  cover?: string;
   /**
    * Song note keys of the standard edition's tracklist, in order. An album
    * note is complete only when every track has its own song note (quality.ts).

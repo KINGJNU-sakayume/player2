@@ -98,7 +98,11 @@ describe('discography digging (preview archive)', () => {
     const row = (title: string) => within(chosen).getByText(title, { selector: 'b' }).closest('li')!;
     expect(within(chosen).getAllByText('Lemon', { selector: 'b' })).toHaveLength(1);
     expect(chosen).not.toHaveTextContent(/Translation/);
-    expect(row('Flamingo')).toHaveTextContent('Song');
+    // Listening notes sit under their album, oldest first, numbered by their place in the tracklist.
+    const groups = within(chosen).getAllByRole('region').filter((el) => el.classList.contains('archive-song-group'));
+    expect(groups.map((group) => group.getAttribute('aria-label'))).toEqual(['STRAY SHEEP', 'LOST CORNER']);
+    expect(row('Flamingo').querySelector('.archive-kind')).toHaveTextContent('02 · 번역');
+    expect(row('Lemon').querySelector('.archive-kind')).toHaveTextContent('08 · 번역');
     await user.click(within(row('Lemon')).getByRole('button', { name: 'Read the note on Lemon' }));
     const lemon = screen.getByRole('complementary', { name: 'Lemon' });
     expect(lemon).toHaveTextContent('Listening note / Song');

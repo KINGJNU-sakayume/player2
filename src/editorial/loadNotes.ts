@@ -34,6 +34,12 @@ function body(fields: FieldReader, full: string, file: string): EditorialBody {
   };
 }
 
+function imageUrl(fields: FieldReader, key: string): string | undefined {
+  const url = fields.optionalString(key);
+  if (url !== undefined && !/^https:\/\/\S+$/.test(url)) fields.fail(`"${key}" must be an https:// image URL, got "${url}".`);
+  return url;
+}
+
 const ERA_LINE = /^(\d{4})(?:\s*([–—-])\s*(\d{4})?)?\s*[·:|]\s*(.+)$/;
 
 /** `2012–2015 · title`, `2020– · title` (ongoing) or `2009 · title` (one year). */
@@ -62,6 +68,8 @@ export function loadArtistNotes(files: NoteFiles): ArtistNote[] {
     names: fields.list('names'),
     origin: fields.optionalString('origin'),
     eras: fields.optionalList('eras')?.map((line) => parseEra(line, file)).sort((a, b) => a.from - b.from),
+    image: imageUrl(fields, 'image'),
+    discography: fields.optionalList('discography'),
     ...body(fields, full, file),
   }));
 }
@@ -73,6 +81,7 @@ export function loadAlbumNotes(files: NoteFiles): AlbumNote[] {
     albumIds: fields.optionalList('albumIds') ?? [],
     titles: fields.list('titles'),
     releaseYear: fields.optionalNumber('releaseYear'),
+    cover: imageUrl(fields, 'cover'),
     tracks: fields.optionalList('tracks'),
     ...body(fields, full, file),
   })).sort((a, b) => a.artist.localeCompare(b.artist) || (a.releaseYear ?? 0) - (b.releaseYear ?? 0) || a.key.localeCompare(b.key));

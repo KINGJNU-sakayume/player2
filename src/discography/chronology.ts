@@ -1,5 +1,5 @@
 import { compareReleaseDates } from './dates';
-import { groupIncludes, type EditionGroup } from './editions';
+import { editionKey, groupIncludes, type EditionGroup } from './editions';
 
 export type ReleaseOrder = 'asc' | 'desc';
 
@@ -9,6 +9,21 @@ export function sortChronologically(groups: readonly EditionGroup[], order: Rele
     (a, b) => compareReleaseDates(a.primary.releaseDate, b.primary.releaseDate) || a.primary.name.localeCompare(b.primary.name),
   );
   return order === 'asc' ? sorted : sorted.reverse();
+}
+
+/**
+ * The artist's own sequence (an artist note's `discography:` list), in list
+ * order. Each entry is a Spotify album ID of any edition or a release title,
+ * which matches every edition of it. Entries Spotify doesn't list are skipped.
+ */
+export function curatedSequence(groups: readonly EditionGroup[], entries: readonly string[]): EditionGroup[] {
+  const sequence: EditionGroup[] = [];
+  for (const entry of entries) {
+    const key = editionKey(entry);
+    const group = groups.find((g) => groupIncludes(g, entry)) ?? groups.find((g) => editionKey(g.primary.name) === key);
+    if (group && !sequence.includes(group)) sequence.push(group);
+  }
+  return sequence;
 }
 
 export interface YearSection {
