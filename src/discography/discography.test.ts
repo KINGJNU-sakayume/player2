@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { CatalogueSource } from '../catalogue/CatalogueSource';
 import type { AlbumSummary, ReleaseGroup } from '../domain/types';
-import { adjacentReleases, sectionsByYear, sortChronologically } from './chronology';
+import { adjacentReleases, curatedSequence, sectionsByYear, sortChronologically } from './chronology';
 import { releaseDateKey } from './dates';
 import { editionKey, groupEditions } from './editions';
 import { loadDiscography } from './loadDiscography';
@@ -103,6 +103,22 @@ describe('chronology', () => {
     expect(adjacentReleases(chronology, first.id)).toMatchObject({ position: 1, previous: null });
     expect(adjacentReleases(chronology, third.id)).toMatchObject({ position: 3, next: null });
     expect(adjacentReleases(chronology, 'elsewhere')).toBeNull();
+  });
+});
+
+describe('curatedSequence', () => {
+  it('follows the list, matching titles across editions and IDs, and skips the rest', () => {
+    const dropout = release('The College Dropout', '2004-02-10');
+    const registration = release('Late Registration', '2005-08-30');
+    const orchestration = release('Late Orchestration', '2006-04-17');
+    const graduation = release('Graduation', '2007-09-11');
+    const graduationDeluxe = release('Graduation (Deluxe Edition)', '2017-01-01');
+    const groups = groupEditions([orchestration, graduationDeluxe, registration, dropout, graduation]);
+    const sequence = curatedSequence(groups, ['the college dropout', registration.id, 'Graduation', 'Not On Spotify', 'Late Registration']);
+    expect(sequence.map((g) => g.primary.id)).toEqual([dropout.id, registration.id, graduation.id]);
+    expect(adjacentReleases(sequence, registration.id)).toMatchObject({ position: 2, total: 3, next: { primary: { id: graduation.id } } });
+    expect(adjacentReleases(sequence, graduationDeluxe.id)).toMatchObject({ position: 3, previous: { primary: { id: registration.id } } });
+    expect(adjacentReleases(sequence, orchestration.id)).toBeNull();
   });
 });
 

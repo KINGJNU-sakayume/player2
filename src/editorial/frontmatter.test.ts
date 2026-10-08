@@ -145,3 +145,25 @@ describe('artist eras', () => {
     expect(artist?.eras?.map((era) => era.title)).toEqual(['earlier', 'later']);
   });
 });
+
+describe('artwork and discography fields', () => {
+  it('reads an album cover, an artist image and the artist discography', () => {
+    const [album] = loadAlbumNotes({ './notes/albums/a.md': '---\nartist: a\ntitles: [T]\ncover: https://i.scdn.co/image/abc\nshort: s\n---\n' });
+    const [artist] = loadArtistNotes({
+      './notes/artists/a.md':
+        '---\nartistIds: [x]\nnames: [A]\nimage: https://i.scdn.co/image/def\ndiscography:\n  - First\n  - 0Ds6i3h0F9RcYIKAD5Olum\nshort: s\n---\n',
+    });
+    expect(album?.cover).toBe('https://i.scdn.co/image/abc');
+    expect(artist?.image).toBe('https://i.scdn.co/image/def');
+    expect(artist?.discography).toEqual(['First', '0Ds6i3h0F9RcYIKAD5Olum']);
+  });
+
+  it('rejects an artwork value that is not an https URL', () => {
+    expect(() => loadAlbumNotes({ './notes/albums/bad.md': '---\nartist: a\ntitles: [T]\ncover: cover.jpg\nshort: s\n---\n' })).toThrow(
+      /bad\.md.*cover.*https/,
+    );
+    expect(() => loadArtistNotes({ './notes/artists/bad.md': '---\nartistIds: [x]\nnames: [A]\nimage: http://x.test/a.jpg\nshort: s\n---\n' })).toThrow(
+      /bad\.md.*image/,
+    );
+  });
+});

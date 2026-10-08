@@ -7,6 +7,17 @@ eras:
   - 2008–2013 · 목소리와 극단의 편곡
   - 2016–2018 · 수정되는 자화상
   - 2019– · 신앙과 발매 형식
+discography:
+  - The College Dropout
+  - Late Registration
+  - Graduation
+  - 808s & Heartbreak
+  - My Beautiful Dark Twisted Fantasy
+  - Yeezus
+  - The Life Of Pablo
+  - ye
+  - JESUS IS KING
+  - Donda
 written: 2026-10-04
 sources:
   - https://open.spotify.com/artist/5K4W6rqBFWDnAN6FQUkS6x
