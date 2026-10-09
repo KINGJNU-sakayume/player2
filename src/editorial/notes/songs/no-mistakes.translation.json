@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 2,
+  "timing": {
+    "lrclibId": 576760,
+    "durationMs": 123000
+  },
+  "segments": [
+    {
+      "startMs": 4370,
+      "endMs": 10360,
+      "translation": "믿거나 말거나"
+    },
+    {
+      "startMs": 10360,
+      "endMs": 12230,
+      "translation": "믿거나 말거나"
+    },
+    {
+      "startMs": 12230,
+      "endMs": 18260,
+      "translation": "오해하지 마, 자기, 난 아직 널 사랑해"
+    },
+    {
+      "startMs": 18260,
+      "endMs": 24240,
+      "translation": "오해하지 마, 자기, 난 아직 널 사랑해"
+    },
+    {
+      "startMs": 24240,
+      "endMs": 30250,
+      "translation": "오해하지 마, 자기, 난 아직 널 사랑해"
+    },
+    {
+      "startMs": 30250,
+      "endMs": 36050,
+      "translation": "오해하지 마, 자기, 난 아직 널 사랑해"
+    },
+    {
+      "startMs": 36050,
+      "endMs": 36960,
+      "translation": "지붕을 열어, 햇살이 들어오게 해"
+    },
+    {
+      "startMs": 36960,
+      "endMs": 40940,
+      "translation": "주님은 여전히 널 비추셔"
+    },
+    {
+      "startMs": 40940,
+      "endMs": 43740,
+      "translation": "와, 곁을 지켜 준 내 친구들 모두, 우린 다시 일어섰어"
+    },
+    {
+      "startMs": 43740,
+      "endMs": 46920,
+      "translation": "다시"
+    },
+    {
+      "startMs": 46920,
+      "endMs": 50700,
+      "translation": "오, 내 이름엔 먹칠이 됐고, 수염엔 흰 털이 났어"
+    },
+    {
+      "startMs": 50700,
+      "endMs": 53650,
+      "translation": "장부엔 빚이 있었지, 정말 흔들린 한 해였어"
+    },
+    {
+      "startMs": 53650,
+      "endMs": 56790,
+      "translation": "분명히 해 둘게, 너희 모두 보라고"
+    },
+    {
+      "startMs": 56790,
+      "endMs": 59660,
+      "translation": "난 나보다 덜 성공한 사람의 조언은 안 들어"
+    },
+    {
+      "startMs": 59660,
+      "endMs": 63290,
+      "translation": "응? 미움은 없지만, 장갑은 벗었어"
+    },
+    {
+      "startMs": 63290,
+      "endMs": 66410,
+      "translation": "클럽이 문 닫을 때까지 우린 여기 있을 거야"
+    },
+    {
+      "startMs": 66410,
+      "endMs": 69400,
+      "translation": "친구들한테 \"총은 치워\" 하고 말해야 했지"
+    },
+    {
+      "startMs": 69400,
+      "endMs": 71910,
+      "translation": "게다가 컵스가 져서 다들 이미 화가 나 있어"
+    },
+    {
+      "startMs": 71910,
+      "endMs": 73170,
+      "translation": "믿거나 말거나"
+    },
+    {
+      "startMs": 73170,
+      "endMs": 74860,
+      "translation": "이 두 번의 잘못이 널 바로잡아 줄 거야"
+    },
+    {
+      "startMs": 74860,
+      "endMs": 76080,
+      "translation": "믿거나 말거나"
+    },
+    {
+      "startMs": 76080,
+      "endMs": 77910,
+      "translation": "고등학교 때 난 너무 일찍 어른이 됐지"
+    },
+    {
+      "startMs": 77910,
+      "endMs": 79220,
+      "translation": "믿거나 말거나"
+    },
+    {
+      "startMs": 79220,
+      "endMs": 80970,
+      "translation": "아이스 큐브의 진짜 영혼"
+    },
+    {
+      "startMs": 80970,
+      "endMs": 84010,
+      "translation": "저격하기엔 너무 가까워, 사실 난 네가 좋아"
+    },
+    {
+      "startMs": 84010,
+      "endMs": 92620,
+      "translation": "글로 쓰기엔 너무 대담하고, 싸우기엔 너무 부자야. 진정해, 피부 밝은 친구. 오해하지 마, 자기, 난 아직 널 사랑해"
+    },
+    {
+      "startMs": 92620,
+      "endMs": 93210,
+      "translation": "오해하지"
+    },
+    {
+      "startMs": 93210,
+      "endMs": 98070,
+      "translation": "오해하지 마, 자기, 난 아직 널 사랑해"
+    },
+    {
+      "startMs": 98070,
+      "endMs": 116100,
+      "translation": "절대 아니야. (믿거나 말거나, 주님은 여전히 널 비추셔) 오해하지 마, 자기, 난 아직 널 사랑해"
+    },
+    {
+      "startMs": 116100,
+      "endMs": 117250,
+      "translation": "절대 아니야"
+    },
+    {
+      "startMs": 117250,
+      "endMs": 123000,
+      "translation": "오해하지 마, 자기, 난 아직 널 사랑해"
+    }
+  ]
+}
