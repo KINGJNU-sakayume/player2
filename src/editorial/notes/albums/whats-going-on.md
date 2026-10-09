@@ -3,6 +3,7 @@ artist: marvin-gaye
 albumIds: [1GUfd3GzQ3QMOJwVphnwg0, 5wjKYZV1AncBq3U83paXSM, 1rfm091srlg2gIh9a2m92J, 3P9Pzn7O4Zsr3tsCSsx7Uk]
 titles: [What's Going On, What's Going On (Ecopac Remastered), What's Going On (Remastered w/Bonus Tracks), What's Going On (Deluxe Edition / 50th Anniversary), What's Going On - 40th Anniversary (Super Deluxe)]
 releaseYear: 1971
+cover: https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02621dcbf02ada125b3d33951d
 tracks:
   - whats-going-on
   - whats-happening-brother

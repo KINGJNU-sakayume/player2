@@ -2,6 +2,7 @@
 artistIds: [3oDbviiivRWhXwIE8hxkVV]
 names: [The Beach Boys, Beach Boys, 비치 보이스]
 origin: Hawthorne, California, USA · band / vocal group / pop
+image: https://image-cdn-ak.spotifycdn.com/image/ab67616100005174bd834acefb42d1012c6b9e36
 short: >
   서핑과 자동차를 노래하던 가족 밴드가 스튜디오 안에서 팝 음악의 편곡을 다시 쓴 이야기. 다섯 명의 화음은 그대로 둔 채, 그 화음이 기댈 소리를 브라이언 윌슨이 끝없이 바꿔 나간 과정이 이 디스코그래피다.
 eras:

@@ -2,6 +2,7 @@
 artistIds: [3koiLjNrgRTNbOwViDipeA]
 names: [Marvin Gaye, 마빈 게이]
 origin: Washington, D.C., USA · singer / songwriter / producer
+image: https://i.scdn.co/image/aa28a931be2da1c33411b0d6c106bcf6e3d17de7
 short: >
   모타운의 히트 공장에서 가장 부드러운 목소리를 맡았던 가수가, 그 목소리로 전쟁과 빈곤, 신앙과 욕망을 직접 말하기까지의 이야기. 겹쳐 녹음한 자기 목소리와 대화하듯 노래하는 방식이 그의 서명이다.
 eras:

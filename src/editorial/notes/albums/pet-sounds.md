@@ -3,6 +3,7 @@ artist: the-beach-boys
 albumIds: [2CNEkSE8TADXRT2AzcEt1b, 0BBduHWw9CbB5dctxFp48f, 1yMPDqzYuQ4TI10ICKlbzW, 6GphKx2QAPRoVGWE9D7ou8]
 titles: [Pet Sounds, Pet Sounds (Mono), Pet Sounds (40th Anniversary Edition), Pet Sounds (Original Mono & Stereo Mix)]
 releaseYear: 1966
+cover: https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e0250eb0c521d2d3b2f599bff04
 tracks:
   - wouldnt-it-be-nice
   - you-still-believe-in-me
