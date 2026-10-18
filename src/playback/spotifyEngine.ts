@@ -21,6 +21,7 @@ import {
 } from './spotifyPlaybackSdk';
 import { BROWSER_DEVICE_NAME, browserDevice, mapRemotePlayback, mapSdkState } from './stateMapping';
 import type { PlayerSnapshot, PlayRequest, PlaybackIssue, QueueSnapshot, SdkErrorReason } from './types';
+import { storageKey } from '../lib/storageNamespace';
 
 export interface Timers {
   setTimeout(fn: () => void, ms: number): unknown;
@@ -98,7 +99,7 @@ const REANCHOR_MS = 3_000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 /** How long a play request waits for this browser's player to finish connecting. */
 const SDK_READY_WAIT_MS = 10_000;
-const VOLUME_KEY = 'arc.player.volume.v1';
+const VOLUME_KEY = storageKey('player.volume.v1');
 
 export interface SpotifyEngineOptions {
   store: PlayerStore;

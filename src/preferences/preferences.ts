@@ -1,11 +1,12 @@
 import { useSyncExternalStore } from 'react';
 import { readJson, writeJson } from '../lib/storage';
+import { storageKey } from '../lib/storageNamespace';
 
 export interface Preferences {
   translationEnabled: boolean;
 }
 
-const KEY = 'arc.preferences.v1';
+const KEY = storageKey('preferences.v1');
 const DEFAULTS: Preferences = { translationEnabled: true };
 
 let current: Preferences = { ...DEFAULTS, ...(readJson<Partial<Preferences>>(KEY) ?? {}) };
